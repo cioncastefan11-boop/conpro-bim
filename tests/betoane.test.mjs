@@ -16,7 +16,7 @@ create table storage.buckets (id text primary key, name text, public boolean, fi
 create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text, name text, owner uuid);
 alter table storage.objects enable row level security;
 `);
-for (const f of ['0001_fundatie.sql', '0002_procese_verbale.sql', '0003_continut_pv.sql', '0004_fam.sql', '0005_betoane_incercari.sql'])
+for (const f of ['0001_fundatie.sql', '0002_procese_verbale.sql', '0003_continut_pv.sql', '0004_fam.sql', '0005_betoane_incercari.sql', '0007_condica_betoane.sql'])
   await db.exec(fs.readFileSync(new URL(`../supabase/migrations/${f}`, import.meta.url), 'utf8'));
 
 const U = {
@@ -101,6 +101,21 @@ await refuses('viza nu se dă de două ori', () => as('dir', `select vizeaza_tur
 await refuses('nimeni nu scrie viza direct', () => as('rte', `update turnari set vizat_la = now() where numar = 1`));
 await ok('membrii văd condica, străinii nu', async () =>
   rows(await as('benef', `select * from turnari`)) === 2 && rows(await as('strain', `select * from turnari`)) === 0);
+
+console.log('Condica, date suplimentare (0007)');
+await ok('turnarea primește punctul de lucru, schimbul, identificarea și supraveghetorul', async () =>
+  (await as('rte', `insert into turnari (proiect_id, data, element, clasa_beton, volum, punct_lucru, schimb, identificare, supravegheat_de)
+                    values ($1, '2026-10-30', 'placă', 'C20/25', 9, 'Corp A', 'I', 'etaj 1, axele 1–6', 'Ion Pop')`, [P])).affectedRows === 1);
+const TD = one(await db.query(`select id from turnari where punct_lucru = 'Corp A'`)).id;
+await refuses('decofrarea nu poate fi înaintea turnării', () => as('rte', `select inregistreaza_decofrare($1, '2026-10-29')`, [TD]), 'înaintea');
+await refuses('dirigintele nu trece decofrarea', () => as('dir', `select inregistreaza_decofrare($1, '2026-10-31')`, [TD]), 'executantul');
+await ok('după viză, executantul trece totuși data decofrării', async () => {
+  await as('dir', `select vizeaza_turnare($1, null)`, [TD]);
+  await as('rte', `select inregistreaza_decofrare($1, '2026-10-31')`, [TD]);
+  return String(one(await db.query(`select data_decofrare::text d from turnari where id=$1`, [TD])).d) === '2026-10-31'; });
+await refuses('data decofrării se trece o singură dată', () => as('rte', `select inregistreaza_decofrare($1, '2026-11-01')`, [TD]), 'deja');
+await ok('după viză, celelalte câmpuri rămân blocate', async () =>
+  (await as('rte', `update turnari set punct_lucru = 'alt' where id = $1`, [TD])).affectedRows === 0);
 
 console.log('Încercări');
 const rezultat = (user, conform = true, obs = null, turnare = T) => as(user,

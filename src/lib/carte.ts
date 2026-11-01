@@ -8,6 +8,7 @@ import {
 } from './domeniu';
 import type { Atasament, ProcesVerbal } from './tipuri';
 import { genereazaCobie, lipsuriEchipament } from './cobie';
+import { excelCondica, htmlCondica as htmlCondicaBetoane } from './condica';
 
 export type ElementOpis = {
   id: string;
@@ -143,7 +144,7 @@ export function htmlOpis(d: DateProiect, capitole: CapitolOpis[]): string {
         e.generat === 'pv' ? `${esc(e.dosar)}/${esc(e.titlu.split(' · ')[0])}.html` : '',
         e.generat === 'manual' ? 'D_Exploatare/Manual-utilizare-mentenanta.html' : '',
         e.generat === 'cobie' ? `D_Exploatare/COBie-${esc(d.proiect.cod)}.xlsx` : '',
-        e.generat === 'condica' ? 'B_Executie/Condica_betoane/Condica-betoane.html' : '',
+        e.generat === 'condica' ? 'B_Executie/Condica_betoane/Condica-betoane.html<br>B_Executie/Condica_betoane/Condica-betoane.xlsx' : '',
         e.generat === 'fam' ? `B_Executie/FAM/${esc(e.titlu.split(' · ')[0].replace('/', '-'))}.html` : '',
         ...e.fisiere.map(f => `${esc(e.dosar)}/${esc(numeInArhiva(f))}`),
       ].filter(Boolean).join('<br>')}</td></tr>`;
@@ -204,14 +205,7 @@ export function htmlManual(d: DateProiect): string {
 }
 
 export function htmlCondica(d: DateProiect): string {
-  let corp = antet(d, 'Condica de betoane');
-  corp += '<table><tr><th>Nr.</th><th>Data</th><th>Element</th><th>Beton</th><th>Volum</th><th>Bonuri</th><th>Temp. aer / beton</th><th>Probe</th><th>Rezultate</th><th>Viza dirigintelui</th></tr>';
-  for (const t of d.turnari) {
-    const r = d.incercari.filter(i => i.turnare_id === t.id);
-    corp += `<tr><td>${t.numar}</td><td>${formatData(t.data)}</td><td>${esc(t.element)}</td><td>${esc([t.clasa_beton, t.clasa_expunere, t.consistenta].filter(Boolean).join(' '))}</td><td>${t.volum ?? ''} m³</td><td>${esc(t.bonuri ?? '')}</td><td>${t.temp_aer ?? ''} / ${t.temp_beton ?? ''} °C</td><td>${t.probe_prelevate ?? ''}${t.coduri_probe ? `<br>${esc(t.coduri_probe)}` : ''}</td><td>${r.map(i => `${esc(numeIncercare(i.tip))}: ${i.valoare ?? ''} ${esc(i.unitate ?? '')} (${i.conform ? 'conform' : 'NECONFORM'})`).join('<br>')}</td><td>${t.vizat_la ? `${esc(numeDe(d, t.vizat_de))}, ${new Date(t.vizat_la).toLocaleDateString('ro-RO')}` : 'nevizată'}</td></tr>`;
-  }
-  corp += '</table>';
-  return doc(`Condica de betoane ${d.proiect.cod}`, corp);
+  return htmlCondicaBetoane(d);
 }
 
 export function htmlFam(d: DateProiect, famId: string): string {
@@ -254,7 +248,10 @@ export async function genereazaArhiva(d: DateProiect, progres: (text: string) =>
   for (const f of d.famuri.filter(x => x.stare === 'aprobat' || x.stare === 'aprobat_cu_observatii')) {
     radacina.file(`B_Executie/FAM/${codFam(d.proiect.cod, f.numar, f.revizie).replace('/', '-')}.html`, htmlFam(d, f.id));
   }
-  if (d.turnari.length) radacina.file('B_Executie/Condica_betoane/Condica-betoane.html', htmlCondica(d));
+  if (d.turnari.length) {
+    radacina.file('B_Executie/Condica_betoane/Condica-betoane.html', htmlCondica(d));
+    radacina.file('B_Executie/Condica_betoane/Condica-betoane.xlsx', await excelCondica(d));
+  }
   if (d.tipuri.length) {
     radacina.file('D_Exploatare/Manual-utilizare-mentenanta.html', htmlManual(d));
     progres('Fișierul COBie…');

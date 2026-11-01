@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Link, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import {
@@ -7,6 +7,8 @@ import {
 import type { Fam, Incercare, Membru, ProcesVerbal, Proiect, Turnare } from '../lib/tipuri';
 import { Eroare, Eticheta, Gol, mesajEroare } from '../components/ui';
 import Atasamente from '../components/Atasamente';
+import { descarca } from './Echipamente';
+import { excelCondica, htmlCondica, puncteLucru } from '../lib/condica';
 
 type Props = { proiect: Proiect; membri: Membru[]; rolulMeu?: Rol; uid: string };
 const EXECUTANTI: Rol[] = ['constructor', 'subcontractor'];
@@ -26,6 +28,30 @@ const nr = (v: string) => (v.trim() === '' ? null : Number(v.replace(',', '.')))
 const om = (membri: Membru[], id: string | null) => { const p = membri.find(m => m.persoana_id === id)?.persoane; return p ? (p.nume || p.email) : '—'; };
 
 // ------------------------------------------------------------------- Condica
+const LATIME_A3 = 1500;
+/** Condica exact cum se tipărește, micșorată cât să încapă pe ecran. */
+function PrevizualizareCondica({ html }: { html: string }) {
+  const cutie = useRef<HTMLDivElement>(null);
+  const cadru = useRef<HTMLIFrameElement>(null);
+  const [scara, setScara] = useState(1);
+  const [inaltime, setInaltime] = useState(900);
+  useEffect(() => {
+    const el = cutie.current; if (!el) return;
+    const ro = new ResizeObserver(() => setScara(Math.min(1, el.clientWidth / LATIME_A3)));
+    ro.observe(el); return () => ro.disconnect();
+  }, []);
+  const masoara = () => { const d = cadru.current?.contentDocument; if (d?.body) setInaltime(Math.ceil(d.body.getBoundingClientRect().height) + 4); };
+  return (
+    <div className="previzualizare-condica">
+      <div ref={cutie} style={{ height: inaltime * scara }}>
+        <iframe ref={cadru} title="Condica de betoane" srcDoc={html} onLoad={masoara} scrolling="no"
+          style={{ width: LATIME_A3, height: inaltime, transform: `scale(${scara})`, transformOrigin: '0 0' }} />
+      </div>
+      {scara < 0.5 && <p className="discret mic">Pe telefon condica apare micșorată; „Condica (tipărire / PDF)” o deschide la mărime reală.</p>}
+    </div>
+  );
+}
+
 function Condica({ proiect, membri, rolulMeu }: Props) {
   const [turnari, setTurnari] = useState<Turnare[] | null>(null);
   const [incercari, setIncercari] = useState<Incercare[]>([]);
@@ -48,8 +74,26 @@ function Condica({ proiect, membri, rolulMeu }: Props) {
   const pe = (t: string) => incercari.filter(i => i.turnare_id === t);
   const deVizat = (turnari ?? []).filter(t => !t.vizat_la);
   const neverificate = incercari.filter(i => !i.verificat_la);
-  const volumTotal = (turnari ?? []).reduce((s, t) => s + (Number(t.volum) || 0), 0);
   const peMateriale = incercari.filter(i => i.fam_id && !i.turnare_id);
+  const [exporta, setExporta] = useState(false);
+  const [vedere, setVedere] = useState<'lista' | 'condica'>('lista');
+  const [punct, setPunct] = useState<string | undefined>(undefined);
+  const puncte = useMemo(() => puncteLucru(turnari ?? []), [turnari]);
+  const vizibile = (turnari ?? []).filter(t => punct === undefined || (t.punct_lucru?.trim() || '') === punct);
+  const previzualizare = useMemo(() => (vedere === 'condica' && turnari?.length
+    ? htmlCondica({ proiect, membri, turnari, incercari }, punct) : ''), [vedere, turnari, incercari, membri, proiect, punct]);
+  const dateCondica = () => ({ proiect, membri, turnari: turnari ?? [], incercari });
+  async function exportExcel() {
+    setExporta(true); setEroare(null);
+    try { descarca(await excelCondica(dateCondica()), `Condica-betoane-${proiect.cod}.xlsx`); }
+    catch { setEroare('Nu s-a putut genera fișierul Excel.'); }
+    setExporta(false);
+  }
+  function tiparesteA3() {
+    const url = URL.createObjectURL(new Blob([htmlCondica(dateCondica())], { type: 'text/html' }));
+    window.open(url, '_blank');
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }
 
   return (
     <>
@@ -64,30 +108,50 @@ function Condica({ proiect, membri, rolulMeu }: Props) {
         <div className="antet-card">
           <div>
             <h2>Condica de betoane</h2>
-            <p className="discret">O ține executantul (RTE): fiecare turnare cu elementul, clasa, volumul, bonurile, condițiile și probele. Dirigintele o vizează.</p>
+            <p className="discret">O ține executantul (RTE): fiecare turnare cu elementul, betonul, temperaturile, probele, rezultatele și decofrarea. Dirigintele vizează fiecare turnare.</p>
           </div>
-          {rolulMeu && EXECUTANTI.includes(rolulMeu) && <Link className="buton principal" to="nou">Turnare nouă</Link>}
+          <div className="actiuni-antet">
+            {!!turnari?.length && <button className="buton" onClick={exportExcel} disabled={exporta}>{exporta ? 'Se pregătește…' : 'Condica (Excel)'}</button>}
+            {!!turnari?.length && <button className="buton" onClick={tiparesteA3}>Condica (tipărire / PDF)</button>}
+            {rolulMeu && EXECUTANTI.includes(rolulMeu) && <Link className="buton principal" to="nou">Turnare nouă</Link>}
+          </div>
         </div>
         <Eroare text={eroare} />
         {turnari === null ? <p className="discret">Se încarcă…</p> : turnari.length === 0 ? (
           <Gol titlu="Nicio turnare înregistrată"><p>Prima turnare o înregistrează constructorul, după ce PV-ul pentru armătură e semnat.</p></Gol>
         ) : (
           <>
-            <p className="discret">{turnari.length} {turnari.length === 1 ? 'turnare' : 'turnări'}, {volumTotal.toLocaleString('ro-RO', { maximumFractionDigits: 2 })} m³ în total.</p>
+            <div className="bara-condica">
+              <div className="comutator" role="tablist">
+                <button role="tab" aria-selected={vedere === 'lista'} className={vedere === 'lista' ? 'activ' : ''} onClick={() => setVedere('lista')}>Listă</button>
+                <button role="tab" aria-selected={vedere === 'condica'} className={vedere === 'condica' ? 'activ' : ''} onClick={() => setVedere('condica')}>Condica (cum se tipărește)</button>
+              </div>
+              {puncte.length > 1 && (
+                <div className="filtre-punct">
+                  <button className={punct === undefined ? 'activ' : ''} onClick={() => setPunct(undefined)}>Toate</button>
+                  {puncte.map(x => <button key={x} className={punct === x ? 'activ' : ''} onClick={() => setPunct(x)}>{x || 'Fără punct de lucru'}</button>)}
+                </div>
+              )}
+            </div>
+            <p className="discret">{vizibile.length} {vizibile.length === 1 ? 'turnare' : 'turnări'}, {vizibile.reduce((s, t) => s + (Number(t.volum) || 0), 0).toLocaleString('ro-RO', { maximumFractionDigits: 2 })} m³{punct !== undefined ? ` la ${punct || 'turnările fără punct de lucru'}` : ' în total'}.</p>
+            {vedere === 'condica' ? (
+              <PrevizualizareCondica html={previzualizare} />
+            ) : (
             <div className="tabel-wrap">
               <table className="tabel stivuit">
-                <thead><tr><th>Nr.</th><th>Data</th><th>Element</th><th>Beton</th><th>Volum</th><th>Probe</th><th>Rezultate</th><th>Viză</th></tr></thead>
+                <thead><tr><th>Nr.</th><th>Data</th><th>Punct de lucru</th><th>Element</th><th>Beton</th><th>Volum</th><th>Probe</th><th>Rezultate</th><th>Viză</th></tr></thead>
                 <tbody>
-                  {turnari.map(t => {
+                  {vizibile.map(t => {
                     const r = pe(t.id);
                     const nc = r.filter(x => !x.conform).length;
                     return (
                       <tr key={t.id}>
                         <td data-eticheta="Nr."><Link to={t.id} className="cod-link">{t.numar}</Link></td>
-                        <td data-eticheta="Data">{formatData(t.data)}</td>
-                        <td data-eticheta="Element">{t.element}</td>
-                        <td data-eticheta="Beton">{t.clasa_beton}{t.clasa_expunere ? ` ${t.clasa_expunere}` : ''}{t.consistenta ? ` ${t.consistenta}` : ''}</td>
-                        <td data-eticheta="Volum">{t.volum != null ? `${Number(t.volum).toLocaleString('ro-RO')} m³` : '—'}</td>
+                        <td data-eticheta="Data"><span className="fara-rupere">{formatData(t.data)}</span>{t.schimb ? <small className="linia2">schimbul {t.schimb}</small> : null}</td>
+                        <td data-eticheta="Punct de lucru">{t.punct_lucru || '—'}</td>
+                        <td data-eticheta="Element">{t.element}{t.identificare ? <small className="linia2">{t.identificare}</small> : null}</td>
+                        <td data-eticheta="Beton"><span className="fara-rupere">{t.clasa_beton}</span>{(t.clasa_expunere || t.consistenta) ? <small className="linia2">{[t.clasa_expunere, t.consistenta].filter(Boolean).join(' · ')}</small> : null}</td>
+                        <td data-eticheta="Volum" className="fara-rupere">{t.volum != null ? `${Number(t.volum).toLocaleString('ro-RO')} m³` : '—'}</td>
                         <td data-eticheta="Probe">{t.probe_prelevate ?? '—'}</td>
                         <td data-eticheta="Rezultate"><span>{r.length === 0 ? <span className="discret">în așteptare</span>
                           : nc > 0 ? <Eticheta stare={{ eticheta: `${nc} neconform${nc > 1 ? 'e' : ''}`, ton: 'alerta' }} />
@@ -99,6 +163,7 @@ function Condica({ proiect, membri, rolulMeu }: Props) {
                 </tbody>
               </table>
             </div>
+            )}
           </>
         )}
       </div>
@@ -122,8 +187,10 @@ type CampuriT = {
   data: string; element: string; clasa_beton: string; clasa_expunere: string; consistenta: string; dmax: string; volum: string;
   statie: string; fam_id: string; pv_id: string; bonuri: string; ora_inceput: string; ora_sfarsit: string; temp_aer: string;
   temp_beton: string; mod_punere: string; tratare: string; probe_prelevate: string; coduri_probe: string; observatii: string;
+  punct_lucru: string; schimb: string; identificare: string; supravegheat_de: string;
 };
-const golT = (): CampuriT => ({
+const golT = (supraveghetor = ''): CampuriT => ({
+  punct_lucru: '', schimb: 'I', identificare: '', supravegheat_de: supraveghetor,
   data: laIso(azi()), element: '', clasa_beton: 'C25/30', clasa_expunere: '', consistenta: 'S3', dmax: '16', volum: '', statie: '',
   fam_id: '', pv_id: '', bonuri: '', ora_inceput: '', ora_sfarsit: '', temp_aer: '', temp_beton: '', mod_punere: '', tratare: '',
   probe_prelevate: '', coduri_probe: '', observatii: '',
@@ -139,29 +206,43 @@ const pentruBaza = (c: CampuriT) => ({
   ora_inceput: c.ora_inceput || null, ora_sfarsit: c.ora_sfarsit || null, temp_aer: nr(c.temp_aer), temp_beton: nr(c.temp_beton),
   mod_punere: c.mod_punere.trim() || null, tratare: c.tratare.trim() || null, probe_prelevate: nr(c.probe_prelevate),
   coduri_probe: c.coduri_probe.trim() || null, observatii: c.observatii.trim() || null,
+  punct_lucru: c.punct_lucru.trim() || null, schimb: c.schimb || null, identificare: c.identificare.trim() || null,
+  supravegheat_de: c.supravegheat_de.trim() || null,
 });
 
 function useLegaturi(proiectId: string) {
   const [famuri, setFamuri] = useState<Fam[]>([]);
   const [pvs, setPvs] = useState<ProcesVerbal[]>([]);
+  const [puncte, setPuncte] = useState<string[]>([]);
   useEffect(() => {
+    supabase.from('turnari').select('punct_lucru').eq('proiect_id', proiectId).then(({ data }) =>
+      setPuncte([...new Set(((data as { punct_lucru: string | null }[]) ?? []).map(x => x.punct_lucru?.trim()).filter((x): x is string => !!x))].sort()));
     Promise.all([
       supabase.from('fam').select('*').eq('proiect_id', proiectId).in('stare', ['aprobat', 'aprobat_cu_observatii']),
       supabase.from('procese_verbale').select('*').eq('proiect_id', proiectId).eq('stare', 'semnat').order('numar', { ascending: false }),
     ]).then(([a, b]) => { setFamuri((a.data as Fam[]) ?? []); setPvs((b.data as ProcesVerbal[]) ?? []); });
   }, [proiectId]);
-  return { famuri, pvs };
+  return { famuri, pvs, puncte };
 }
 
 function FormularTurnare({ c, set, proiect, blocat }: { c: CampuriT; set: (x: CampuriT) => void; proiect: Proiect; blocat?: boolean }) {
-  const { famuri, pvs } = useLegaturi(proiect.id);
+  const { famuri, pvs, puncte } = useLegaturi(proiect.id);
   const s = (k: keyof CampuriT) => ({ value: c[k], onChange: (e: { target: { value: string } }) => set({ ...c, [k]: e.target.value }) });
   const rez = rezistenteClasa(c.clasa_beton);
   return (
     <fieldset disabled={blocat}>
       <div className="campuri">
+        <label>Punctul de lucru
+          <input {...s('punct_lucru')} list="puncte-lucru" placeholder="ex. Corp A, Tronson 2" />
+          <datalist id="puncte-lucru">{puncte.map(x => <option key={x} value={x} />)}</datalist>
+          <small>Opțional. Dacă lucrarea are mai multe corpuri, condica se împarte pe ele.</small>
+        </label>
         <label>Data turnării<input type="date" {...s('data')} max={laIso(azi())} required /></label>
-        <label className="lat">Elementul / zona<input {...s('element')} required minLength={3} placeholder="ex. Placa +3,00, axele 1–6 / A–D" /></label>
+        <label>Schimbul
+          <select {...s('schimb')}><option value="">—</option><option value="I">I</option><option value="II">II</option><option value="III">III</option></select>
+        </label>
+        <label className="lat">Elementul betonat<input {...s('element')} required minLength={3} placeholder="ex. placă, stâlpi, fundații" /></label>
+        <label className="lat">Nivel, axe, travee<input {...s('identificare')} placeholder="ex. etaj 1, axele 1–6 / A–D, planșa R-03" /></label>
         <label>Clasa betonului
           <input {...s('clasa_beton')} list="clase-beton" required pattern="L?C[0-9]{1,3}/[0-9]{1,3}" placeholder="C25/30" />
           <datalist id="clase-beton">{CLASE_BETON.map(x => <option key={x} value={x} />)}</datalist>
@@ -195,6 +276,7 @@ function FormularTurnare({ c, set, proiect, blocat }: { c: CampuriT; set: (x: Ca
         <label className="lat">Protecția și tratarea după turnare<input {...s('tratare')} placeholder="ex. stropire cu apă 7 zile, folie" /></label>
         <label>Probe prelevate (seturi)<input {...s('probe_prelevate')} inputMode="numeric" /></label>
         <label className="lat">Codurile probelor<input {...s('coduri_probe')} placeholder="ex. P1-2026-11-04 (3 cuburi), P2 (3 cuburi)" /></label>
+        <label className="lat">Supravegheată de<input {...s('supravegheat_de')} /></label>
         <label className="lat">Observații<textarea {...s('observatii')} rows={2} /></label>
       </div>
       {c.temp_aer !== '' && Number(c.temp_aer.replace(',', '.')) < 5 && (
@@ -204,9 +286,10 @@ function FormularTurnare({ c, set, proiect, blocat }: { c: CampuriT; set: (x: Ca
   );
 }
 
-function TurnareNoua({ proiect, rolulMeu, uid }: Props) {
+function TurnareNoua({ proiect, membri, rolulMeu, uid }: Props) {
   const nav = useNavigate();
-  const [c, setC] = useState<CampuriT>(golT());
+  const eu = membri.find(m => m.persoana_id === uid)?.persoane;
+  const [c, setC] = useState<CampuriT>(golT(eu ? (eu.nume || eu.email) : ''));
   const [eroare, setEroare] = useState<string | null>(null);
   const [lucreaza, setLucreaza] = useState(false);
   if (!rolulMeu || !EXECUTANTI.includes(rolulMeu)) return <Gol titlu="Condica de betoane o ține executantul (constructor / RTE)" />;
@@ -244,6 +327,7 @@ function DetaliuTurnare({ proiect, membri, rolulMeu }: Props) {
   const [eroare, setEroare] = useState<string | null>(null);
   const [mesaj, setMesaj] = useState<string | null>(null);
   const [obsViza, setObsViza] = useState('');
+  const [dataDecofrare, setDataDecofrare] = useState(laIso(azi()));
   const [negasit, setNegasit] = useState(false);
 
   const incarca = useCallback(async () => {
@@ -271,6 +355,11 @@ function DetaliuTurnare({ proiect, membri, rolulMeu }: Props) {
     const { error } = await supabase.from('turnari').update(pentruBaza(c)).eq('id', t!.id);
     if (error) setEroare(mesajEroare(error)); else { setMesaj('Salvat.'); incarca(); }
   }
+  async function decofrare() {
+    setEroare(null);
+    const { error } = await supabase.rpc('inregistreaza_decofrare', { p_turnare: t!.id, p_data: dataDecofrare });
+    if (error) setEroare(mesajEroare(error)); else incarca();
+  }
   async function vizeaza() {
     setEroare(null);
     if (!window.confirm('Vizați turnarea? După viză nu se mai poate modifica.')) return;
@@ -286,7 +375,7 @@ function DetaliuTurnare({ proiect, membri, rolulMeu }: Props) {
           <div>
             <span className="cod">CONDICA {proiect.cod} · nr. {t.numar}</span>
             <h2>Turnare · {t.element}</h2>
-            <p className="discret">{formatData(t.data)} · înregistrată de {om(membri, t.inregistrat_de)}</p>
+            <p className="discret">{t.punct_lucru ? `${t.punct_lucru} · ` : ''}{formatData(t.data)}{t.schimb ? `, sch. ${t.schimb}` : ''} · înregistrată de {om(membri, t.inregistrat_de)}{t.supravegheat_de ? ` · supravegheată de ${t.supravegheat_de}` : ''}</p>
           </div>
           {t.vizat_la ? <Eticheta stare={{ eticheta: 'Vizată', ton: 'ok' }} /> : <Eticheta stare={{ eticheta: 'Nevizată', ton: 'neutru' }} />}
         </header>
@@ -297,6 +386,15 @@ function DetaliuTurnare({ proiect, membri, rolulMeu }: Props) {
             {mesaj && <span className="mesaj-scurt">{mesaj}</span>}
           </div>
         )}
+        {t.data_decofrare
+          ? <p className="mesaj info">Decofrat la {formatData(t.data_decofrare)}.</p>
+          : executant && (
+            <div className="rand-decofrare nu-tipari">
+              <label>Data decofrării<input type="date" value={dataDecofrare} min={t.data} max={laIso(azi())} onChange={e => setDataDecofrare(e.target.value)} /></label>
+              <button className="buton" onClick={decofrare}>Înregistrează decofrarea</button>
+              <small className="discret">Se trece o singură dată; merge și după viza dirigintelui.</small>
+            </div>
+          )}
         {t.vizat_la && <p className="mesaj ok">Vizată de {om(membri, t.vizat_de)}, {new Date(t.vizat_la).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' })}{t.observatii_viza ? `: ${t.observatii_viza}` : ''}.</p>}
         <Eroare text={eroare} />
 

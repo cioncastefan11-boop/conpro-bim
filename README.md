@@ -18,6 +18,20 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.6 (condica de betoane, versiunea completă)
+
+1. **GitHub:** urcați din nou tot conținutul folderului (Add file → Upload files → Commit changes).
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0007_condica_betoane.sql`, lipiți și **Run**. Scriptul doar adaugă coloane și o funcție; nu șterge nimic.
+3. Verificare: `select count(*) from information_schema.columns where table_name='turnari' and column_name in ('punct_lucru','schimb','identificare','data_decofrare','supravegheat_de');` trebuie să dea **5**.
+
+Ce aduce:
+- **Condica de betoane generată din proiect:** antet cu lucrarea, adresa, beneficiarul, autorizația, executantul, RTE-ul și dirigintele; un rezumat (turnări, volum, probe, rezultate, decofrări, vize); tabelul pe grupe: turnarea, elementul betonat, betonul, temperaturile, probele și încercările, decofrarea, supravegherea și viza. Rezultatele neconforme apar evidențiate. La final, semnăturile RTE și diriginte.
+- **Câmpuri noi la turnare:** punctul de lucru (opțional, pentru lucrări cu mai multe corpuri), schimbul, nivelul / axele / travea și cine a supravegheat turnarea (implicit, cel care înregistrează).
+- **Data decofrării:** o trece executantul o singură dată, și după viza dirigintelui; nu poate fi înaintea turnării sau în viitor.
+- **În aplicație:** comutator „Listă” / „Condica (cum se tipărește)” și filtru pe punctul de lucru.
+- **Export:** „Condica (Excel)”, o foaie cu toate turnările, filtre pe coloane și totalul volumului, și „Condica (tipărire / PDF)”. Arhiva Cărții tehnice le conține pe amândouă.
+- Tip nou de încercare: **nedistructivă** (sclerometru, ultrasunete).
+
 ## Actualizare la 0.5 (echipamente, COBie și Cartea tehnică)
 
 1. **GitHub:** urcați din nou tot conținutul folderului (Add file → Upload files → Commit changes). Netlify instalează singur bibliotecile noi (exceljs, jszip).

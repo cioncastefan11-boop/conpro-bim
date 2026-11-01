@@ -265,3 +265,24 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
 .opis a, .opis b .legatura { color: var(--text); }
 .fisiere-mici { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 4px; font-size: 13px; }
 @media (max-width: 760px) { .rand-formular.trei { grid-template-columns: 1fr 1fr; } }
+
+/* 0.6 · condica de betoane */
+.actiuni-antet { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.rand-decofrare { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin: 12px 0; }
+.rand-decofrare label { max-width: 220px; }
+.rand-decofrare small { flex-basis: 100%; }
+.antet-card .actiuni-antet { margin-bottom: 8px; }
+.bara-condica { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 4px 0 10px; }
+.comutator { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; padding: 3px; background: var(--bg); }
+.comutator button { border: 0; background: transparent; padding: 7px 14px; border-radius: 7px; font: inherit; font-size: 14px; color: inherit; cursor: pointer; }
+.comutator button.activ { background: #fff; box-shadow: 0 1px 3px rgba(15, 23, 42, .15); font-weight: 600; }
+.filtre-punct { display: flex; gap: 6px; flex-wrap: wrap; }
+.filtre-punct button { border: 1px solid var(--border); background: #fff; border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer; color: inherit; }
+.filtre-punct button.activ { background: var(--navy); border-color: var(--navy); color: #fff; }
+.previzualizare-condica { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #e5e7eb; padding: 12px; }
+.previzualizare-condica > div { overflow: hidden; }
+.previzualizare-condica iframe { display: block; border: 0; background: #fff; box-shadow: 0 2px 10px rgba(15, 23, 42, .18); }
+.previzualizare-condica .mic { font-size: 12px; margin: 8px 0 0; }
+.fara-rupere { white-space: nowrap; }
+.linia2 { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+@media (max-width: 640px) { .tabel.stivuit td > .linia2 { grid-column: 2; margin-top: -6px; } .tabel.stivuit td > .fara-rupere { grid-column: 2; } }

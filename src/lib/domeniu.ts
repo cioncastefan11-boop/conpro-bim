@@ -270,6 +270,7 @@ export const TIPURI_INCERCARE: { id: string; nume: string; unitate?: string; var
   { id: 'compresiune_7', nume: 'Rezistența la compresiune la 7 zile', unitate: 'MPa', varsta: 7 },
   { id: 'consistenta', nume: 'Consistența (tasarea conului)', unitate: 'mm' },
   { id: 'permeabilitate', nume: 'Adâncimea de pătrundere a apei', unitate: 'mm' },
+  { id: 'nedistructiv', nume: 'Încercare nedistructivă (sclerometru, ultrasunete)' },
   { id: 'gelivitate', nume: 'Rezistența la îngheț-dezgheț' },
   { id: 'altul', nume: 'Altă încercare' },
 ];

@@ -139,6 +139,7 @@ export type Turnare = {
   temp_aer: number | null; temp_beton: number | null; mod_punere: string | null; tratare: string | null;
   probe_prelevate: number | null; coduri_probe: string | null; observatii: string | null;
   inregistrat_de: string; creat_la: string; vizat_de: string | null; vizat_la: string | null; observatii_viza: string | null;
+  punct_lucru: string | null; schimb: string | null; identificare: string | null; data_decofrare: string | null; supravegheat_de: string | null;
 };
 
 export type Incercare = {
