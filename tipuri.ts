@@ -128,7 +128,7 @@ export type LivrareFam = {
 };
 
 export type Atasament = {
-  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare'; entitate_id: string;
+  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte'; entitate_id: string;
   tip_document: string; nume_fisier: string; cale: string; marime: number | null; incarcat_de: string; incarcat_la: string;
 };
 
@@ -146,4 +146,21 @@ export type Incercare = {
   laborator: string | null; buletin_numar: string | null; buletin_data: string | null; varsta_zile: number | null;
   valoare: number | null; unitate: string | null; cerinta: string | null; conform: boolean; observatii: string | null;
   introdus_de: string; creat_la: string; verificat_de: string | null; verificat_la: string | null;
+};
+
+export type Nivel = { id: string; proiect_id: string; cod: string; denumire: string; cota: number | null; ordine: number; creat_de: string };
+export type Incapere = { id: string; proiect_id: string; nivel_id: string; cod: string; denumire: string; functiune: string | null; arie: number | null; creat_de: string };
+export type TipEchipament = {
+  id: string; proiect_id: string; denumire: string; categorie: string | null; producator: string | null; model: string | null;
+  fam_id: string | null; garantie_luni: number | null; garant: string | null; interval_mentenanta_luni: number | null;
+  durata_viata_ani: number | null; instructiuni_mentenanta: string | null; creat_de: string; creat_la: string;
+};
+export type Echipament = {
+  id: string; proiect_id: string; tip_id: string; incapere_id: string | null; cod: string; serie: string | null;
+  data_montaj: string | null; data_punere_functiune: string | null; pv_id: string | null; garantie_start: string | null;
+  observatii: string | null; creat_de: string; creat_la: string;
+};
+export type DocumentCarte = {
+  id: string; proiect_id: string; capitol: 'A' | 'B' | 'C' | 'D'; titlu: string; numar: string | null; data: string | null;
+  emitent: string | null; observatii: string | null; creat_de: string; creat_la: string;
 };

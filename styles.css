@@ -246,3 +246,22 @@ a.buton { text-decoration: none; display: inline-block; }
 .revizii a { color: #c2410c; font-weight: 600; }
 fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { background: #f8fafc; color: var(--text); border-color: var(--border); }
 @media print { .circuit li { break-inside: avoid; } fieldset:disabled input, fieldset:disabled textarea { border: 0; padding: 0; } }
+
+/* ---------- echipamente și Cartea tehnică ---------- */
+.indicatori { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin: 14px 0; }
+.indicatori > div { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; display: grid; }
+.indicatori b { font-family: var(--display); font-size: 22px; line-height: 1.1; }
+.indicatori span { font-size: 12px; color: var(--muted); }
+.indicatori .ok b { color: var(--ok); }
+.indicatori .atentie b { color: var(--warn); }
+.rand-formular.trei { grid-template-columns: 1fr 2fr 1fr auto; }
+.lista-tipuri { display: grid; gap: 10px; margin-top: 12px; }
+.tip-rand { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.tip-cap { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+.instructiuni { background: var(--bg); border-radius: 8px; padding: 10px 12px; margin-top: 10px; white-space: pre-line; }
+.opis { list-style: none; padding: 0; margin: 10px 0 0; }
+.opis li { display: grid; grid-template-columns: 48px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.opis-nr { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; color: var(--muted); }
+.opis a, .opis b .legatura { color: var(--text); }
+.fisiere-mici { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 4px; font-size: 13px; }
+@media (max-width: 760px) { .rand-formular.trei { grid-template-columns: 1fr 1fr; } }

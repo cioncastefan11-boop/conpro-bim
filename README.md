@@ -1,4 +1,4 @@
-# Conpro BIM · versiunea 0.4
+# Conpro BIM · versiunea 0.5
 
 Platforma în care beneficiarul, dirigintele, constructorul și proiectantul lucrează pe aceleași informații ale unei lucrări, fiecare cu contul și răspunderea lui (SR EN ISO 19650, Legea 169/2026).
 
@@ -17,6 +17,16 @@ Platforma în care beneficiarul, dirigintele, constructorul și proiectantul luc
 Următoarele module (CDE și documente, FAM, condica de betoane, încercări, echipamente COBie, Cartea tehnică) se construiesc peste această fundație.
 
 ---
+
+## Actualizare la 0.5 (echipamente, COBie și Cartea tehnică)
+
+1. **GitHub:** urcați din nou tot conținutul folderului (Add file → Upload files → Commit changes). Netlify instalează singur bibliotecile noi (exceljs, jszip).
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0006_echipamente_carte.sql`, lipiți și **Run**. La avertismentul „destructive operations” apăsați **Run query**: scriptul doar extinde lista de documente care se pot atașa.
+3. Verificare: `select count(*) from pg_policies where tablename in ('niveluri','incaperi','tipuri_echipament','echipamente','documente_carte');` trebuie să dea **10**.
+
+Ce aduce:
+- **Echipamente (COBie):** niveluri și încăperi (se pot lipi din Excel), tipuri de echipamente cu producător, model, garanție, interval de mentenanță, durată de viață, instrucțiuni și documentele producătorului; echipamentele montate, cu eticheta, încăperea, seria, montajul, punerea în funcțiune (legată de PV-ul semnat) și garanția. Aplicația arată ce date lipsesc la fiecare echipament și procentul de completare. Exportul COBie generează foile Contact, Facility, Floor, Space, Type, Component, Job și Document. Pentru predarea oficială, verificați fișierul și cu un instrument COBie QC.
+- **Cartea tehnică:** opisul pe capitole A–D (art. 530), completat automat din PV-urile semnate, FAM-urile aprobate și livrările, condica de betoane, încercări și echipamente, plus documentele din afara aplicației (certificat de urbanism, autorizație, proiect, as-built), care nu se mai modifică după înregistrare. Lista „Ce mai lipsește pentru un dosar complet” arată ce e încă deschis. Manualul de utilizare și mentenanță (art. 528 alin. 3 lit. e) se generează din echipamente. **Arhiva electronică (.zip)** conține opisul, PV-urile, FAM-urile, condica, manualul și COBie generate, plus toate fișierele, pe capitole.
 
 ## Actualizare la 0.4 (condica de betoane și încercări)
 
@@ -120,7 +130,7 @@ Supabase trimite gratuit doar câteva emailuri pe oră. Pentru pilot e suficient
   - invitațiile se acceptă prin `accepta_invitatiile()`, doar pentru un email confirmat;
   - proiectele nu se șterg, se arhivează.
 - **Inserarea unui proiect** se face fără `returning`: politica de citire cere calitatea de membru, care apare abia în triggerul `after insert`.
-- **Teste:** `npm install && npm run test:db` rulează 170 de verificări pe un Postgres local (PGlite), cu utilizatori simulați: 40 pentru regulile de bază, 54 pentru procese verbale, conținutul lor și registru, 43 pentru FAM, livrări, atașamente și Storage, 33 pentru condica de betoane și încercări (ordinea art. 426, participanți obligatorii, imuabilitate, vizibilitate).
+- **Teste:** `npm install && npm run test:db` rulează 194 de verificări pe un Postgres local (PGlite), cu utilizatori simulați: 40 pentru regulile de bază, 54 pentru procese verbale, conținutul lor și registru, 43 pentru FAM, livrări, atașamente și Storage, 33 pentru condica de betoane și încercări, 24 pentru spații, echipamente și Cartea tehnică (ordinea art. 426, participanți obligatorii, imuabilitate, vizibilitate).
 - **PV-uri:** scrierea se face doar prin funcțiile `convoaca_pv`, `confirma_pv`, `anuleaza_pv` (`security definer`); tabelele au doar drept de citire pentru utilizatori. Intrările automate în registru sunt scrise de `confirma_pv`; cele manuale trec prin triggerul `verifica_intrare_registru`.
 - **Local:** copiați `.env.example` în `.env`, completați, apoi `npm run dev`.
 
@@ -129,7 +139,7 @@ Supabase trimite gratuit doar câteva emailuri pe oră. Pentru pilot e suficient
 ```
 supabase/migrations/   schema bazei de date și regulile de acces
 tests/                 testele regulilor de acces
-src/lib/               clientul Supabase, sesiunea, denumirile din CATUC și ISO 19650
-src/pages/             autentificare, proiecte, proiect (detalii, procese verbale, materiale FAM, betoane și încercări, echipă, istoric), registru, profil
+src/lib/               clientul Supabase, sesiunea, denumirile din CATUC și ISO 19650, exportul COBie, Cartea tehnică și arhiva
+src/pages/             autentificare, proiecte, proiect (detalii, procese verbale, materiale FAM, betoane și încercări, echipamente, Cartea tehnică, echipă, istoric), registru, profil
 src/components/        elemente comune de interfață
 ```

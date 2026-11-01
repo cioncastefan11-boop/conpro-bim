@@ -257,6 +257,9 @@ export const TIPURI_ATASAMENT: Record<string, string> = {
   poza: 'Fotografie',
   pv_semnat: 'PV semnat (scan sau semnat electronic)',
   bon_livrare: 'Bonuri de livrare beton',
+  manual: 'Manual de utilizare și mentenanță',
+  certificat_garantie: 'Certificat de garanție',
+  document: 'Document',
   buletin: 'Buletin de încercare',
   altul: 'Alt document',
 };
@@ -278,3 +281,13 @@ export function rezistenteClasa(clasa: string): { fck: number; fckCub: number } 
   return m ? { fck: Number(m[1]), fckCub: Number(m[2]) } : null;
 }
 export const CLASE_BETON = ['C8/10', 'C12/15', 'C16/20', 'C20/25', 'C25/30', 'C30/37', 'C35/45', 'C40/50', 'C45/55', 'C50/60'];
+
+// ---------- echipamente și Cartea tehnică (migrarea 0006) ----------
+export const CATEGORII_ECHIPAMENT = ['Încălzire', 'Răcire', 'Ventilare', 'Sanitare', 'Electrice', 'Iluminat', 'Curenți slabi',
+  'Securitate la incendiu', 'Lifturi', 'Tâmplărie și uși', 'Altele'];
+export const CAPITOLE_CARTE: { id: 'A' | 'B' | 'C' | 'D'; nume: string; continut: string }[] = [
+  { id: 'A', nume: 'A · Documentația privind proiectarea', continut: 'Certificatul de urbanism, autorizația, avizele, proiectul tehnic actualizat la recepție, as-built, dispozițiile de șantier ale proiectantului.' },
+  { id: 'B', nume: 'B · Documentația privind execuția', continut: 'Procesele verbale de lucrări ascunse și faze determinante, FAM-urile și livrările, condica de betoane, încercările, probele.' },
+  { id: 'C', nume: 'C · Documentația privind recepția', continut: 'Procesele verbale de recepție, punctele de vedere ale proiectanților și dirigintelui, fișele de instruire.' },
+  { id: 'D', nume: 'D · Exploatarea, întreținerea și urmărirea comportării', continut: 'Manualul de utilizare și mentenanță, inventarul echipamentelor (COBie), garanțiile, programul de urmărire în timp.' },
+];
