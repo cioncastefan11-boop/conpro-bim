@@ -140,7 +140,8 @@ export const codPv = (codProiect: string, numar: number) => `PV-${codProiect}-${
 
 // ---------- registrul electronic (art. 456 lit. f, art. 459 lit. i) ----------
 export type TipRegistru = 'verificare' | 'lucrari_ascunse' | 'faza_determinanta' | 'proba' | 'receptie'
-  | 'neconformitate' | 'oprire_lucrari' | 'notificare_isc' | 'dispozitie_santier' | 'alt';
+  | 'neconformitate' | 'oprire_lucrari' | 'notificare_isc' | 'dispozitie_santier' | 'alt'
+  | 'aprobare_fam' | 'verificare_livrare';
 export const TIPURI_REGISTRU: { id: TipRegistru; nume: string; manual: boolean }[] = [
   { id: 'verificare', nume: 'Verificare pe șantier', manual: true },
   { id: 'neconformitate', nume: 'Raport de neconformitate', manual: true },
@@ -151,6 +152,8 @@ export const TIPURI_REGISTRU: { id: TipRegistru; nume: string; manual: boolean }
   { id: 'faza_determinanta', nume: 'Fază determinantă', manual: false },
   { id: 'proba', nume: 'Probă', manual: false },
   { id: 'receptie', nume: 'Recepție', manual: false },
+  { id: 'aprobare_fam', nume: 'Decizie FAM', manual: false },
+  { id: 'verificare_livrare', nume: 'Verificare la livrare', manual: false },
   { id: 'alt', nume: 'Altă activitate', manual: true },
 ];
 export const numeTipRegistru = (t: TipRegistru) => TIPURI_REGISTRU.find(x => x.id === t)?.nume ?? t;
@@ -221,3 +224,35 @@ export function propunereContinutPv(d: {
       };
   }
 }
+
+// ---------- FAM (migrarea 0004) ----------
+export type StareFam = 'ciorna' | 'depus' | 'completari' | 'avizat' | 'aprobat' | 'aprobat_cu_observatii' | 'respins';
+export type AvizFam = 'conform' | 'echivalent' | 'neconform';
+export type DecizieFam = 'aprobat' | 'aprobat_cu_observatii' | 'respins';
+
+export const STARI_FAM: Record<StareFam, { eticheta: string; ton: Stare['ton']; cine?: string }> = {
+  ciorna: { eticheta: 'Ciornă', ton: 'neutru', cine: 'constructor' },
+  depus: { eticheta: 'La avizul proiectantului', ton: 'atentie', cine: 'proiectant' },
+  completari: { eticheta: 'De completat', ton: 'atentie', cine: 'constructor' },
+  avizat: { eticheta: 'La decizia dirigintelui', ton: 'atentie', cine: 'diriginte' },
+  aprobat: { eticheta: 'Aprobat', ton: 'ok' },
+  aprobat_cu_observatii: { eticheta: 'Aprobat cu observații', ton: 'ok' },
+  respins: { eticheta: 'Respins', ton: 'alerta', cine: 'constructor' },
+};
+export const AVIZE: Record<AvizFam, string> = {
+  conform: 'Conform cu proiectul', echivalent: 'Echivalent cu produsul din proiect', neconform: 'Neconform, de completat',
+};
+export const codFam = (codProiect: string, numar: number, revizie: number) =>
+  `FAM-${codProiect}-${String(numar).padStart(3, '0')}/R${revizie}`;
+
+export const TIPURI_ATASAMENT: Record<string, string> = {
+  fisa_tehnica: 'Fișă tehnică',
+  dop: 'Declarație de performanță',
+  agrement: 'Agrement tehnic',
+  certificat: 'Certificat / declarație de conformitate',
+  instructiuni: 'Instrucțiuni de utilizare',
+  aviz_insotire: 'Aviz de însoțire / certificat de lot',
+  poza: 'Fotografie',
+  pv_semnat: 'PV semnat (scan sau semnat electronic)',
+  altul: 'Alt document',
+};

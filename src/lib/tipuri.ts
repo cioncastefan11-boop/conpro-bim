@@ -108,3 +108,26 @@ export type IntrareRegistru = {
   automat: boolean;
   creat_la: string;
 };
+
+export type Fam = {
+  id: string; proiect_id: string; numar: number; revizie: number; fam_anterior_id: string | null;
+  material: string; utilizare: string | null; cerinte_proiect: string | null;
+  producator: string | null; produs: string | null; furnizor: string | null;
+  performante_declarate: string | null; date_mediu: string | null;
+  dop_numar: string | null; dop_data: string | null; marcaj_ce: boolean;
+  agrement_numar: string | null; agrement_valabil_pana: string | null; alte_documente: string | null;
+  stare: import('./domeniu').StareFam;
+  creat_de: string; creat_la: string; depus_de: string | null; depus_la: string | null;
+  aviz: import('./domeniu').AvizFam | null; aviz_observatii: string | null; avizat_de: string | null; avizat_la: string | null;
+  decizie: import('./domeniu').DecizieFam | null; decizie_observatii: string | null; decis_de: string | null; decis_la: string | null;
+};
+
+export type LivrareFam = {
+  id: string; fam_id: string; proiect_id: string; data: string; cantitate: string | null; lot: string | null;
+  document_insotire: string | null; conform: boolean; observatii: string | null; verificat_de: string; creat_la: string;
+};
+
+export type Atasament = {
+  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv'; entitate_id: string;
+  tip_document: string; nume_fisier: string; cale: string; marime: number | null; incarcat_de: string; incarcat_la: string;
+};

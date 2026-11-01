@@ -226,3 +226,23 @@ a.buton { text-decoration: none; display: inline-block; }
   .eticheta { border: 1px solid #999; background: none !important; color: #000 !important; }
   a { text-decoration: none; color: #000; }
 }
+
+/* ---------- FAM și atașamente ---------- */
+.atasamente { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 4px; }
+.lista-fisiere { list-style: none; padding: 0; margin: 6px 0 10px; display: grid; gap: 6px; }
+.lista-fisiere li { font-size: 14px; }
+.incarcare-fisiere { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin: 6px 0; }
+.incarcare-fisiere > label:first-child { min-width: 240px; }
+.buton-fisier { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
+.buton-fisier input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.buton-fisier:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.circuit { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 0; counter-reset: pas; }
+.circuit li { position: relative; padding: 10px 0 10px 36px; border-left: 2px solid var(--border); margin-left: 12px; counter-increment: pas; }
+.circuit li::before { content: counter(pas); position: absolute; left: -13px; top: 8px; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 2px solid var(--border); display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--muted); }
+.circuit li.facut::before { background: var(--ok); border-color: var(--ok); color: #fff; content: "✓"; }
+.circuit li.respins::before { background: var(--bad); border-color: var(--bad); color: #fff; content: "×"; }
+.circuit .obs { color: #334155; font-style: italic; }
+.revizii { font-size: 14px; }
+.revizii a { color: #c2410c; font-weight: 600; }
+fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { background: #f8fafc; color: var(--text); border-color: var(--border); }
+@media print { .circuit li { break-inside: avoid; } fieldset:disabled input, fieldset:disabled textarea { border: 0; padding: 0; } }

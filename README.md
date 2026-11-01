@@ -1,4 +1,4 @@
-# Conpro BIM · versiunea 0.2.1
+# Conpro BIM · versiunea 0.3
 
 Platforma în care beneficiarul, dirigintele, constructorul și proiectantul lucrează pe aceleași informații ale unei lucrări, fiecare cu contul și răspunderea lui (SR EN ISO 19650, Legea 169/2026).
 
@@ -17,6 +17,17 @@ Platforma în care beneficiarul, dirigintele, constructorul și proiectantul luc
 Următoarele module (CDE și documente, FAM, condica de betoane, încercări, echipamente COBie, Cartea tehnică) se construiesc peste această fundație.
 
 ---
+
+## Actualizare la 0.3 (FAM, livrări, atașamente)
+
+1. **GitHub:** urcați din nou tot conținutul folderului (Add file → Upload files → Commit changes).
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0004_fam.sql`, lipiți și **Run**. La avertismentul „destructive operations” apăsați **Run query**: scriptul doar înlocuiește două reguli de acces pentru fișiere, nu șterge date.
+3. Verificare: `select count(*) from pg_policies where schemaname in ('public','storage') and policyname like any (array['fam_%','livrari_%','atasamente_%','documente_%']);` trebuie să dea **9**. În **Storage** trebuie să apară bucket-ul privat `documente`.
+
+Ce aduce:
+- **FAM:** constructorul (sau subcontractorul) întocmește fișa: materialul și performanțele cerute în proiect, produsul propus, performanțele declarate, datele de mediu (art. 386 lit. h) și documentele însoțitoare (art. 563), cu fișierele atașate. O depune; proiectantul avizează conform / echivalent / neconform (neconform îl întoarce la completări); dirigintele aprobă, aprobă cu observații sau respinge. Un FAM respins se reia ca revizie nouă (FAM-COD-002/R2). După depunere fișa nu se mai modifică. Dacă echipa nu are proiectant, FAM-ul merge direct la diriginte.
+- **Verificarea la livrare:** dirigintele înregistrează fiecare livrare (cantitate, lot, document de însoțire) ca conformă sau neconformă; nu se poate înregistra livrarea unui material fără FAM aprobat. Deciziile pe FAM și livrările intră automat în registrul electronic al dirigintelui; o livrare neconformă intră ca neconformitate.
+- **Atașamente:** fișiere de până la 50 MB în bucket-ul privat `documente`, vizibile doar membrilor proiectului; la FAM, la livrări și la procese verbale (PV-ul semnat, scanat sau semnat electronic calificat, și fotografii). Fișierele nu se șterg.
 
 ## Actualizare la 0.2.1 (conținutul și concluziile PV-ului)
 
@@ -99,7 +110,7 @@ Supabase trimite gratuit doar câteva emailuri pe oră. Pentru pilot e suficient
   - invitațiile se acceptă prin `accepta_invitatiile()`, doar pentru un email confirmat;
   - proiectele nu se șterg, se arhivează.
 - **Inserarea unui proiect** se face fără `returning`: politica de citire cere calitatea de membru, care apare abia în triggerul `after insert`.
-- **Teste:** `npm install && npm run test:db` rulează 94 de verificări pe un Postgres local (PGlite), cu utilizatori simulați: 40 pentru regulile de bază, 54 pentru procese verbale, conținutul lor și registru (ordinea art. 426, participanți obligatorii, imuabilitate, vizibilitate).
+- **Teste:** `npm install && npm run test:db` rulează 137 de verificări pe un Postgres local (PGlite), cu utilizatori simulați: 40 pentru regulile de bază, 54 pentru procese verbale, conținutul lor și registru, 43 pentru FAM, livrări, atașamente și Storage (ordinea art. 426, participanți obligatorii, imuabilitate, vizibilitate).
 - **PV-uri:** scrierea se face doar prin funcțiile `convoaca_pv`, `confirma_pv`, `anuleaza_pv` (`security definer`); tabelele au doar drept de citire pentru utilizatori. Intrările automate în registru sunt scrise de `confirma_pv`; cele manuale trec prin triggerul `verifica_intrare_registru`.
 - **Local:** copiați `.env.example` în `.env`, completați, apoi `npm run dev`.
 
@@ -109,6 +120,6 @@ Supabase trimite gratuit doar câteva emailuri pe oră. Pentru pilot e suficient
 supabase/migrations/   schema bazei de date și regulile de acces
 tests/                 testele regulilor de acces
 src/lib/               clientul Supabase, sesiunea, denumirile din CATUC și ISO 19650
-src/pages/             autentificare, proiecte, proiect (detalii, procese verbale, echipă, istoric), registru, profil
+src/pages/             autentificare, proiecte, proiect (detalii, procese verbale, materiale FAM, echipă, istoric), registru, profil
 src/components/        elemente comune de interfață
 ```

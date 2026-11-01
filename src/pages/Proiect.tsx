@@ -3,11 +3,12 @@ import { NavLink, Route, Routes, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useUid } from '../lib/sesiune';
 import {
-  CLASE, ROLURI, STADII, codPv, formatData, numeRol, numeTipRegistru, tipPv, numeTipDoc, stareAutorizatie, stareDocument, type DeciziePv, type Rol, type TipPv, type TipRegistru,
+  CLASE, ROLURI, STADII, codFam, codPv, formatData, numeRol, numeTipRegistru, tipPv, numeTipDoc, stareAutorizatie, stareDocument, type DeciziePv, type Rol, type TipPv, type TipRegistru,
 } from '../lib/domeniu';
 import type { DocumentPersoana, IntrareJurnal, Invitatie, Membru, Proiect as TProiect } from '../lib/tipuri';
 import { Eroare, Eticheta, Gol, mesajEroare } from '../components/ui';
 import ProceseVerbale from './ProceseVerbale';
+import Materiale from './Materiale';
 
 export default function Proiect() {
   const { id = '' } = useParams();
@@ -50,6 +51,7 @@ export default function Proiect() {
       <nav className="file" aria-label="Secțiunile proiectului">
         <NavLink to="" end>Detalii</NavLink>
         <NavLink to="pv">Procese verbale</NavLink>
+        <NavLink to="fam">Materiale (FAM)</NavLink>
         <NavLink to="echipa">Echipa ({membri.length})</NavLink>
         <NavLink to="istoric">Istoric</NavLink>
       </nav>
@@ -57,6 +59,7 @@ export default function Proiect() {
       <Routes>
         <Route index element={<Detalii proiect={proiect} admin={admin} onSalvat={incarca} />} />
         <Route path="echipa" element={<Echipa proiectId={id} membri={membri} admin={admin} uid={uid} onSchimbat={incarca} />} />
+        <Route path="fam/*" element={<Materiale proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="pv/*" element={<ProceseVerbale proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="istoric" element={<Istoric proiect={proiect} membri={membri} />} />
       </Routes>
@@ -300,6 +303,7 @@ const confirmare = (text: string) => window.confirm(text);
 const NUME_TABEL: Record<string, string> = {
   proiecte: 'Proiect', membri_proiect: 'Echipă', invitatii: 'Invitație',
   procese_verbale: 'Proces verbal', participanti_pv: 'Proces verbal', registru_intrari: 'Registru electronic',
+  fam: 'FAM', livrari_fam: 'Livrare', atasamente: 'Document',
 };
 const CAMPURI: Record<string, string> = {
   denumire: 'denumirea', adresa: 'adresa', beneficiar: 'beneficiarul', stadiu_catuc: 'stadiul',
@@ -364,6 +368,20 @@ function Istoric({ proiect, membri }: { proiect: TProiect; membri: Membru[] }) {
       if (verb) return `${verb} ${cod}${d.observatii ? `: „${d.observatii}”` : ''}`;
       return 'a actualizat o participare';
     }
+    if (j.tabel === 'fam') {
+      const cod = codFam(proiect.cod, Number(d.numar ?? i.numar), Number(d.revizie ?? i.revizie));
+      if (j.operatie === 'INSERT') return `a întocmit ${cod}: ${d.material}`;
+      if (d.stare !== i.stare) {
+        const ce: Record<string, string> = {
+          depus: 'a depus', avizat: d.aviz ? `a avizat (${String(d.aviz)})` : 'a depus', completari: 'a cerut completări la',
+          aprobat: 'a aprobat', aprobat_cu_observatii: 'a aprobat cu observații', respins: 'a respins',
+        };
+        return `${ce[String(d.stare)] ?? 'a modificat'} ${cod}`;
+      }
+      return `a modificat ${cod}`;
+    }
+    if (j.tabel === 'livrari_fam') return `a verificat o livrare: ${d.conform ? 'conformă' : 'NECONFORMĂ'}${d.lot ? `, lot ${d.lot}` : ''}`;
+    if (j.tabel === 'atasamente') return `a atașat documentul „${d.nume_fisier}”`;
     if (j.tabel === 'registru_intrari') return `a scris în registrul electronic (${numeTipRegistru(d.tip as TipRegistru).toLowerCase()})`;
     return `${j.operatie} ${j.tabel}`;
   }

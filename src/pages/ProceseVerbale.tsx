@@ -7,6 +7,7 @@ import {
 } from '../lib/domeniu';
 import type { Membru, ParticipantPv, ProcesVerbal, Proiect } from '../lib/tipuri';
 import { Eroare, Eticheta, Gol, mesajEroare } from '../components/ui';
+import Atasamente from '../components/Atasamente';
 
 type Props = { proiect: Proiect; membri: Membru[]; rolulMeu?: Rol; uid: string };
 const POT_CONVOCA: Rol[] = ['constructor', 'diriginte', 'administrator'];
@@ -315,6 +316,10 @@ function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
         )}
         {pv.stare === 'contestat' && <p className="mesaj alerta">Un participant a refuzat. Procesul verbal se anulează și, după remediere, se convoacă unul nou.</p>}
         {pv.stare === 'anulat' && <p className="mesaj info">Anulat de {om(pv.anulat_de)}: {pv.motiv_anulare}</p>}
+        <Atasamente proiectId={proiect.id} entitate="pv" entitateId={pv.id} membri={membri}
+          poateIncarca={pv.stare !== 'anulat' && (pv.convocat_de === uid || parti.some(p => p.persoana_id === uid))}
+          tipuri={['pv_semnat', 'poza', 'altul']} titlu="Documente și fotografii"
+          gol="Se pot atașa PV-ul semnat (scan sau semnat electronic calificat) și fotografiile de pe șantier." />
         <p className="nota doar-tipar">Document generat din Conpro BIM. Confirmările sunt înregistrate cu contul fiecărui participant, cu data și ora.</p>
       </article>
 
