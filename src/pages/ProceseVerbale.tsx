@@ -169,8 +169,9 @@ function Convocare({ proiect, membri, rolulMeu, uid }: Props) {
       <div className="campuri">
         <label>Tip
           <select value={tip} onChange={e => setTip(e.target.value as TipPv)}>
-            {TIPURI_PV.map(x => <option key={x.id} value={x.id}>{x.nume}</option>)}
+            {TIPURI_PV.filter(x => !['receptie_partiala', 'receptie_terminare', 'receptie_finala'].includes(x.id)).map(x => <option key={x.id} value={x.id}>{x.nume}</option>)}
           </select>
+          <small>Recepția la terminare, parțială și finală se fac din tabul Recepție.</small>
         </label>
         <label>Data<input type="date" value={data} onChange={e => setData(e.target.value)} required /></label>
         <label>Locul<input value={loc} onChange={e => setLoc(e.target.value)} /></label>

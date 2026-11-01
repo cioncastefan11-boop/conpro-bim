@@ -11,6 +11,7 @@ import ProceseVerbale from './ProceseVerbale';
 import Materiale from './Materiale';
 import Betoane from './Betoane';
 import Echipamente from './Echipamente';
+import Receptie from './Receptie';
 import CarteaTehnica from './CarteaTehnica';
 
 export default function Proiect() {
@@ -57,6 +58,7 @@ export default function Proiect() {
         <NavLink to="fam">Materiale (FAM)</NavLink>
         <NavLink to="beton">Betoane și încercări</NavLink>
         <NavLink to="echipamente">Echipamente</NavLink>
+        <NavLink to="receptie">Recepție</NavLink>
         <NavLink to="carte">Cartea tehnică</NavLink>
         <NavLink to="echipa">Echipa ({membri.length})</NavLink>
         <NavLink to="istoric">Istoric</NavLink>
@@ -66,6 +68,7 @@ export default function Proiect() {
         <Route index element={<Detalii proiect={proiect} admin={admin} onSalvat={incarca} />} />
         <Route path="echipa" element={<Echipa proiectId={id} membri={membri} admin={admin} uid={uid} onSchimbat={incarca} />} />
         <Route path="echipamente" element={<Echipamente proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
+        <Route path="receptie/*" element={<Receptie proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="carte" element={<CarteaTehnica proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="beton/*" element={<Betoane proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="fam/*" element={<Materiale proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
@@ -409,6 +412,17 @@ function Istoric({ proiect, membri }: { proiect: TProiect; membri: Membru[] }) {
       return `${j.operatie === 'INSERT' ? 'a înregistrat' : j.operatie === 'DELETE' ? 'a șters' : 'a completat'} echipamentul ${x.cod}`;
     }
     if (j.tabel === 'documente_carte') return `a înregistrat în Cartea tehnică (capitolul ${d.capitol}): ${d.titlu}`;
+    if (j.tabel === 'receptii') {
+      if (j.operatie === 'INSERT') return `a deschis recepția nr. ${d.numar} (${d.tip === 'terminare' ? 'la terminarea lucrărilor' : 'finală'}): ${d.obiect}`;
+      const st = d.stare as string, inainte = (j.inainte ?? {}) as Record<string, unknown>;
+      if (st !== inainte.stare) return ({ convocata: `a convocat comisia de recepție nr. ${d.numar}`, decisa: `a consemnat decizia comisiei la recepția nr. ${d.numar}`, aprobata: `a aprobat recepția nr. ${d.numar}`, respinsa: `a respins recepția nr. ${d.numar}`, anulata: `a anulat recepția nr. ${d.numar}` } as Record<string, string>)[st] ?? `a modificat recepția nr. ${d.numar}`;
+      return `a modificat datele recepției nr. ${d.numar}`;
+    }
+    if (j.tabel === 'comisie_receptie') return j.operatie === 'DELETE' ? 'a scos un membru din comisia de recepție' : j.operatie === 'INSERT' ? `a numit în comisia de recepție: ${d.nume}` : `a consemnat poziția lui ${d.nume} în comisia de recepție`;
+    if (j.tabel === 'obiectii_receptie') {
+      if (j.operatie === 'INSERT') return `a consemnat obiecția nr. ${d.numar} la recepție: ${d.descriere}`;
+      return d.stare === 'remediata' ? `a raportat remedierea obiecției nr. ${d.numar}` : d.stare === 'confirmata' ? `a confirmat remedierea obiecției nr. ${d.numar}` : `a redeschis obiecția nr. ${d.numar}`;
+    }
     if (j.tabel === 'atasamente') return `a atașat documentul „${d.nume_fisier}”`;
     if (j.tabel === 'registru_intrari') return `a scris în registrul electronic (${numeTipRegistru(d.tip as TipRegistru).toLowerCase()})`;
     return `${j.operatie} ${j.tabel}`;

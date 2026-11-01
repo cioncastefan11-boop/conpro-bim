@@ -18,6 +18,22 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.7 (recepția construcției)
+
+1. **GitHub:** urcați din nou tot conținutul folderului (Add file → Upload files → Commit changes).
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0008_receptie.sql`, lipiți și **Run**. La avertismentul „destructive operations” apăsați **Run query**: scriptul doar extinde lista documentelor care se pot atașa, nu șterge date.
+3. Verificare: `select count(*) from pg_policies where tablename in ('receptii','comisie_receptie','obiectii_receptie');` trebuie să dea **9**.
+
+Ce aduce (Legea 169/2026, art. 280, 456, 527–532):
+- **Tab nou „Recepție”:** recepția la terminarea lucrărilor (și parțială, pe corpuri sau tronsoane), apoi recepția finală la expirarea garanției.
+- **Pregătirea:** dirigintele (secretariatul comisiei) deschide recepția, compune comisia (președinte, reprezentantul emitentului AC, specialiști, ISC/ISU/cultură/ordonator, invitați) și vede ce mai lipsește înainte de convocare. Fără autorizație de construire nu se poate deschide recepția.
+- **Documentele de la art. 528 alin. 3 (a–g):** verificate automat; punctele de vedere, fișele de instruire, as-built-ul și PV-ul semnat se atașează la recepție. Proiectantul își încarcă singur punctul de vedere.
+- **Ședința:** se consemnează poziția fiecărui membru; reprezentanții autorităților au drept de veto, motivat. Obiecțiile se scriu cu termen și responsabil. Decizia: admitere, admitere cu obiecții, suspendare, respingere (la recepția finală și prelungirea garanției). Textul constatărilor se poate propune din datele proiectului.
+- **Aprobarea beneficiarului**, apoi garanția: minimul legal după clasa de consecințe (CC1 1 an, CC2 3 ani, CC3–CC4 5 ani), curge de la data recepției; aplicația arată termenul recepției finale (10 zile după expirare). Proiectul trece singur în stadiul 6, apoi 7.
+- **Remedierile:** executantul raportează, cu dovezi, dirigintele confirmă sau refuză; totul intră în registrul electronic.
+- **Procesul verbal de recepție** generat, gata de tipărit sau salvat PDF; intră în Cartea tehnică (capitolul C) și în arhivă.
+- La procesele verbale, tipurile de recepție la terminare, parțială și finală s-au mutat în tabul Recepție.
+
 ## Actualizare la 0.6 (condica de betoane, versiunea completă)
 
 1. **GitHub:** urcați din nou tot conținutul folderului (Add file → Upload files → Commit changes).

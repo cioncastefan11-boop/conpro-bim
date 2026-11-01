@@ -25,6 +25,10 @@ export function mesajEroare(e: { message?: string; code?: string } | null): stri
   if (m.includes('livrare_neconforma_cere_observatii')) return 'La o livrare neconformă scrieți ce nu corespunde.';
   if (m.includes('incercare_neconforma_cere_observatii')) return 'La un rezultat neconform scrieți ce nu corespunde.';
   if (m.includes('turnari_clasa_beton_check')) return 'Clasa betonului se scrie ca C25/30.';
+  if (m.includes('receptie_terminare_unica')) return 'Există deja o recepție la terminare a întregii construcții în lucru.';
+  if (m.includes('invitatii_nu_voteaza')) return 'Invitații participă fără drept de vot.';
+  if (m.includes('veto_doar_autoritati')) return 'Drept de veto au doar reprezentanții autorităților și ai organelor de control.';
+  if (m.includes('veto_motivat')) return 'Vetoul se motivează în scris.';
   if (m.includes('check constraint')) return 'Unele valori nu sunt valide. Verificați datele introduse.';
   return m;
 }

@@ -9,6 +9,8 @@ import {
 import type { Atasament, ProcesVerbal } from './tipuri';
 import { genereazaCobie, lipsuriEchipament } from './cobie';
 import { excelCondica, htmlCondica as htmlCondicaBetoane } from './condica';
+import { fisiereReceptie, htmlReceptie } from './receptie';
+import { codReceptie, DECIZII_RECEPTIE, numeReceptie } from './domeniu';
 
 export type ElementOpis = {
   id: string;
@@ -16,7 +18,7 @@ export type ElementOpis = {
   detalii?: string;
   data?: string | null;
   fisiere: Atasament[];
-  generat?: 'pv' | 'manual' | 'cobie' | 'condica' | 'fam';
+  generat?: 'pv' | 'manual' | 'cobie' | 'condica' | 'fam' | 'receptie';
   pvId?: string;
   dosar: string;                 // folderul din arhivă
 };
@@ -48,6 +50,17 @@ export function construiesteOpis(d: DateProiect): CapitolOpis[] {
     (rec ? cap.C : cap.B).push({
       id: pv.id, titlu: `${codPv(p.cod, pv.numar)} · ${tipPv(pv.tip).nume}`, detalii: pv.obiect + (pv.elemente ? ` · ${pv.elemente}` : ''),
       data: pv.data_pv, fisiere: fis('pv', pv.id), generat: 'pv', pvId: pv.id, dosar: rec ? 'C_Receptie/PV' : 'B_Executie/PV',
+    });
+  }
+
+  // C · recepțiile cu decizia comisiei
+  for (const rc of d.receptii.filter(x => x.decizie && x.stare !== 'anulata')) {
+    const ob = d.obiectii.filter(o => o.receptie_id === rc.id);
+    cap.C.push({
+      id: rc.id, titlu: `${codReceptie(p.cod, rc.numar)} · ${numeReceptie(rc)}`,
+      detalii: [rc.obiect, DECIZII_RECEPTIE[rc.decizie!].nume.toLowerCase(), rc.stare === 'aprobata' ? 'aprobată de beneficiar' : rc.stare === 'respinsa' ? 'respinsă' : 'la aprobarea beneficiarului',
+        ob.length && `${ob.filter(o => o.stare === 'confirmata').length}/${ob.length} obiecții remediate`].filter(Boolean).join(' · '),
+      data: rc.data_receptie, fisiere: fisiereReceptie(d, rc), generat: 'receptie', dosar: `C_Receptie/${codReceptie(p.cod, rc.numar)}`,
     });
   }
 
@@ -112,7 +125,8 @@ export function lipsuriCarte(d: DateProiect): Lipsa[] {
   const cuLipsuri = d.echipamente.filter(e => lipsuriEchipament(d, e.id).length);
   if (cuLipsuri.length) l.push({ text: `${n(cuLipsuri.length, 'echipament', 'echipamente')} cu date COBie lipsă`, unde: 'echipamente' });
   if (!d.tipuri.length) l.push({ text: 'Nu sunt înregistrate echipamente, deci nici manualul de mentenanță', unde: 'echipamente' });
-  if (!d.pvs.some(x => x.tip === 'receptie_terminare' && x.stare === 'semnat')) l.push({ text: 'Procesul verbal de recepție la terminarea lucrărilor nu e încă semnat', unde: 'pv' });
+  if (!d.receptii.some(x => x.tip === 'terminare' && !x.partiala && x.stare === 'aprobata') && !d.pvs.some(x => x.tip === 'receptie_terminare' && x.stare === 'semnat'))
+    l.push({ text: 'Procesul verbal de recepție la terminarea lucrărilor nu e încă aprobat', unde: 'receptie' });
   if (!p.ac_numar && !d.documente.some(x => x.capitol === 'A' && /autoriza/i.test(x.titlu))) l.push({ text: 'Autorizația de construire nu e înregistrată', unde: 'carte' });
   if (!d.documente.some(x => x.capitol === 'A' && /as.?built|real executat/i.test(x.titlu))) l.push({ text: 'Proiectul as-built (art. 528 alin. 3 lit. g) nu e înregistrat în capitolul A', unde: 'carte' });
   return l;
@@ -145,6 +159,7 @@ export function htmlOpis(d: DateProiect, capitole: CapitolOpis[]): string {
         e.generat === 'manual' ? 'D_Exploatare/Manual-utilizare-mentenanta.html' : '',
         e.generat === 'cobie' ? `D_Exploatare/COBie-${esc(d.proiect.cod)}.xlsx` : '',
         e.generat === 'condica' ? 'B_Executie/Condica_betoane/Condica-betoane.html<br>B_Executie/Condica_betoane/Condica-betoane.xlsx' : '',
+        e.generat === 'receptie' ? `${esc(e.dosar)}/${esc(e.titlu.split(' · ')[0])}.html` : '',
         e.generat === 'fam' ? `B_Executie/FAM/${esc(e.titlu.split(' · ')[0].replace('/', '-'))}.html` : '',
         ...e.fisiere.map(f => `${esc(e.dosar)}/${esc(numeInArhiva(f))}`),
       ].filter(Boolean).join('<br>')}</td></tr>`;
@@ -244,6 +259,9 @@ export async function genereazaArhiva(d: DateProiect, progres: (text: string) =>
       const pv = d.pvs.find(x => x.id === e.pvId)!;
       radacina.file(`${e.dosar}/${codPv(d.proiect.cod, pv.numar)}.html`, htmlPv(d, pv));
     }
+  }
+  for (const rc of d.receptii.filter(x => x.decizie && x.stare !== 'anulata')) {
+    radacina.file(`C_Receptie/${codReceptie(d.proiect.cod, rc.numar)}/${codReceptie(d.proiect.cod, rc.numar)}.html`, htmlReceptie(d, rc));
   }
   for (const f of d.famuri.filter(x => x.stare === 'aprobat' || x.stare === 'aprobat_cu_observatii')) {
     radacina.file(`B_Executie/FAM/${codFam(d.proiect.cod, f.numar, f.revizie).replace('/', '-')}.html`, htmlFam(d, f.id));

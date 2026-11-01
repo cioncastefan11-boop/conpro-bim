@@ -1,4 +1,5 @@
 // Denumiri și reguli din Legea 169/2026 (CATUC) și ISO 19650.
+import type { CalitateComisie, DecizieReceptie, Receptie, StareReceptie } from './tipuri';
 
 export type Rol =
   | 'administrator' | 'beneficiar' | 'diriginte' | 'constructor' | 'proiectant'
@@ -261,6 +262,14 @@ export const TIPURI_ATASAMENT: Record<string, string> = {
   certificat_garantie: 'Certificat de garanție',
   document: 'Document',
   buletin: 'Buletin de încercare',
+  punct_vedere_proiectant: 'Punctul de vedere al proiectantului',
+  punct_vedere_diriginte: 'Punctul de vedere al dirigintelui',
+  pv_receptie_semnat: 'PV de recepție semnat',
+  fisa_instruire: 'Fișă de instruire a operatorilor',
+  as_built: 'Proiectul as-built',
+  instiintare_finalizare: 'Înștiințarea emitentului AC',
+  raport_comportare: 'Raportul privind comportarea în exploatare',
+  dovada_remediere: 'Dovada remedierii',
   altul: 'Alt document',
 };
 
@@ -292,3 +301,42 @@ export const CAPITOLE_CARTE: { id: 'A' | 'B' | 'C' | 'D'; nume: string; continut
   { id: 'C', nume: 'C · Documentația privind recepția', continut: 'Procesele verbale de recepție, punctele de vedere ale proiectanților și dirigintelui, fișele de instruire.' },
   { id: 'D', nume: 'D · Exploatarea, întreținerea și urmărirea comportării', continut: 'Manualul de utilizare și mentenanță, inventarul echipamentelor (COBie), garanțiile, programul de urmărire în timp.' },
 ];
+
+// ---------- recepția (migrarea 0008) ----------
+
+export const STARI_RECEPTIE: Record<StareReceptie, { eticheta: string; ton: Stare['ton'] }> = {
+  pregatire: { eticheta: 'În pregătire', ton: 'neutru' },
+  convocata: { eticheta: 'Comisie convocată', ton: 'atentie' },
+  decisa: { eticheta: 'La aprobarea beneficiarului', ton: 'atentie' },
+  aprobata: { eticheta: 'Aprobată', ton: 'ok' },
+  respinsa: { eticheta: 'Respinsă', ton: 'alerta' },
+  anulata: { eticheta: 'Anulată', ton: 'neutru' },
+};
+export const DECIZII_RECEPTIE: Record<DecizieReceptie, { nume: string; ton: Stare['ton']; doarFinala?: boolean }> = {
+  admitere: { nume: 'Admiterea recepției', ton: 'ok' },
+  admitere_cu_obiectii: { nume: 'Admiterea recepției cu obiecții', ton: 'ok' },
+  suspendare: { nume: 'Suspendarea recepției', ton: 'atentie' },
+  respingere: { nume: 'Respingerea recepției', ton: 'alerta' },
+  prelungire_garantie: { nume: 'Prelungirea perioadei de garanție', ton: 'atentie', doarFinala: true },
+};
+export const CALITATI_COMISIE: { id: CalitateComisie; nume: string; veto?: boolean; invitat?: boolean }[] = [
+  { id: 'presedinte', nume: 'Președinte (reprezentantul investitorului)' },
+  { id: 'reprezentant_ac', nume: 'Reprezentantul emitentului autorizației', veto: true },
+  { id: 'specialist', nume: 'Specialist' },
+  { id: 'isc', nume: 'Inspectoratul de Stat în Construcții', veto: true },
+  { id: 'isu', nume: 'Inspectoratul pentru Situații de Urgență', veto: true },
+  { id: 'cultura', nume: 'Direcția pentru cultură', veto: true },
+  { id: 'ordonator_credite', nume: 'Ordonatorul principal de credite', veto: true },
+  { id: 'invitat_executant', nume: 'Invitat · executantul', invitat: true },
+  { id: 'invitat_proiectant', nume: 'Invitat · proiectantul', invitat: true },
+  { id: 'invitat_altul', nume: 'Invitat', invitat: true },
+];
+export const calitate = (c: CalitateComisie) => CALITATI_COMISIE.find(x => x.id === c)!;
+export const POZITII_COMISIE = { de_acord: 'De acord', obiectii: 'De acord, cu obiecții', veto: 'Veto: propune respingerea' } as const;
+
+/** Garanția minimă după clasa de consecințe, în luni (art. 531 alin. 6). */
+export const garantieMinima = (cc: string | null) => ({ CC1: 12, CC2: 36, CC3: 60, CC4: 60 } as Record<string, number>)[cc ?? ''] ?? null;
+export const numeReceptie = (r: Pick<Receptie, 'tip' | 'partiala'>) =>
+  (r.tip === 'terminare' ? 'Recepția la terminarea lucrărilor' : 'Recepția finală') + (r.partiala ? ' (parțială)' : '');
+export const codReceptie = (proiect: string, numar: number) => `REC-${proiect}-${String(numar).padStart(2, '0')}`;
+export const adaugaZile = (iso: string, zile: number) => { const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + zile); return d.toISOString().slice(0, 10); };

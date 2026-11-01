@@ -286,3 +286,49 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
 .fara-rupere { white-space: nowrap; }
 .linia2 { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
 @media (max-width: 640px) { .tabel.stivuit td > .linia2 { grid-column: 2; margin-top: -6px; } .tabel.stivuit td > .fara-rupere { grid-column: 2; } }
+
+/* 0.7 · recepția */
+.buton.mic { padding: 5px 10px; font-size: 13px; }
+.pasi { list-style: none; display: flex; gap: 6px; padding: 0; margin: 4px 0 16px; flex-wrap: wrap; }
+.pasi li { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px; background: #f1f5f9; color: var(--muted); font-size: 13px; font-weight: 600; }
+.pasi li span { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 1px solid var(--border); font-size: 12px; }
+.pasi li.gata { background: var(--ok-bg); color: var(--ok); }
+.pasi li.gata span { background: var(--ok); border-color: var(--ok); color: #fff; }
+.pasi li.acum { background: var(--navy); color: #fff; }
+.pasi li.acum span { background: var(--accent); border-color: var(--accent); color: #fff; }
+.verificari { list-style: none; padding: 0; margin: 6px 0 14px; display: grid; gap: 6px; }
+.verificari li { display: grid; grid-template-columns: 26px 1fr auto; gap: 10px; align-items: start; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: #fff; }
+.verificari li small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 1px; }
+.verificari .semn { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; font-weight: 800; }
+.verificari li.bine .semn { background: var(--ok-bg); color: var(--ok); }
+.verificari li.lipsa { border-color: #fecaca; }
+.verificari li.lipsa .semn { background: var(--bad-bg); color: var(--bad); }
+.verificari li.atentie .semn { background: var(--warn-bg); color: var(--warn); }
+.kpi-rand { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 8px 0 12px; }
+.kpi { border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; background: var(--bg); }
+.kpi span { display: block; font-size: 12px; color: var(--muted); }
+.kpi b { display: block; font-size: 20px; font-family: var(--display); margin: 2px 0; }
+.kpi small { color: var(--muted); font-size: 12px; }
+.decizie-bloc { border: 2px solid var(--border); border-radius: 10px; padding: 12px 16px; margin: 6px 0 12px; }
+.decizie-bloc.ok { border-color: var(--ok); }
+.decizie-bloc.atentie { border-color: var(--warn); }
+.decizie-bloc.alerta { border-color: var(--bad); }
+.decizie-bloc > b { font-size: 16px; }
+.decizie-bloc p { margin: 6px 0; }
+.optiuni-decizie { display: grid; gap: 6px; margin: 8px 0 12px; }
+.optiuni-decizie label { display: flex; flex-direction: row; align-items: center; gap: 10px; font-weight: 600; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; }
+.optiuni-decizie label input { width: auto; margin: 0; }
+.optiuni-decizie label.dezactivat { opacity: .45; cursor: not-allowed; }
+.obiectii { list-style: none; padding: 0; margin: 6px 0 12px; display: grid; gap: 8px; }
+.obiectii > li { border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+.obiectie-cap { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.remediere { margin: 6px 0 0; padding: 6px 10px; background: var(--bg); border-radius: 8px; white-space: pre-line; font-size: 13.5px; }
+.rand-actiune { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.rand-actiune input { flex: 1; min-width: 200px; }
+.rand-adaugare { display: grid; grid-template-columns: 2fr 1.6fr 1.6fr auto; gap: 10px; align-items: end; margin: 8px 0 14px; padding: 12px; background: var(--bg); border-radius: 10px; }
+.rand-adaugare label.lat { grid-column: auto; }
+.pozitie { display: grid; gap: 6px; }
+@media (max-width: 760px) { .rand-adaugare { grid-template-columns: 1fr; } }
+.card.receptie > h3 { margin: 26px 0 8px; padding-top: 14px; border-top: 1px solid var(--border); }
+.obiectii .atasamente, .obiectii h3 { margin-top: 8px; }
+.obiectii .atasamente h3 { font-size: 13px; margin: 8px 0 4px; }

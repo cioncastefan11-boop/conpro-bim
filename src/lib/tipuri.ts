@@ -128,7 +128,7 @@ export type LivrareFam = {
 };
 
 export type Atasament = {
-  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte'; entitate_id: string;
+  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte' | 'receptie' | 'obiectie_receptie'; entitate_id: string;
   tip_document: string; nume_fisier: string; cale: string; marime: number | null; incarcat_de: string; incarcat_la: string;
 };
 
@@ -164,4 +164,27 @@ export type Echipament = {
 export type DocumentCarte = {
   id: string; proiect_id: string; capitol: 'A' | 'B' | 'C' | 'D'; titlu: string; numar: string | null; data: string | null;
   emitent: string | null; observatii: string | null; creat_de: string; creat_la: string;
+};
+
+// ---------- recepția (migrarea 0008) ----------
+export type StareReceptie = 'pregatire' | 'convocata' | 'decisa' | 'aprobata' | 'respinsa' | 'anulata';
+export type DecizieReceptie = 'admitere' | 'admitere_cu_obiectii' | 'suspendare' | 'respingere' | 'prelungire_garantie';
+export type Receptie = {
+  id: string; proiect_id: string; numar: number; tip: 'terminare' | 'finala'; partiala: boolean; obiect: string;
+  receptie_terminare_id: string | null; data_finalizare_lucrari: string | null; data_receptie: string | null; loc: string | null;
+  garantie_luni: number | null; stare: StareReceptie; constatari: string | null; decizie: DecizieReceptie | null;
+  motivare_decizie: string | null; decis_de: string | null; decis_la: string | null; aprobat_de: string | null; aprobat_la: string | null;
+  observatii_beneficiar: string | null; garantie_pana: string | null; motiv_anulare: string | null; convocat_la: string | null;
+  creat_de: string; creat_la: string;
+};
+export type CalitateComisie = 'presedinte' | 'reprezentant_ac' | 'specialist' | 'isc' | 'isu' | 'cultura' | 'ordonator_credite'
+  | 'invitat_executant' | 'invitat_proiectant' | 'invitat_altul';
+export type MembruComisie = {
+  id: string; receptie_id: string; proiect_id: string; ordine: number; nume: string; calitate: CalitateComisie;
+  institutie: string | null; pozitie: 'de_acord' | 'obiectii' | 'veto' | null; motivare: string | null; inregistrat_la: string | null;
+};
+export type ObiectieReceptie = {
+  id: string; receptie_id: string; proiect_id: string; numar: number; descriere: string; termen: string; responsabil: string | null;
+  stare: 'deschisa' | 'remediata' | 'confirmata'; remediere: string | null; remediat_de: string | null; remediat_la: string | null;
+  confirmat_de: string | null; confirmat_la: string | null; creat_de: string; creat_la: string;
 };
