@@ -1,4 +1,4 @@
-# Conpro BIM · versiunea 0.3
+# Conpro BIM · versiunea 0.4
 
 Platforma în care beneficiarul, dirigintele, constructorul și proiectantul lucrează pe aceleași informații ale unei lucrări, fiecare cu contul și răspunderea lui (SR EN ISO 19650, Legea 169/2026).
 
@@ -17,6 +17,16 @@ Platforma în care beneficiarul, dirigintele, constructorul și proiectantul luc
 Următoarele module (CDE și documente, FAM, condica de betoane, încercări, echipamente COBie, Cartea tehnică) se construiesc peste această fundație.
 
 ---
+
+## Actualizare la 0.4 (condica de betoane și încercări)
+
+1. **GitHub:** urcați din nou tot conținutul folderului (Add file → Upload files → Commit changes).
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0005_betoane_incercari.sql`, lipiți și **Run**. La avertismentul „destructive operations” apăsați **Run query**: scriptul doar extinde lista de documente care se pot atașa, nu șterge date.
+3. Verificare: `select count(*) from pg_policies where tablename in ('turnari','incercari');` trebuie să dea **5**.
+
+Ce aduce:
+- **Condica de betoane:** constructorul (RTE) înregistrează fiecare turnare: elementul, clasa betonului (cu fck și fck,cub afișate), clasa de expunere, consistența, volumul, stația, bonurile, orele, temperaturile, punerea în operă, tratarea și probele prelevate. Turnarea se leagă doar de un FAM de beton aprobat și de un PV de armare semnat de toți. Se corectează până la viza dirigintelui; viza intră în registrul lui.
+- **Încercări:** laboratorul (sau constructorul) introduce rezultatele, cu buletinul PDF, pe turnări sau pe materiale cu FAM. Rezultatele nu se modifică. Dirigintele le ia la cunoștință; un rezultat neconform intră în registru ca neconformitate. Conformitatea o stabilește laboratorul după normativ; aplicația o consemnează și arată media la 28 de zile față de fck,cub.
 
 ## Actualizare la 0.3 (FAM, livrări, atașamente)
 
@@ -110,7 +120,7 @@ Supabase trimite gratuit doar câteva emailuri pe oră. Pentru pilot e suficient
   - invitațiile se acceptă prin `accepta_invitatiile()`, doar pentru un email confirmat;
   - proiectele nu se șterg, se arhivează.
 - **Inserarea unui proiect** se face fără `returning`: politica de citire cere calitatea de membru, care apare abia în triggerul `after insert`.
-- **Teste:** `npm install && npm run test:db` rulează 137 de verificări pe un Postgres local (PGlite), cu utilizatori simulați: 40 pentru regulile de bază, 54 pentru procese verbale, conținutul lor și registru, 43 pentru FAM, livrări, atașamente și Storage (ordinea art. 426, participanți obligatorii, imuabilitate, vizibilitate).
+- **Teste:** `npm install && npm run test:db` rulează 170 de verificări pe un Postgres local (PGlite), cu utilizatori simulați: 40 pentru regulile de bază, 54 pentru procese verbale, conținutul lor și registru, 43 pentru FAM, livrări, atașamente și Storage, 33 pentru condica de betoane și încercări (ordinea art. 426, participanți obligatorii, imuabilitate, vizibilitate).
 - **PV-uri:** scrierea se face doar prin funcțiile `convoaca_pv`, `confirma_pv`, `anuleaza_pv` (`security definer`); tabelele au doar drept de citire pentru utilizatori. Intrările automate în registru sunt scrise de `confirma_pv`; cele manuale trec prin triggerul `verifica_intrare_registru`.
 - **Local:** copiați `.env.example` în `.env`, completați, apoi `npm run dev`.
 
@@ -120,6 +130,6 @@ Supabase trimite gratuit doar câteva emailuri pe oră. Pentru pilot e suficient
 supabase/migrations/   schema bazei de date și regulile de acces
 tests/                 testele regulilor de acces
 src/lib/               clientul Supabase, sesiunea, denumirile din CATUC și ISO 19650
-src/pages/             autentificare, proiecte, proiect (detalii, procese verbale, materiale FAM, echipă, istoric), registru, profil
+src/pages/             autentificare, proiecte, proiect (detalii, procese verbale, materiale FAM, betoane și încercări, echipă, istoric), registru, profil
 src/components/        elemente comune de interfață
 ```
