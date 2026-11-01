@@ -3,10 +3,11 @@ import { NavLink, Route, Routes, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useUid } from '../lib/sesiune';
 import {
-  CLASE, ROLURI, STADII, formatData, numeRol, numeTipDoc, stareAutorizatie, stareDocument, type Rol,
+  CLASE, ROLURI, STADII, codPv, formatData, numeRol, numeTipRegistru, tipPv, numeTipDoc, stareAutorizatie, stareDocument, type DeciziePv, type Rol, type TipPv, type TipRegistru,
 } from '../lib/domeniu';
 import type { DocumentPersoana, IntrareJurnal, Invitatie, Membru, Proiect as TProiect } from '../lib/tipuri';
 import { Eroare, Eticheta, Gol, mesajEroare } from '../components/ui';
+import ProceseVerbale from './ProceseVerbale';
 
 export default function Proiect() {
   const { id = '' } = useParams();
@@ -48,6 +49,7 @@ export default function Proiect() {
       </div>
       <nav className="file" aria-label="Secțiunile proiectului">
         <NavLink to="" end>Detalii</NavLink>
+        <NavLink to="pv">Procese verbale</NavLink>
         <NavLink to="echipa">Echipa ({membri.length})</NavLink>
         <NavLink to="istoric">Istoric</NavLink>
       </nav>
@@ -55,7 +57,8 @@ export default function Proiect() {
       <Routes>
         <Route index element={<Detalii proiect={proiect} admin={admin} onSalvat={incarca} />} />
         <Route path="echipa" element={<Echipa proiectId={id} membri={membri} admin={admin} uid={uid} onSchimbat={incarca} />} />
-        <Route path="istoric" element={<Istoric proiectId={id} membri={membri} />} />
+        <Route path="pv/*" element={<ProceseVerbale proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
+        <Route path="istoric" element={<Istoric proiect={proiect} membri={membri} />} />
       </Routes>
     </>
   );
@@ -294,7 +297,10 @@ const acord = (t: DocumentPersoana['tip'], e: string) => {
 const confirmare = (text: string) => window.confirm(text);
 
 // ------------------------------------------------------------------ Istoric
-const NUME_TABEL: Record<string, string> = { proiecte: 'Proiect', membri_proiect: 'Echipă', invitatii: 'Invitație' };
+const NUME_TABEL: Record<string, string> = {
+  proiecte: 'Proiect', membri_proiect: 'Echipă', invitatii: 'Invitație',
+  procese_verbale: 'Proces verbal', participanti_pv: 'Proces verbal', registru_intrari: 'Registru electronic',
+};
 const CAMPURI: Record<string, string> = {
   denumire: 'denumirea', adresa: 'adresa', beneficiar: 'beneficiarul', stadiu_catuc: 'stadiul',
   clasa_consecinte: 'clasa de consecințe', data_cerere_ac: 'data cererii AC', ac_numar: 'numărul AC',
@@ -302,14 +308,24 @@ const CAMPURI: Record<string, string> = {
   arhivat: 'arhivarea', rol: 'rolul', zona: 'zona',
 };
 
-function Istoric({ proiectId, membri }: { proiectId: string; membri: Membru[] }) {
+function Istoric({ proiect, membri }: { proiect: TProiect; membri: Membru[] }) {
+  const proiectId = proiect.id;
   const [intrari, setIntrari] = useState<IntrareJurnal[] | null>(null);
   const [eroare, setEroare] = useState<string | null>(null);
 
+  const [coduriPv, setCoduriPv] = useState(new Map<string, string>());
+
   useEffect(() => {
-    supabase.from('jurnal').select('*').eq('proiect_id', proiectId).order('la', { ascending: false }).limit(200)
-      .then(({ data, error }) => { setEroare(mesajEroare(error)); setIntrari((data as IntrareJurnal[]) ?? []); });
-  }, [proiectId]);
+    Promise.all([
+      supabase.from('jurnal').select('*').eq('proiect_id', proiectId).order('la', { ascending: false }).limit(300),
+      supabase.from('procese_verbale').select('id, numar').eq('proiect_id', proiectId),
+    ]).then(([a, b]) => {
+      setEroare(mesajEroare(a.error ?? b.error));
+      // convocarea fiecărui participant nu se afișează separat: apare în rândul de convocare
+      setIntrari(((a.data as IntrareJurnal[]) ?? []).filter(j => !(j.tabel === 'participanti_pv' && j.operatie === 'INSERT')));
+      setCoduriPv(new Map(((b.data as { id: string; numar: number }[]) ?? []).map(x => [x.id, codPv(proiect.cod, x.numar)])));
+    });
+  }, [proiectId, proiect.cod]);
 
   const nume = (id: string | null | undefined) => {
     const p = membri.find(m => m.persoana_id === id)?.persoane;
@@ -334,6 +350,20 @@ function Istoric({ proiectId, membri }: { proiectId: string; membri: Membru[] })
       if (j.operatie === 'DELETE') return `a anulat invitația pentru ${i.email}`;
       return `a acceptat invitația ca ${numeRol(d.rol as Rol)}`;
     }
+    if (j.tabel === 'procese_verbale') {
+      const cod = codPv(proiect.cod, Number(d.numar ?? i.numar));
+      if (j.operatie === 'INSERT') return `a convocat ${cod} (${tipPv(d.tip as TipPv).nume.toLowerCase()}): ${d.obiect}`;
+      if (d.stare === 'anulat' && i.stare !== 'anulat') return `a anulat ${cod}: ${d.motiv_anulare}`;
+      if (d.stare !== i.stare) return `${cod} a trecut în starea „${String(d.stare).replace('_', ' ')}”`;
+      return `a actualizat ${cod}`;
+    }
+    if (j.tabel === 'participanti_pv') {
+      const cod = coduriPv.get(d.pv_id as string) ?? 'procesul verbal';
+      const verb = { confirm: 'a confirmat', confirm_cu_observatii: 'a confirmat cu observații', refuz: 'a refuzat' }[d.decizie as DeciziePv];
+      if (verb) return `${verb} ${cod}${d.observatii ? `: „${d.observatii}”` : ''}`;
+      return 'a actualizat o participare';
+    }
+    if (j.tabel === 'registru_intrari') return `a scris în registrul electronic (${numeTipRegistru(d.tip as TipRegistru).toLowerCase()})`;
     return `${j.operatie} ${j.tabel}`;
   }
 

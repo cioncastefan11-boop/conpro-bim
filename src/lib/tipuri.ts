@@ -60,3 +60,46 @@ export type IntrareJurnal = {
   autor: string | null;
   la: string;
 };
+
+export type ProcesVerbal = {
+  id: string;
+  proiect_id: string;
+  numar: number;
+  tip: import('./domeniu').TipPv;
+  obiect: string;
+  elemente: string | null;
+  data_pv: string;
+  loc: string | null;
+  alti_participanti: string | null;
+  stare: import('./domeniu').StarePv;
+  convocat_de: string;
+  convocat_la: string;
+  semnat_la: string | null;
+  anulat_de: string | null;
+  anulat_la: string | null;
+  motiv_anulare: string | null;
+};
+
+export type ParticipantPv = {
+  id: string;
+  pv_id: string;
+  persoana_id: string;
+  rol: Rol;
+  decizie: import('./domeniu').DeciziePv | null;
+  observatii: string | null;
+  confirmat_la: string | null;
+};
+
+export type IntrareRegistru = {
+  id: string;
+  persoana_id: string;
+  proiect_id: string;
+  rol: Rol;
+  data: string;
+  tip: import('./domeniu').TipRegistru;
+  descriere: string;
+  pv_id: string | null;
+  corecteaza_id: string | null;
+  automat: boolean;
+  creat_la: string;
+};

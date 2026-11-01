@@ -98,3 +98,59 @@ export function stareAutorizatie(p: { ac_valabil_pana: string | null; ac_prelung
   return { eticheta: `Prelungită până la ${formatData(pana)}`, ton: z <= 60 ? 'atentie' : 'ok',
     detaliu: 'Autorizația a fost deja prelungită; nu se mai poate prelungi.' };
 }
+
+// ---------- procese verbale (migrarea 0002) ----------
+export type TipPv = 'lucrari_ascunse' | 'faza_determinanta' | 'proba' | 'punere_in_functiune'
+  | 'receptie_stadiu_fizic' | 'receptie_partiala' | 'receptie_terminare' | 'receptie_finala' | 'alt';
+export type StarePv = 'convocat' | 'in_semnare' | 'semnat' | 'contestat' | 'anulat';
+export type DeciziePv = 'confirm' | 'confirm_cu_observatii' | 'refuz';
+
+export const TIPURI_PV: { id: TipPv; nume: string; obligatorii: Rol[]; ordine426?: boolean; nota?: string }[] = [
+  { id: 'lucrari_ascunse', nume: 'Lucrări ascunse', obligatorii: ['diriginte', 'constructor'] },
+  { id: 'faza_determinanta', nume: 'Fază determinantă', obligatorii: ['diriginte', 'constructor', 'proiectant'], ordine426: true,
+    nota: 'Inspectoratul în construcții se convoacă conform programului de control. Proiectantul confirmă după diriginte și RTE (art. 426 alin. 3).' },
+  { id: 'proba', nume: 'Probă (presiune, etanșeitate, funcțională)', obligatorii: ['diriginte', 'constructor'] },
+  { id: 'punere_in_functiune', nume: 'Punere în funcțiune', obligatorii: ['diriginte', 'constructor'] },
+  { id: 'receptie_stadiu_fizic', nume: 'Recepție pe stadiu fizic', obligatorii: ['diriginte', 'beneficiar'],
+    nota: 'Se consemnează starea lucrării, viciile, măsurile, termenele și măsurile de conservare (art. 527 alin. 7).' },
+  { id: 'receptie_partiala', nume: 'Recepție parțială', obligatorii: ['diriginte', 'beneficiar'],
+    nota: 'Pentru părți distincte fizic și funcțional, cu avizul proiectantului (art. 527 alin. 3).' },
+  { id: 'receptie_terminare', nume: 'Recepție la terminarea lucrărilor', obligatorii: ['diriginte', 'beneficiar', 'constructor'], ordine426: true,
+    nota: 'Proiectantul confirmă după diriginte și RTE (art. 426 alin. 3). Dosarul de recepție: art. 528.' },
+  { id: 'receptie_finala', nume: 'Recepție finală', obligatorii: ['diriginte', 'beneficiar'] },
+  { id: 'alt', nume: 'Alt proces verbal', obligatorii: [] },
+];
+export const tipPv = (t: TipPv) => TIPURI_PV.find(x => x.id === t)!;
+
+export const STARI_PV: Record<StarePv, { eticheta: string; ton: Stare['ton'] }> = {
+  convocat: { eticheta: 'Convocat', ton: 'neutru' },
+  in_semnare: { eticheta: 'În semnare', ton: 'atentie' },
+  semnat: { eticheta: 'Semnat', ton: 'ok' },
+  contestat: { eticheta: 'Contestat', ton: 'alerta' },
+  anulat: { eticheta: 'Anulat', ton: 'neutru' },
+};
+
+export const DECIZII: Record<DeciziePv, string> = {
+  confirm: 'Confirmat',
+  confirm_cu_observatii: 'Confirmat cu observații',
+  refuz: 'Refuzat',
+};
+
+export const codPv = (codProiect: string, numar: number) => `PV-${codProiect}-${String(numar).padStart(4, '0')}`;
+
+// ---------- registrul electronic (art. 456 lit. f, art. 459 lit. i) ----------
+export type TipRegistru = 'verificare' | 'lucrari_ascunse' | 'faza_determinanta' | 'proba' | 'receptie'
+  | 'neconformitate' | 'oprire_lucrari' | 'notificare_isc' | 'dispozitie_santier' | 'alt';
+export const TIPURI_REGISTRU: { id: TipRegistru; nume: string; manual: boolean }[] = [
+  { id: 'verificare', nume: 'Verificare pe șantier', manual: true },
+  { id: 'neconformitate', nume: 'Raport de neconformitate', manual: true },
+  { id: 'oprire_lucrari', nume: 'Oprirea lucrărilor', manual: true },
+  { id: 'notificare_isc', nume: 'Înștiințare ISC (24 de ore)', manual: true },
+  { id: 'dispozitie_santier', nume: 'Dispoziție de șantier', manual: true },
+  { id: 'lucrari_ascunse', nume: 'Lucrări ascunse', manual: false },
+  { id: 'faza_determinanta', nume: 'Fază determinantă', manual: false },
+  { id: 'proba', nume: 'Probă', manual: false },
+  { id: 'receptie', nume: 'Recepție', manual: false },
+  { id: 'alt', nume: 'Altă activitate', manual: true },
+];
+export const numeTipRegistru = (t: TipRegistru) => TIPURI_REGISTRU.find(x => x.id === t)?.nume ?? t;

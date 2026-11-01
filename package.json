@@ -1,13 +1,13 @@
 {
   "name": "conpro-bim",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test:db": "node tests/reguli-acces.test.mjs"
+    "test:db": "node tests/reguli-acces.test.mjs && node tests/pv-registru.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

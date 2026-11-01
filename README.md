@@ -1,4 +1,4 @@
-# Conpro BIM · versiunea 0.1
+# Conpro BIM · versiunea 0.2
 
 Platforma în care beneficiarul, dirigintele, constructorul și proiectantul lucrează pe aceleași informații ale unei lucrări, fiecare cu contul și răspunderea lui (SR EN ISO 19650, Legea 169/2026).
 
@@ -11,7 +11,18 @@ Platforma în care beneficiarul, dirigintele, constructorul și proiectantul luc
 - autorizațiile ISC, atestatele și polițele fiecărei persoane, cu avertizare la expirare (art. 456, 459, 556); beneficiarul le vede pe ale echipei;
 - istoricul complet al modificărilor: cine, ce, când, valoarea anterioară.
 
-Următoarele module (CDE, procese verbale, FAM, condica de betoane, echipamente COBie, registrul electronic al dirigintelui, Cartea tehnică) se construiesc peste această fundație.
+- **procese verbale** (din 0.2): convocare de către constructor, diriginte sau administrator, cu participanții obligatorii pe tip de PV; confirmare individuală (confirm, confirm cu observații, refuz); la fazele determinante și la recepția la terminarea lucrărilor proiectantul confirmă după diriginte și RTE (art. 426 alin. 3); numerotare continuă pe proiect (PV-COD-0001); PV-ul semnat nu se mai modifică; tipărire / PDF;
+- **registrul electronic de evidență** al dirigintelui și al RTE-ului (art. 456 lit. f, art. 459 lit. i), din 0.2: se completează automat la fiecare confirmare de PV și manual (verificări, neconformități, opriri, înștiințări ISC, dispoziții); intrările nu se modifică și nu se șterg, se corectează prin intrări noi; export Excel (CSV) și tipărire.
+
+Următoarele module (CDE și documente, FAM, condica de betoane, încercări, echipamente COBie, Cartea tehnică) se construiesc peste această fundație.
+
+---
+
+## Actualizare de la 0.1 la 0.2
+
+1. **GitHub:** dezarhivați arhiva nouă; în depozit, **Add file → Upload files**, trageți din nou tot conținutul folderului `conpro-bim` (fișierele existente se înlocuiesc) și apăsați **Commit changes**. Netlify publică singur versiunea nouă în 1–2 minute.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0002_procese_verbale.sql`, lipiți și **Run**. Se rulează o singură dată. Nu rulați din nou `0001`.
+3. Verificare: în SQL Editor, `select count(*) from pg_policies where schemaname = 'public';` trebuie să dea **23**.
 
 ---
 
@@ -80,7 +91,8 @@ Supabase trimite gratuit doar câteva emailuri pe oră. Pentru pilot e suficient
   - invitațiile se acceptă prin `accepta_invitatiile()`, doar pentru un email confirmat;
   - proiectele nu se șterg, se arhivează.
 - **Inserarea unui proiect** se face fără `returning`: politica de citire cere calitatea de membru, care apare abia în triggerul `after insert`.
-- **Teste:** `npm install && npm run test:db` rulează 40 de verificări ale regulilor de acces pe un Postgres local (PGlite), cu utilizatori simulați: străin, beneficiar, constructor, administrator.
+- **Teste:** `npm install && npm run test:db` rulează 85 de verificări pe un Postgres local (PGlite), cu utilizatori simulați: 40 pentru regulile de bază, 45 pentru procese verbale și registru (ordinea art. 426, participanți obligatorii, imuabilitate, vizibilitate).
+- **PV-uri:** scrierea se face doar prin funcțiile `convoaca_pv`, `confirma_pv`, `anuleaza_pv` (`security definer`); tabelele au doar drept de citire pentru utilizatori. Intrările automate în registru sunt scrise de `confirma_pv`; cele manuale trec prin triggerul `verifica_intrare_registru`.
 - **Local:** copiați `.env.example` în `.env`, completați, apoi `npm run dev`.
 
 ## Structura
@@ -89,6 +101,6 @@ Supabase trimite gratuit doar câteva emailuri pe oră. Pentru pilot e suficient
 supabase/migrations/   schema bazei de date și regulile de acces
 tests/                 testele regulilor de acces
 src/lib/               clientul Supabase, sesiunea, denumirile din CATUC și ISO 19650
-src/pages/             autentificare, proiecte, proiect (detalii, echipă, istoric), profil
+src/pages/             autentificare, proiecte, proiect (detalii, procese verbale, echipă, istoric), registru, profil
 src/components/        elemente comune de interfață
 ```

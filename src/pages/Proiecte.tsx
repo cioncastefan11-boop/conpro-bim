@@ -2,11 +2,12 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useUid } from '../lib/sesiune';
-import { CLASE, STADII, numeRol, stareAutorizatie, type Rol } from '../lib/domeniu';
+import { CLASE, STADII, codPv, numeRol, stareAutorizatie, tipPv, type Rol, type TipPv } from '../lib/domeniu';
 import type { Proiect } from '../lib/tipuri';
 import { Eroare, Eticheta, Gol, mesajEroare } from '../components/ui';
 
 type Rand = Proiect & { membri_proiect: { rol: Rol }[] };
+type DeConfirmat = { pv_id: string; procese_verbale: { numar: number; tip: TipPv; obiect: string; proiect_id: string; proiecte: { cod: string } | null } | null };
 
 export default function Proiecte() {
   const uid = useUid();
@@ -14,6 +15,7 @@ export default function Proiecte() {
   const [eroare, setEroare] = useState<string | null>(null);
   const [formular, setFormular] = useState(false);
   const [invitatiiNoi, setInvitatiiNoi] = useState(0);
+  const [deConfirmat, setDeConfirmat] = useState<DeConfirmat[]>([]);
 
   const incarca = useCallback(async () => {
     // Întâi se acceptă invitațiile primite pe emailul contului.
@@ -27,6 +29,11 @@ export default function Proiecte() {
       .order('creat_la', { ascending: false });
     if (error) setEroare(mesajEroare(error));
     setLista((data as Rand[]) ?? []);
+    const pv = await supabase.from('participanti_pv')
+      .select('pv_id, procese_verbale!inner(numar, tip, obiect, proiect_id, stare, proiecte(cod))')
+      .eq('persoana_id', uid).is('confirmat_la', null)
+      .in('procese_verbale.stare', ['convocat', 'in_semnare']);
+    setDeConfirmat((pv.data as unknown as DeConfirmat[]) ?? []);
   }, [uid]);
 
   useEffect(() => { incarca(); }, [incarca]);
@@ -41,6 +48,20 @@ export default function Proiecte() {
         <button className="buton principal" onClick={() => setFormular(true)}>Proiect nou</button>
       </div>
       {invitatiiNoi > 0 && <p className="mesaj ok">Ați fost adăugat în {invitatiiNoi === 1 ? 'proiectul la care ați fost invitat' : `${invitatiiNoi} proiecte noi`}.</p>}
+      {deConfirmat.length > 0 && (
+        <div className="card atentie-card">
+          <h3>Procese verbale la care participați și nu ați confirmat ({deConfirmat.length})</h3>
+          <ul className="lista-simpla">
+            {deConfirmat.map(d => d.procese_verbale && (
+              <li key={d.pv_id}>
+                <Link to={`/proiect/${d.procese_verbale.proiect_id}/pv/${d.pv_id}`}>
+                  {codPv(d.procese_verbale.proiecte?.cod ?? '', d.procese_verbale.numar)}
+                </Link> · {tipPv(d.procese_verbale.tip).nume} · {d.procese_verbale.obiect}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <Eroare text={eroare} />
       {formular && <ProiectNou onInchide={() => setFormular(false)} />}
       {lista === null ? <p className="discret">Se încarcă…</p> : lista.length === 0 ? (

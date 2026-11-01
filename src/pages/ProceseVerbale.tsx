@@ -1,0 +1,370 @@
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { Link, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+import {
+  DECIZII, STARI_PV, TIPURI_PV, codPv, formatData, laIso, azi, numeRol, tipPv,
+  type DeciziePv, type Rol, type TipPv,
+} from '../lib/domeniu';
+import type { Membru, ParticipantPv, ProcesVerbal, Proiect } from '../lib/tipuri';
+import { Eroare, Eticheta, Gol, mesajEroare } from '../components/ui';
+
+type Props = { proiect: Proiect; membri: Membru[]; rolulMeu?: Rol; uid: string };
+const POT_CONVOCA: Rol[] = ['constructor', 'diriginte', 'administrator'];
+
+export default function ProceseVerbale(props: Props) {
+  return (
+    <Routes>
+      <Route index element={<Lista {...props} />} />
+      <Route path="nou" element={<Convocare {...props} />} />
+      <Route path=":pvId" element={<Detaliu {...props} />} />
+    </Routes>
+  );
+}
+
+/** Poate persoana confirma acum? Aplică ordinea din art. 426 alin. (3). */
+function poateConfirma(pv: ProcesVerbal, parti: ParticipantPv[], uid: string): { da: boolean; motiv?: string } {
+  const eu = parti.find(p => p.persoana_id === uid);
+  if (!eu || eu.confirmat_la) return { da: false };
+  if (pv.stare !== 'convocat' && pv.stare !== 'in_semnare') return { da: false };
+  if (tipPv(pv.tip).ordine426 && eu.rol === 'proiectant'
+      && parti.some(p => (p.rol === 'diriginte' || p.rol === 'constructor') && (!p.confirmat_la || p.decizie === 'refuz'))) {
+    return { da: false, motiv: 'Confirmați după diriginte și RTE (art. 426 alin. 3 din Legea 169/2026).' };
+  }
+  return { da: true };
+}
+
+// --------------------------------------------------------------------- Lista
+function Lista({ proiect, rolulMeu, uid }: Props) {
+  const [pvs, setPvs] = useState<ProcesVerbal[] | null>(null);
+  const [parti, setParti] = useState<ParticipantPv[]>([]);
+  const [eroare, setEroare] = useState<string | null>(null);
+  const [filtru, setFiltru] = useState<'toate' | 'deschise' | 'ale_mele'>('toate');
+
+  useEffect(() => {
+    Promise.all([
+      supabase.from('procese_verbale').select('*').eq('proiect_id', proiect.id).order('numar', { ascending: false }),
+      supabase.from('participanti_pv').select('*').eq('proiect_id', proiect.id),
+    ]).then(([a, b]) => {
+      setEroare(mesajEroare(a.error ?? b.error));
+      setPvs((a.data as ProcesVerbal[]) ?? []);
+      setParti((b.data as ParticipantPv[]) ?? []);
+    });
+  }, [proiect.id]);
+
+  const dePe = useCallback((pv: string) => parti.filter(p => p.pv_id === pv), [parti]);
+  const deConfirmat = (pvs ?? []).filter(pv => poateConfirma(pv, dePe(pv.id), uid).da);
+  const vizibile = (pvs ?? []).filter(pv =>
+    filtru === 'toate' ? true
+    : filtru === 'deschise' ? pv.stare === 'convocat' || pv.stare === 'in_semnare' || pv.stare === 'contestat'
+    : dePe(pv.id).some(p => p.persoana_id === uid));
+
+  return (
+    <>
+      {deConfirmat.length > 0 && (
+        <div className="mesaj atentie-bloc">
+          <b>Așteaptă confirmarea dumneavoastră:</b>{' '}
+          {deConfirmat.map((pv, i) => (
+            <span key={pv.id}>{i > 0 && ', '}<Link to={pv.id}>{codPv(proiect.cod, pv.numar)}</Link></span>
+          ))}
+        </div>
+      )}
+      <div className="card">
+        <div className="antet-card">
+          <div>
+            <h2>Procese verbale</h2>
+            <p className="discret">Fiecare participant confirmă cu contul lui. Ce s-a semnat nu se mai modifică.</p>
+          </div>
+          {rolulMeu && POT_CONVOCA.includes(rolulMeu) && <Link className="buton principal" to="nou">Convoacă un PV</Link>}
+        </div>
+        <div className="filtre" role="group" aria-label="Filtru">
+          {(['toate', 'deschise', 'ale_mele'] as const).map(f => (
+            <button key={f} className={`pastila${filtru === f ? ' activ' : ''}`} onClick={() => setFiltru(f)}>
+              {{ toate: 'Toate', deschise: 'Deschise', ale_mele: 'La care particip' }[f]}
+            </button>
+          ))}
+        </div>
+        <Eroare text={eroare} />
+        {pvs === null ? <p className="discret">Se încarcă…</p> : vizibile.length === 0 ? (
+          <Gol titlu="Niciun proces verbal">
+            <p>{filtru === 'toate' ? 'Primul PV se convoacă de constructor, de diriginte sau de administrator.' : 'Schimbați filtrul ca să vedeți și alte procese verbale.'}</p>
+          </Gol>
+        ) : (
+          <div className="tabel-wrap">
+            <table className="tabel stivuit">
+              <thead><tr><th>Cod</th><th>Tip</th><th>Obiect</th><th>Data</th><th>Confirmări</th><th>Stare</th></tr></thead>
+              <tbody>
+                {vizibile.map(pv => {
+                  const p = dePe(pv.id);
+                  const st = STARI_PV[pv.stare];
+                  return (
+                    <tr key={pv.id} className={pv.stare === 'anulat' ? 'estompat' : ''}>
+                      <td data-eticheta="Cod"><Link to={pv.id} className="cod-link">{codPv(proiect.cod, pv.numar)}</Link></td>
+                      <td data-eticheta="Tip">{tipPv(pv.tip).nume}</td>
+                      <td data-eticheta="Obiect">{pv.obiect}</td>
+                      <td data-eticheta="Data">{formatData(pv.data_pv)}</td>
+                      <td data-eticheta="Confirmări">{p.filter(x => x.confirmat_la).length} / {p.length}</td>
+                      <td data-eticheta="Stare"><Eticheta stare={st} /></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+// ----------------------------------------------------------------- Convocare
+function Convocare({ proiect, membri, rolulMeu, uid }: Props) {
+  const nav = useNavigate();
+  const [tip, setTip] = useState<TipPv>('lucrari_ascunse');
+  const [obiect, setObiect] = useState('');
+  const [elemente, setElemente] = useState('');
+  const [data, setData] = useState(laIso(azi()));
+  const [loc, setLoc] = useState('Pe șantier');
+  const [alti, setAlti] = useState('');
+  const [alesi, setAlesi] = useState<Set<string>>(new Set());
+  const [eroare, setEroare] = useState<string | null>(null);
+  const [lucreaza, setLucreaza] = useState(false);
+  const t = tipPv(tip);
+
+  // La schimbarea tipului se bifează automat rolurile obligatorii (și cel care convoacă).
+  useEffect(() => {
+    setAlesi(new Set(membri.filter(m => t.obligatorii.includes(m.rol) || m.persoana_id === uid && m.rol !== 'administrator')
+      .map(m => m.persoana_id)));
+  }, [tip, membri, uid]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const lipsa = useMemo(() => t.obligatorii.filter(r => !membri.some(m => m.rol === r && alesi.has(m.persoana_id))), [t, membri, alesi]);
+  const lipsaDinEchipa = t.obligatorii.filter(r => !membri.some(m => m.rol === r));
+
+  if (!rolulMeu || !POT_CONVOCA.includes(rolulMeu)) return <Gol titlu="Procesele verbale le convoacă constructorul, dirigintele sau administratorul" />;
+
+  async function trimite(e: FormEvent) {
+    e.preventDefault(); setEroare(null); setLucreaza(true);
+    const { data: id, error } = await supabase.rpc('convoaca_pv', {
+      p_proiect: proiect.id, p_tip: tip, p_obiect: obiect, p_elemente: elemente, p_data: data,
+      p_loc: loc, p_participanti: [...alesi], p_alti: alti,
+    });
+    setLucreaza(false);
+    if (error) { setEroare(mesajEroare(error)); return; }
+    nav(`../${id}`);
+  }
+
+  const comuta = (id: string) => setAlesi(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+
+  return (
+    <form className="card formular" onSubmit={trimite}>
+      <p><Link to=".." className="inapoi">← Procese verbale</Link></p>
+      <h2>Convocați un proces verbal</h2>
+      <div className="campuri">
+        <label>Tip
+          <select value={tip} onChange={e => setTip(e.target.value as TipPv)}>
+            {TIPURI_PV.map(x => <option key={x.id} value={x.id}>{x.nume}</option>)}
+          </select>
+        </label>
+        <label>Data<input type="date" value={data} onChange={e => setData(e.target.value)} required /></label>
+        <label>Locul<input value={loc} onChange={e => setLoc(e.target.value)} /></label>
+        <label className="lat">Obiectul
+          <input value={obiect} onChange={e => setObiect(e.target.value)} required minLength={3}
+            placeholder={tip === 'faza_determinanta' ? 'ex. Armarea fundațiilor înainte de turnarea betonului' : 'ex. Hidroizolația pereților subsolului, axele 1–4'} />
+        </label>
+        <label className="lat">Elementele sau zona
+          <input value={elemente} onChange={e => setElemente(e.target.value)} placeholder="ex. Fundații F1–F6, axele A–C" />
+          <small>Legătura directă cu elementele din modelul IFC vine odată cu modulul de model.</small>
+        </label>
+      </div>
+      {t.nota && <p className="mesaj info">{t.nota}</p>}
+
+      <h3>Participanți din echipă</h3>
+      {lipsaDinEchipa.length > 0 && (
+        <p className="mesaj alerta">Echipa nu are încă: {lipsaDinEchipa.map(numeRol).join(', ')}. Invitați-i la fila Echipa înainte de convocare.</p>
+      )}
+      <div className="lista-bife">
+        {membri.map(m => (
+          <label key={m.persoana_id} className="bifa-rand">
+            <input type="checkbox" checked={alesi.has(m.persoana_id)} onChange={() => comuta(m.persoana_id)} />
+            <span><b>{m.persoane?.nume || m.persoane?.email}</b> · {numeRol(m.rol)}{t.obligatorii.includes(m.rol) && <span className="obligatoriu"> obligatoriu</span>}</span>
+          </label>
+        ))}
+      </div>
+      <label>Alți participanți, fără cont în aplicație
+        <input value={alti} onChange={e => setAlti(e.target.value)} placeholder="ex. inspector ISC, membri ai comisiei de recepție" />
+        <small>Semnează pe hârtie; scanul se atașează odată cu modulul de documente.</small>
+      </label>
+      {lipsa.length > 0 && lipsaDinEchipa.length === 0 && <p className="mesaj alerta">Lipsește de pe listă: {lipsa.map(numeRol).join(', ')}.</p>}
+      <Eroare text={eroare} />
+      <div className="actiuni">
+        <Link to=".." className="buton">Renunță</Link>
+        <button className="buton principal" disabled={lucreaza || lipsa.length > 0 || alesi.size === 0}>
+          {lucreaza ? 'Se convoacă…' : 'Convoacă'}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// ------------------------------------------------------------------- Detaliu
+function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
+  const { pvId = '' } = useParams();
+  const [pv, setPv] = useState<ProcesVerbal | null>(null);
+  const [parti, setParti] = useState<ParticipantPv[]>([]);
+  const [eroare, setEroare] = useState<string | null>(null);
+  const [negasit, setNegasit] = useState(false);
+
+  const incarca = useCallback(async () => {
+    const [a, b] = await Promise.all([
+      supabase.from('procese_verbale').select('*').eq('id', pvId).maybeSingle(),
+      supabase.from('participanti_pv').select('*').eq('pv_id', pvId),
+    ]);
+    setEroare(mesajEroare(a.error ?? b.error));
+    if (!a.data && !a.error) setNegasit(true);
+    setPv(a.data as ProcesVerbal | null);
+    setParti((b.data as ParticipantPv[]) ?? []);
+  }, [pvId]);
+  useEffect(() => { incarca(); }, [incarca]);
+
+  const om = (id: string | null) => {
+    const p = membri.find(m => m.persoana_id === id)?.persoane;
+    return p ? (p.nume || p.email) : '—';
+  };
+  const firma = (id: string) => membri.find(m => m.persoana_id === id)?.persoane?.firme?.denumire;
+
+  if (negasit) return <Gol titlu="Procesul verbal nu există" />;
+  if (!pv) return <><Eroare text={eroare} /><p className="discret">Se încarcă…</p></>;
+
+  const t = tipPv(pv.tip);
+  const cod = codPv(proiect.cod, pv.numar);
+  const pot = poateConfirma(pv, parti, uid);
+  const eu = parti.find(p => p.persoana_id === uid);
+  const potAnula = (pv.convocat_de === uid || rolulMeu === 'administrator') && pv.stare !== 'semnat' && pv.stare !== 'anulat';
+  // ordinea de afișare: diriginte și RTE, ceilalți, proiectantul la final când se aplică art. 426
+  const ord = (r: Rol) => (r === 'diriginte' ? 0 : r === 'constructor' ? 1 : r === 'proiectant' && t.ordine426 ? 9 : 5);
+  const sortati = [...parti].sort((a, b) => ord(a.rol) - ord(b.rol));
+
+  return (
+    <>
+      <p className="nu-tipari"><Link to=".." className="inapoi">← Procese verbale</Link></p>
+      <article className="card document-pv">
+        <header className="antet-pv">
+          <div>
+            <span className="cod">{cod}</span>
+            <h2>Proces verbal · {t.nume}</h2>
+            <p className="discret">{proiect.denumire}{proiect.adresa ? `, ${proiect.adresa}` : ''}</p>
+          </div>
+          <Eticheta stare={STARI_PV[pv.stare]} />
+        </header>
+
+        <dl className="date-pv">
+          <div><dt>Obiectul</dt><dd>{pv.obiect}</dd></div>
+          {pv.elemente && <div><dt>Elementele / zona</dt><dd>{pv.elemente}</dd></div>}
+          <div><dt>Data</dt><dd>{formatData(pv.data_pv)}</dd></div>
+          {pv.loc && <div><dt>Locul</dt><dd>{pv.loc}</dd></div>}
+          <div><dt>Convocat de</dt><dd>{om(pv.convocat_de)}, {new Date(pv.convocat_la).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' })}</dd></div>
+          {proiect.ac_numar && <div><dt>Autorizația de construire</dt><dd>nr. {proiect.ac_numar}{proiect.ac_emis_la ? ` din ${formatData(proiect.ac_emis_la)}` : ''}</dd></div>}
+          {pv.alti_participanti && <div><dt>Alți participanți</dt><dd>{pv.alti_participanti}</dd></div>}
+        </dl>
+        {t.ordine426 && <p className="nota">La acest tip de proces verbal, proiectantul confirmă după dirigintele de șantier și responsabilul tehnic cu execuția (art. 426 alin. 3 din Legea 169/2026).</p>}
+
+        <h3>Confirmări</h3>
+        <div className="tabel-wrap">
+          <table className="tabel">
+            <thead><tr><th>Participant</th><th>Calitatea</th><th>Decizia</th><th>Observații</th><th>Data și ora</th></tr></thead>
+            <tbody>
+              {sortati.map(p => (
+                <tr key={p.id}>
+                  <td><b>{om(p.persoana_id)}</b>{firma(p.persoana_id) && <><br /><span className="discret">{firma(p.persoana_id)}</span></>}</td>
+                  <td>{p.rol === 'constructor' ? 'Constructor / RTE' : numeRol(p.rol)}</td>
+                  <td>{p.decizie ? <Eticheta stare={{ eticheta: DECIZII[p.decizie], ton: p.decizie === 'refuz' ? 'alerta' : p.decizie === 'confirm' ? 'ok' : 'atentie' }} />
+                    : <span className="discret">în așteptare</span>}</td>
+                  <td>{p.observatii ?? ''}</td>
+                  <td className="nowrap">{p.confirmat_la ? new Date(p.confirmat_la).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' }) : ''}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {pv.stare === 'semnat' && pv.semnat_la && (
+          <p className="mesaj ok">Semnat de toți participanții din aplicație la {new Date(pv.semnat_la).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' })}. Nu se mai modifică.</p>
+        )}
+        {pv.stare === 'contestat' && <p className="mesaj alerta">Un participant a refuzat. Procesul verbal se anulează și, după remediere, se convoacă unul nou.</p>}
+        {pv.stare === 'anulat' && <p className="mesaj info">Anulat de {om(pv.anulat_de)}: {pv.motiv_anulare}</p>}
+        <p className="nota doar-tipar">Document generat din Conpro BIM. Confirmările sunt înregistrate cu contul fiecărui participant, cu data și ora.</p>
+      </article>
+
+      <div className="nu-tipari">
+        {pot.motiv && <p className="mesaj info">{pot.motiv}</p>}
+        {pot.da && eu && <Confirmare pvId={pv.id} onGata={incarca} />}
+        <Eroare text={eroare} />
+        <div className="actiuni stanga">
+          <button className="buton" onClick={() => window.print()}>Tipărește / salvează PDF</button>
+          {potAnula && <Anulare pvId={pv.id} onGata={incarca} />}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function Confirmare({ pvId, onGata }: { pvId: string; onGata: () => void }) {
+  const [decizie, setDecizie] = useState<DeciziePv>('confirm');
+  const [obs, setObs] = useState('');
+  const [eroare, setEroare] = useState<string | null>(null);
+  const [lucreaza, setLucreaza] = useState(false);
+
+  async function trimite(e: FormEvent) {
+    e.preventDefault(); setEroare(null);
+    if (decizie !== 'confirm' && obs.trim().length < 3) { setEroare('Scrieți observațiile sau motivul refuzului.'); return; }
+    if (!window.confirm(decizie === 'refuz' ? 'Refuzați procesul verbal? Decizia nu se mai poate schimba.' : 'Confirmați procesul verbal? Confirmarea nu se mai poate modifica.')) return;
+    setLucreaza(true);
+    const { error } = await supabase.rpc('confirma_pv', { p_pv: pvId, p_decizie: decizie, p_observatii: obs });
+    setLucreaza(false);
+    if (error) setEroare(mesajEroare(error)); else onGata();
+  }
+
+  return (
+    <form className="card formular confirmare" onSubmit={trimite}>
+      <h3>Decizia dumneavoastră</h3>
+      <div className="optiuni">
+        {(Object.keys(DECIZII) as DeciziePv[]).map(d => (
+          <label key={d} className={`optiune ${decizie === d ? 'activ' : ''} ${d}`}>
+            <input type="radio" name="decizie" checked={decizie === d} onChange={() => setDecizie(d)} />
+            {d === 'confirm' ? 'Confirm' : d === 'confirm_cu_observatii' ? 'Confirm cu observații' : 'Refuz'}
+          </label>
+        ))}
+      </div>
+      {decizie !== 'confirm' && (
+        <label>{decizie === 'refuz' ? 'Motivul refuzului' : 'Observații'}
+          <textarea value={obs} onChange={e => setObs(e.target.value)} rows={3} required />
+        </label>
+      )}
+      <Eroare text={eroare} />
+      <div className="actiuni">
+        <button className={`buton principal${decizie === 'refuz' ? ' pericol' : ''}`} disabled={lucreaza}>
+          {lucreaza ? 'Se trimite…' : decizie === 'refuz' ? 'Refuz procesul verbal' : 'Confirm procesul verbal'}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function Anulare({ pvId, onGata }: { pvId: string; onGata: () => void }) {
+  const [deschis, setDeschis] = useState(false);
+  const [motiv, setMotiv] = useState('');
+  const [eroare, setEroare] = useState<string | null>(null);
+  if (!deschis) return <button className="buton" onClick={() => setDeschis(true)}>Anulează PV-ul</button>;
+  return (
+    <div className="subformular lat-tot">
+      <label>Motivul anulării<input value={motiv} onChange={e => setMotiv(e.target.value)} autoFocus /></label>
+      <div className="actiuni stanga">
+        <button className="buton" onClick={() => setDeschis(false)}>Renunță</button>
+        <button className="buton principal pericol" disabled={motiv.trim().length < 3} onClick={async () => {
+          const { error } = await supabase.rpc('anuleaza_pv', { p_pv: pvId, p_motiv: motiv });
+          if (error) setEroare(mesajEroare(error)); else { setDeschis(false); onGata(); }
+        }}>Anulează definitiv</button>
+      </div>
+      <Eroare text={eroare} />
+    </div>
+  );
+}

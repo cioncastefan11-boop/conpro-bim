@@ -151,3 +151,70 @@ input:focus, select:focus { border-color: var(--accent); outline: 2px solid var(
   .card { padding: 18px 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .card.proiect { transition: none; } }
+
+/* ---------- procese verbale și registru ---------- */
+textarea { font: inherit; font-weight: 400; color: var(--text); background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 11px; width: 100%; resize: vertical; }
+textarea:focus { border-color: var(--accent); outline: 2px solid var(--accent-soft); }
+.antet-card { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+a.buton { text-decoration: none; display: inline-block; }
+.buton.pericol { background: var(--bad); border-color: var(--bad); color: #fff; }
+.buton.pericol:hover { background: #991b1b; }
+.actiuni.stanga { justify-content: flex-start; flex-wrap: wrap; }
+.mesaj.atentie-bloc { background: var(--warn-bg); color: #78350f; }
+.mesaj.atentie-bloc a { color: #78350f; font-weight: 700; }
+.atentie-card { border-left: 4px solid var(--accent); }
+.lista-simpla { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+.lista-simpla a { font-weight: 700; color: #c2410c; }
+.filtre { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 4px; }
+.pastila { font: inherit; font-size: 13px; font-weight: 600; border: 1px solid var(--border); background: #fff; color: #334155; padding: 5px 12px; border-radius: 999px; cursor: pointer; }
+.pastila.activ { background: var(--navy); color: #fff; border-color: var(--navy); }
+.tabel tr.estompat td { color: var(--muted); }
+.cod-link { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; color: #c2410c; white-space: nowrap; }
+.inapoi { color: var(--muted); text-decoration: none; font-weight: 600; }
+.inapoi:hover { color: var(--text); }
+.nowrap { white-space: nowrap; }
+.lista-bife { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; margin: 8px 0 16px; }
+.bifa-rand { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; font-size: 14px; color: var(--text); padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
+.bifa-rand input { width: auto; margin-top: 3px; }
+.obligatoriu { font-size: 11px; font-weight: 700; color: #c2410c; text-transform: uppercase; letter-spacing: .04em; }
+.antet-pv { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; border-bottom: 2px solid var(--navy); padding-bottom: 12px; margin-bottom: 14px; }
+.date-pv { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px 20px; margin: 0 0 12px; }
+.date-pv dt { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.date-pv dd { margin: 2px 0 0; }
+.document-pv h3 { margin-top: 18px; }
+.optiuni { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 12px; }
+.optiune { display: flex; align-items: center; gap: 8px; font-weight: 600; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
+.optiune input { width: auto; }
+.optiune.activ.confirm { border-color: var(--ok); background: var(--ok-bg); }
+.optiune.activ.confirm_cu_observatii { border-color: var(--warn); background: var(--warn-bg); }
+.optiune.activ.refuz { border-color: var(--bad); background: var(--bad-bg); }
+.confirmare { border: 2px solid var(--accent); }
+.filtre-registru { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 8px; }
+.lat-tot { width: 100%; }
+.doar-tipar { display: none; }
+
+@media (max-width: 760px) {
+  .filtre-registru { grid-template-columns: 1fr 1fr; }
+  .filtre-registru > label:first-child, .filtre-registru .actiuni-mici { grid-column: 1 / -1; }
+  .antet-pv { flex-direction: column; }
+}
+
+@media (max-width: 640px) {
+  .tabel.stivuit thead { display: none; }
+  .tabel.stivuit, .tabel.stivuit tbody, .tabel.stivuit tr, .tabel.stivuit td { display: block; width: 100%; }
+  .tabel.stivuit tr { border-bottom: 1px solid var(--border); padding: 10px 0; }
+  .tabel.stivuit td { border: 0; padding: 2px 0; display: grid; grid-template-columns: 96px 1fr; gap: 8px; }
+  .tabel.stivuit td::before { content: attr(data-eticheta); font-size: 12px; font-weight: 600; color: var(--muted); }
+  .tabel.stivuit td > .eticheta { justify-self: start; }
+}
+
+@media print {
+  body { background: #fff; font-size: 12px; }
+  .bara, .file, .nu-tipari, .antet-pagina, .atentie-bloc { display: none !important; }
+  .doar-tipar { display: block; }
+  .continut { max-width: none; padding: 0; }
+  .card { border: 0; box-shadow: none; padding: 0; }
+  .tabel th, .tabel td { padding: 6px; }
+  .eticheta { border: 1px solid #999; background: none !important; color: #000 !important; }
+  a { text-decoration: none; color: #000; }
+}

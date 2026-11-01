@@ -6,6 +6,7 @@ import Proiecte from './pages/Proiecte';
 import Proiect from './pages/Proiect';
 import Profil from './pages/Profil';
 import Configurare from './pages/Configurare';
+import Registru from './pages/Registru';
 
 export default function App() {
   const { sesiune, incarcare } = useSesiune();
@@ -28,7 +29,8 @@ export default function App() {
         <Link to="/" className="marca">CON<span>PRO</span> BIM</Link>
         <nav>
           <NavLink to="/" end>Proiecte</NavLink>
-          <NavLink to="/profil">Profilul meu</NavLink>
+          <NavLink to="/registru">Registru</NavLink>
+          <NavLink to="/profil">Profil</NavLink>
           <button className="legatura" onClick={async () => { await supabase.auth.signOut(); nav('/autentificare'); }}>
             Ieșire
           </button>
@@ -38,6 +40,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Proiecte />} />
           <Route path="/proiect/:id/*" element={<Proiect />} />
+          <Route path="/registru" element={<Registru />} />
           <Route path="/profil" element={<Profil />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
