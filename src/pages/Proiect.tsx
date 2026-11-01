@@ -9,6 +9,9 @@ import type { DocumentPersoana, IntrareJurnal, Invitatie, Membru, Proiect as TPr
 import { Eroare, Eticheta, Gol, mesajEroare } from '../components/ui';
 import ProceseVerbale from './ProceseVerbale';
 import Materiale from './Materiale';
+import Betoane from './Betoane';
+import Echipamente from './Echipamente';
+import CarteaTehnica from './CarteaTehnica';
 
 export default function Proiect() {
   const { id = '' } = useParams();
@@ -52,6 +55,9 @@ export default function Proiect() {
         <NavLink to="" end>Detalii</NavLink>
         <NavLink to="pv">Procese verbale</NavLink>
         <NavLink to="fam">Materiale (FAM)</NavLink>
+        <NavLink to="beton">Betoane și încercări</NavLink>
+        <NavLink to="echipamente">Echipamente</NavLink>
+        <NavLink to="carte">Cartea tehnică</NavLink>
         <NavLink to="echipa">Echipa ({membri.length})</NavLink>
         <NavLink to="istoric">Istoric</NavLink>
       </nav>
@@ -59,6 +65,9 @@ export default function Proiect() {
       <Routes>
         <Route index element={<Detalii proiect={proiect} admin={admin} onSalvat={incarca} />} />
         <Route path="echipa" element={<Echipa proiectId={id} membri={membri} admin={admin} uid={uid} onSchimbat={incarca} />} />
+        <Route path="echipamente" element={<Echipamente proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
+        <Route path="carte" element={<CarteaTehnica proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
+        <Route path="beton/*" element={<Betoane proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="fam/*" element={<Materiale proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="pv/*" element={<ProceseVerbale proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="istoric" element={<Istoric proiect={proiect} membri={membri} />} />
@@ -303,7 +312,8 @@ const confirmare = (text: string) => window.confirm(text);
 const NUME_TABEL: Record<string, string> = {
   proiecte: 'Proiect', membri_proiect: 'Echipă', invitatii: 'Invitație',
   procese_verbale: 'Proces verbal', participanti_pv: 'Proces verbal', registru_intrari: 'Registru electronic',
-  fam: 'FAM', livrari_fam: 'Livrare', atasamente: 'Document',
+  fam: 'FAM', livrari_fam: 'Livrare', atasamente: 'Document', turnari: 'Condica de betoane', incercari: 'Încercare',
+  tipuri_echipament: 'Echipamente', echipamente: 'Echipamente', documente_carte: 'Cartea tehnică',
 };
 const CAMPURI: Record<string, string> = {
   denumire: 'denumirea', adresa: 'adresa', beneficiar: 'beneficiarul', stadiu_catuc: 'stadiul',
@@ -381,6 +391,24 @@ function Istoric({ proiect, membri }: { proiect: TProiect; membri: Membru[] }) {
       return `a modificat ${cod}`;
     }
     if (j.tabel === 'livrari_fam') return `a verificat o livrare: ${d.conform ? 'conformă' : 'NECONFORMĂ'}${d.lot ? `, lot ${d.lot}` : ''}`;
+    if (j.tabel === 'turnari') {
+      if (j.operatie === 'INSERT') return `a înregistrat turnarea nr. ${d.numar}: ${d.element}, ${d.clasa_beton}${d.volum ? `, ${d.volum} m³` : ''}`;
+      if (d.vizat_la && !i.vizat_la) return `a vizat turnarea nr. ${d.numar}`;
+      return `a corectat turnarea nr. ${d.numar}`;
+    }
+    if (j.tabel === 'incercari') {
+      if (j.operatie === 'INSERT') return `a introdus un rezultat de încercare: ${d.descriere ?? d.tip}${d.valoare != null ? ` = ${d.valoare} ${d.unitate ?? ''}` : ''}, ${d.conform ? 'conform' : 'NECONFORM'}`;
+      return 'a luat la cunoștință un rezultat de încercare';
+    }
+    if (j.tabel === 'tipuri_echipament') {
+      const x = (j.operatie === 'DELETE' ? i : d) as Record<string, unknown>;
+      return `${j.operatie === 'INSERT' ? 'a adăugat' : j.operatie === 'DELETE' ? 'a șters' : 'a modificat'} tipul de echipament „${x.denumire}”`;
+    }
+    if (j.tabel === 'echipamente') {
+      const x = (j.operatie === 'DELETE' ? i : d) as Record<string, unknown>;
+      return `${j.operatie === 'INSERT' ? 'a înregistrat' : j.operatie === 'DELETE' ? 'a șters' : 'a completat'} echipamentul ${x.cod}`;
+    }
+    if (j.tabel === 'documente_carte') return `a înregistrat în Cartea tehnică (capitolul ${d.capitol}): ${d.titlu}`;
     if (j.tabel === 'atasamente') return `a atașat documentul „${d.nume_fisier}”`;
     if (j.tabel === 'registru_intrari') return `a scris în registrul electronic (${numeTipRegistru(d.tip as TipRegistru).toLowerCase()})`;
     return `${j.operatie} ${j.tabel}`;

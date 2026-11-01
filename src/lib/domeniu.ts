@@ -141,7 +141,7 @@ export const codPv = (codProiect: string, numar: number) => `PV-${codProiect}-${
 // ---------- registrul electronic (art. 456 lit. f, art. 459 lit. i) ----------
 export type TipRegistru = 'verificare' | 'lucrari_ascunse' | 'faza_determinanta' | 'proba' | 'receptie'
   | 'neconformitate' | 'oprire_lucrari' | 'notificare_isc' | 'dispozitie_santier' | 'alt'
-  | 'aprobare_fam' | 'verificare_livrare';
+  | 'aprobare_fam' | 'verificare_livrare' | 'condica_betoane' | 'incercare';
 export const TIPURI_REGISTRU: { id: TipRegistru; nume: string; manual: boolean }[] = [
   { id: 'verificare', nume: 'Verificare pe șantier', manual: true },
   { id: 'neconformitate', nume: 'Raport de neconformitate', manual: true },
@@ -154,6 +154,8 @@ export const TIPURI_REGISTRU: { id: TipRegistru; nume: string; manual: boolean }
   { id: 'receptie', nume: 'Recepție', manual: false },
   { id: 'aprobare_fam', nume: 'Decizie FAM', manual: false },
   { id: 'verificare_livrare', nume: 'Verificare la livrare', manual: false },
+  { id: 'condica_betoane', nume: 'Condica de betoane', manual: false },
+  { id: 'incercare', nume: 'Rezultat de încercare', manual: false },
   { id: 'alt', nume: 'Altă activitate', manual: true },
 ];
 export const numeTipRegistru = (t: TipRegistru) => TIPURI_REGISTRU.find(x => x.id === t)?.nume ?? t;
@@ -254,5 +256,38 @@ export const TIPURI_ATASAMENT: Record<string, string> = {
   aviz_insotire: 'Aviz de însoțire / certificat de lot',
   poza: 'Fotografie',
   pv_semnat: 'PV semnat (scan sau semnat electronic)',
+  bon_livrare: 'Bonuri de livrare beton',
+  manual: 'Manual de utilizare și mentenanță',
+  certificat_garantie: 'Certificat de garanție',
+  document: 'Document',
+  buletin: 'Buletin de încercare',
   altul: 'Alt document',
 };
+
+// ---------- condica de betoane și încercări (migrarea 0005) ----------
+export const TIPURI_INCERCARE: { id: string; nume: string; unitate?: string; varsta?: number }[] = [
+  { id: 'compresiune_28', nume: 'Rezistența la compresiune la 28 de zile', unitate: 'MPa', varsta: 28 },
+  { id: 'compresiune_7', nume: 'Rezistența la compresiune la 7 zile', unitate: 'MPa', varsta: 7 },
+  { id: 'consistenta', nume: 'Consistența (tasarea conului)', unitate: 'mm' },
+  { id: 'permeabilitate', nume: 'Adâncimea de pătrundere a apei', unitate: 'mm' },
+  { id: 'gelivitate', nume: 'Rezistența la îngheț-dezgheț' },
+  { id: 'altul', nume: 'Altă încercare' },
+];
+export const numeIncercare = (t: string) => TIPURI_INCERCARE.find(x => x.id === t)?.nume ?? t;
+
+/** Din clasa betonului (ex. C25/30) rezultă rezistența caracteristică pe cilindri și pe cuburi. */
+export function rezistenteClasa(clasa: string): { fck: number; fckCub: number } | null {
+  const m = /^L?C(\d{1,3})\/(\d{1,3})$/.exec(clasa.trim().toUpperCase());
+  return m ? { fck: Number(m[1]), fckCub: Number(m[2]) } : null;
+}
+export const CLASE_BETON = ['C8/10', 'C12/15', 'C16/20', 'C20/25', 'C25/30', 'C30/37', 'C35/45', 'C40/50', 'C45/55', 'C50/60'];
+
+// ---------- echipamente și Cartea tehnică (migrarea 0006) ----------
+export const CATEGORII_ECHIPAMENT = ['Încălzire', 'Răcire', 'Ventilare', 'Sanitare', 'Electrice', 'Iluminat', 'Curenți slabi',
+  'Securitate la incendiu', 'Lifturi', 'Tâmplărie și uși', 'Altele'];
+export const CAPITOLE_CARTE: { id: 'A' | 'B' | 'C' | 'D'; nume: string; continut: string }[] = [
+  { id: 'A', nume: 'A · Documentația privind proiectarea', continut: 'Certificatul de urbanism, autorizația, avizele, proiectul tehnic actualizat la recepție, as-built, dispozițiile de șantier ale proiectantului.' },
+  { id: 'B', nume: 'B · Documentația privind execuția', continut: 'Procesele verbale de lucrări ascunse și faze determinante, FAM-urile și livrările, condica de betoane, încercările, probele.' },
+  { id: 'C', nume: 'C · Documentația privind recepția', continut: 'Procesele verbale de recepție, punctele de vedere ale proiectanților și dirigintelui, fișele de instruire.' },
+  { id: 'D', nume: 'D · Exploatarea, întreținerea și urmărirea comportării', continut: 'Manualul de utilizare și mentenanță, inventarul echipamentelor (COBie), garanțiile, programul de urmărire în timp.' },
+];

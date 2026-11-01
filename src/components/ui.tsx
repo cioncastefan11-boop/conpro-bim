@@ -23,6 +23,8 @@ export function mesajEroare(e: { message?: string; code?: string } | null): stri
   if (m.includes('ac_prelungire_max_12_luni')) return 'Prelungirea autorizației se face o singură dată, cu cel mult 12 luni după termenul inițial.';
   if (m.includes('ac_termen_valid')) return 'Termenul autorizației nu poate fi înaintea datei de emitere.';
   if (m.includes('livrare_neconforma_cere_observatii')) return 'La o livrare neconformă scrieți ce nu corespunde.';
+  if (m.includes('incercare_neconforma_cere_observatii')) return 'La un rezultat neconform scrieți ce nu corespunde.';
+  if (m.includes('turnari_clasa_beton_check')) return 'Clasa betonului se scrie ca C25/30.';
   if (m.includes('check constraint')) return 'Unele valori nu sunt valide. Verificați datele introduse.';
   return m;
 }
