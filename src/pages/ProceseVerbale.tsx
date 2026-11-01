@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Link, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { Link, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import {
-  DECIZII, STARI_PV, TIPURI_PV, codPv, formatData, laIso, azi, numeRol, tipPv,
+  DECIZII, STARI_PV, TIPURI_PV, codPv, formatData, laIso, azi, numeRol, propunereContinutPv, tipPv,
   type DeciziePv, type Rol, type TipPv,
 } from '../lib/domeniu';
 import type { Membru, ParticipantPv, ProcesVerbal, Proiect } from '../lib/tipuri';
@@ -26,6 +26,7 @@ function poateConfirma(pv: ProcesVerbal, parti: ParticipantPv[], uid: string): {
   const eu = parti.find(p => p.persoana_id === uid);
   if (!eu || eu.confirmat_la) return { da: false };
   if (pv.stare !== 'convocat' && pv.stare !== 'in_semnare') return { da: false };
+  if (!pv.descriere_lucrari || !pv.concluzii) return { da: false, motiv: 'Confirmarea devine posibilă după ce constructorul (RTE) completează descrierea lucrărilor și concluziile.' };
   if (tipPv(pv.tip).ordine426 && eu.rol === 'proiectant'
       && parti.some(p => (p.rol === 'diriginte' || p.rol === 'constructor') && (!p.confirmat_la || p.decizie === 'refuz'))) {
     return { da: false, motiv: 'Confirmați după diriginte și RTE (art. 426 alin. 3 din Legea 169/2026).' };
@@ -126,6 +127,7 @@ function Convocare({ proiect, membri, rolulMeu, uid }: Props) {
   const [loc, setLoc] = useState('Pe șantier');
   const [alti, setAlti] = useState('');
   const [alesi, setAlesi] = useState<Set<string>>(new Set());
+  const [continut, setContinut] = useState<Continut>({ descriere: '', referinte: '', concluzii: '' });
   const [eroare, setEroare] = useState<string | null>(null);
   const [lucreaza, setLucreaza] = useState(false);
   const t = tipPv(tip);
@@ -147,8 +149,13 @@ function Convocare({ proiect, membri, rolulMeu, uid }: Props) {
       p_proiect: proiect.id, p_tip: tip, p_obiect: obiect, p_elemente: elemente, p_data: data,
       p_loc: loc, p_participanti: [...alesi], p_alti: alti,
     });
+    if (error) { setLucreaza(false); setEroare(mesajEroare(error)); return; }
+    // conținutul se salvează imediat dacă a fost completat la convocare
+    if (continut.descriere.trim() || continut.concluzii.trim()) {
+      const r = await supabase.rpc('completeaza_pv', { p_pv: id, p_descriere: continut.descriere, p_referinte: continut.referinte, p_concluzii: continut.concluzii });
+      if (r.error) { setLucreaza(false); nav(`../${id}`, { state: { eroareContinut: mesajEroare(r.error) } }); return; }
+    }
     setLucreaza(false);
-    if (error) { setEroare(mesajEroare(error)); return; }
     nav(`../${id}`);
   }
 
@@ -193,6 +200,10 @@ function Convocare({ proiect, membri, rolulMeu, uid }: Props) {
         <input value={alti} onChange={e => setAlti(e.target.value)} placeholder="ex. inspector ISC, membri ai comisiei de recepție" />
         <small>Semnează pe hârtie; scanul se atașează odată cu modulul de documente.</small>
       </label>
+      <h3>Conținutul procesului verbal</h3>
+      <p className="discret">Îl completează constructorul (RTE). Se poate lăsa și pentru după convocare, dar fără el nimeni nu poate confirma.</p>
+      <CampuriContinut valoare={continut} onChange={setContinut}
+        propune={() => propunereContinutPv({ tip, obiect, elemente, referinte: continut.referinte, proiect })} poatePropune={obiect.trim().length >= 3} />
       {lipsa.length > 0 && lipsaDinEchipa.length === 0 && <p className="mesaj alerta">Lipsește de pe listă: {lipsa.map(numeRol).join(', ')}.</p>}
       <Eroare text={eroare} />
       <div className="actiuni">
@@ -208,6 +219,7 @@ function Convocare({ proiect, membri, rolulMeu, uid }: Props) {
 // ------------------------------------------------------------------- Detaliu
 function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
   const { pvId = '' } = useParams();
+  const eroareContinut = (useLocation().state as { eroareContinut?: string } | null)?.eroareContinut ?? null;
   const [pv, setPv] = useState<ProcesVerbal | null>(null);
   const [parti, setParti] = useState<ParticipantPv[]>([]);
   const [eroare, setEroare] = useState<string | null>(null);
@@ -237,6 +249,8 @@ function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
   const t = tipPv(pv.tip);
   const cod = codPv(proiect.cod, pv.numar);
   const pot = poateConfirma(pv, parti, uid);
+  const potCompleta = pv.stare === 'convocat' && !parti.some(p => p.confirmat_la)
+    && (pv.convocat_de === uid || parti.some(p => p.persoana_id === uid && p.rol === 'constructor'));
   const eu = parti.find(p => p.persoana_id === uid);
   const potAnula = (pv.convocat_de === uid || rolulMeu === 'administrator') && pv.stare !== 'semnat' && pv.stare !== 'anulat';
   // ordinea de afișare: diriginte și RTE, ceilalți, proiectantul la final când se aplică art. 426
@@ -265,6 +279,16 @@ function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
           {proiect.ac_numar && <div><dt>Autorizația de construire</dt><dd>nr. {proiect.ac_numar}{proiect.ac_emis_la ? ` din ${formatData(proiect.ac_emis_la)}` : ''}</dd></div>}
           {pv.alti_participanti && <div><dt>Alți participanți</dt><dd>{pv.alti_participanti}</dd></div>}
         </dl>
+        {pv.descriere_lucrari ? (
+          <section className="continut-pv">
+            {pv.referinte_proiect && <><h3>Documentația de referință</h3><p>{pv.referinte_proiect}</p></>}
+            <h3>Descrierea lucrărilor</h3>
+            <p>{pv.descriere_lucrari}</p>
+            <h3>Concluzii</h3>
+            <p className="concluzii">{pv.concluzii}</p>
+            {pv.completat_de && <p className="nota">Completat de {om(pv.completat_de)}{pv.completat_la ? `, ${new Date(pv.completat_la).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' })}` : ''}.</p>}
+          </section>
+        ) : <p className="mesaj atentie-bloc nu-tipari">Descrierea lucrărilor și concluziile nu sunt încă completate.</p>}
         {t.ordine426 && <p className="nota">La acest tip de proces verbal, proiectantul confirmă după dirigintele de șantier și responsabilul tehnic cu execuția (art. 426 alin. 3 din Legea 169/2026).</p>}
 
         <h3>Confirmări</h3>
@@ -296,6 +320,7 @@ function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
 
       <div className="nu-tipari">
         {pot.motiv && <p className="mesaj info">{pot.motiv}</p>}
+        {potCompleta && <EditareContinut pv={pv} proiect={proiect} eroareInitiala={eroareContinut} onGata={incarca} />}
         {pot.da && eu && <Confirmare pvId={pv.id} onGata={incarca} />}
         <Eroare text={eroare} />
         <div className="actiuni stanga">
@@ -366,5 +391,73 @@ function Anulare({ pvId, onGata }: { pvId: string; onGata: () => void }) {
       </div>
       <Eroare text={eroare} />
     </div>
+  );
+}
+
+// ------------------------------------------------------- Conținutul PV-ului
+type Continut = { descriere: string; referinte: string; concluzii: string };
+
+function CampuriContinut({ valoare, onChange, propune, poatePropune }:
+  { valoare: Continut; onChange: (c: Continut) => void; propune: () => { descriere: string; concluzii: string }; poatePropune: boolean }) {
+  const [generat, setGenerat] = useState(false);
+  const set = (k: keyof Continut, v: string) => onChange({ ...valoare, [k]: v });
+  function genereaza() {
+    if ((valoare.descriere.trim() || valoare.concluzii.trim())
+        && !window.confirm('Înlocuiți textul scris cu propunerea generată?')) return;
+    const p = propune();
+    onChange({ ...valoare, descriere: p.descriere, concluzii: p.concluzii });
+    setGenerat(true);
+  }
+  return (
+    <div className="campuri-continut">
+      <label>Documentația de referință
+        <input value={valoare.referinte} onChange={e => set('referinte', e.target.value)}
+          placeholder="ex. Proiect tehnic nr. 12/2026, planșele R-03, R-04; caietul de sarcini CS-02" />
+        <small>Se folosește și în textul propus.</small>
+      </label>
+      <div className="rand-propunere">
+        <button type="button" className="buton" onClick={genereaza} disabled={!poatePropune}>Generează propunere de text</button>
+        <span className="discret">Din tipul PV-ului, obiect, elemente, referințe și datele lucrării. Verificați și corectați înainte de salvare.</span>
+      </div>
+      {generat && <p className="mesaj info">Text propus automat. Completați ce lipsește (de exemplu rezultatele probei sau viciile constatate) și ștergeți ce nu se aplică.</p>}
+      <label>Descrierea lucrărilor executate
+        <textarea value={valoare.descriere} onChange={e => set('descriere', e.target.value)} rows={5} />
+      </label>
+      <label>Concluzii
+        <textarea value={valoare.concluzii} onChange={e => set('concluzii', e.target.value)} rows={3} />
+      </label>
+    </div>
+  );
+}
+
+function EditareContinut({ pv, proiect, eroareInitiala, onGata }:
+  { pv: ProcesVerbal; proiect: Proiect; eroareInitiala: string | null; onGata: () => void }) {
+  const [c, setC] = useState<Continut>({ descriere: pv.descriere_lucrari ?? '', referinte: pv.referinte_proiect ?? '', concluzii: pv.concluzii ?? '' });
+  const [deschis, setDeschis] = useState(!pv.descriere_lucrari);
+  const [eroare, setEroare] = useState<string | null>(eroareInitiala);
+  const [lucreaza, setLucreaza] = useState(false);
+
+  if (!deschis) return <div className="actiuni stanga"><button className="buton" onClick={() => setDeschis(true)}>Modifică descrierea și concluziile</button></div>;
+
+  async function salveaza(e: FormEvent) {
+    e.preventDefault(); setEroare(null); setLucreaza(true);
+    const { error } = await supabase.rpc('completeaza_pv', { p_pv: pv.id, p_descriere: c.descriere, p_referinte: c.referinte, p_concluzii: c.concluzii });
+    setLucreaza(false);
+    if (error) { setEroare(mesajEroare(error)); return; }
+    setDeschis(false); onGata();
+  }
+
+  return (
+    <form className="card formular confirmare" onSubmit={salveaza}>
+      <h3>Descrierea lucrărilor și concluziile</h3>
+      <p className="discret">Se pot modifica până la prima confirmare. După aceea, toți confirmă exact acest text.</p>
+      <CampuriContinut valoare={c} onChange={setC} poatePropune
+        propune={() => propunereContinutPv({ tip: pv.tip, obiect: pv.obiect, elemente: pv.elemente, referinte: c.referinte, proiect })} />
+      <Eroare text={eroare} />
+      <div className="actiuni">
+        {pv.descriere_lucrari && <button type="button" className="buton" onClick={() => setDeschis(false)}>Renunță</button>}
+        <button className="buton principal" disabled={lucreaza}>{lucreaza ? 'Se salvează…' : 'Salvează conținutul'}</button>
+      </div>
+    </form>
   );
 }

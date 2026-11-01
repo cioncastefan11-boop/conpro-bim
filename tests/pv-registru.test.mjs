@@ -13,7 +13,7 @@ create role anon nologin; create role authenticated nologin;
 grant usage on schema auth to anon, authenticated;
 grant execute on function auth.uid() to anon, authenticated;
 `);
-for (const f of ['0001_fundatie.sql', '0002_procese_verbale.sql'])
+for (const f of ['0001_fundatie.sql', '0002_procese_verbale.sql', '0003_continut_pv.sql'])
   await db.exec(fs.readFileSync(new URL(`../supabase/migrations/${f}`, import.meta.url), 'utf8'));
 
 const U = {
@@ -55,9 +55,17 @@ for (const [u, rol] of [['dir', 'diriginte'], ['rte', 'constructor'], ['proi', '
   await as('admin', `insert into invitatii (proiect_id, email, rol) values ($1, $2, $3)`, [P, `${u}@test.ro`, rol]);
 for (const u of ['dir', 'rte', 'proi', 'benef', 'lab']) await as(u, `select accepta_invitatiile()`);
 
-const convoaca = (user, tip, participanti, obiect = 'Armare fundații axele A–C') =>
+const convoacaGol = (user, tip, participanti, obiect = 'Armare fundații axele A–C') =>
   as(user, `select convoaca_pv($1, $2, $3, 'Fundații F1–F6', '2026-11-03', 'Șantier', $4::uuid[], 'Inspector ISC') as id`,
      [P, tip, obiect, participanti.map(x => U[x])]).then(one).then(r => r.id);
+const completeaza = (user, pv) => as(user, `select completeaza_pv($1, $2, $3, $4)`,
+  [pv, 'S-a executat armarea fundațiilor conform planșelor R-03 și R-04.', 'PTh nr. 12/2026, planșele R-03, R-04', 'Lucrările sunt conforme cu proiectul. Se admite turnarea betonului.']);
+// convocare + completarea conținutului de către RTE (fluxul normal)
+const convoaca = async (user, tip, participanti, obiect) => {
+  const id = await convoacaGol(user, tip, participanti, obiect);
+  await completeaza(participanti.includes('rte') ? 'rte' : user, id);
+  return id;
+};
 const confirma = (user, pv, decizie = 'confirm', obs = null) =>
   as(user, `select confirma_pv($1, $2, $3) as s`, [pv, decizie, obs]).then(one).then(r => r.s);
 
@@ -109,9 +117,23 @@ await refuses('altcineva decât convocatorul sau administratorul nu anulează', 
 await ok('numerotarea continuă: 1, 2, 3', async () =>
   (await as('admin', `select array_agg(numar order by numar) n from procese_verbale`)).rows[0].n.join(',') === '1,2,3');
 
+console.log('Conținut și concluzii (0003)');
+let G;
+await ok('un PV nou pornește fără conținut', async () => { G = await convoacaGol('dir', 'lucrari_ascunse', ['dir', 'rte'], 'Izolație termică planșeu'); return true; });
+await refuses('nimeni nu confirmă un PV fără concluzii', () => confirma('dir', G), 'concluziile');
+await refuses('beneficiarul nu completează conținutul', () => completeaza('benef', G), 'constructorul');
+await refuses('concluziile nu pot lipsi', () => as('rte', `select completeaza_pv($1, 'S-a montat izolația conform proiectului.', null, '')`, [G]), 'concluziile');
+await ok('RTE-ul completează conținutul', async () => { await completeaza('rte', G); return true; });
+await ok('conținutul se poate corecta până la prima confirmare', async () => { await completeaza('rte', G); return true; });
+await ok('după completare se poate confirma', async () => (await confirma('dir', G)) === 'in_semnare');
+await refuses('după prima confirmare conținutul se blochează', () => completeaza('rte', G), 'confirmări');
+await ok('conținutul și autorul completării rămân pe PV', async () => {
+  const r = one(await as('benef', `select concluzii, completat_de from procese_verbale where id=$1`, [G]));
+  return r.concluzii.startsWith('Lucrările sunt conforme') && r.completat_de === U.rte; });
+
 console.log('Registrul electronic');
 await ok('confirmările dirigintelui intră automat în registrul lui', async () =>
-  rows(await as('dir', `select * from registru_intrari where persoana_id=auth.uid() and automat`)) === 2);
+  rows(await as('dir', `select * from registru_intrari where persoana_id=auth.uid() and automat`)) === 3);
 await ok('RTE-ul are și el intrările lui', async () =>
   rows(await as('rte', `select * from registru_intrari where persoana_id=auth.uid()`)) === 2);
 await ok('confirmarea proiectantului nu intră în registru', async () =>
@@ -136,11 +158,11 @@ await ok('intrările nu se modifică', async () =>
   (await as('dir', `update registru_intrari set descriere='altceva'`).catch(() => ({ affectedRows: 0 }))).affectedRows === 0);
 await ok('intrările nu se șterg', async () =>
   (await as('dir', `delete from registru_intrari`).catch(() => ({ affectedRows: 0 }))).affectedRows === 0
-  && rows(await db.query(`select * from registru_intrari where persoana_id=$1`, [U.dir])) === 3);
+  && rows(await db.query(`select * from registru_intrari where persoana_id=$1`, [U.dir])) === 4);
 await ok('RTE-ul nu vede registrul dirigintelui', async () =>
   rows(await as('rte', `select * from registru_intrari where persoana_id=$1`, [U.dir])) === 0);
 await ok('beneficiarul vede registrele de pe proiectul lui', async () =>
-  rows(await as('benef', `select * from registru_intrari`)) === 5);
+  rows(await as('benef', `select * from registru_intrari`)) === 6);
 await ok('laboratorul nu vede registrele', async () => rows(await as('lab', `select * from registru_intrari`)) === 0);
 
 console.log('Jurnal');

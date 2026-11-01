@@ -154,3 +154,70 @@ export const TIPURI_REGISTRU: { id: TipRegistru; nume: string; manual: boolean }
   { id: 'alt', nume: 'Altă activitate', manual: true },
 ];
 export const numeTipRegistru = (t: TipRegistru) => TIPURI_REGISTRU.find(x => x.id === t)?.nume ?? t;
+
+// ---------- propunere de text pentru PV (fără AI: șabloane pe tip) ----------
+/** Compune o propunere de descriere și de concluzii din datele PV-ului.
+ *  Constructorul o verifică și o corectează înainte de salvare. */
+export function propunereContinutPv(d: {
+  tip: TipPv; obiect: string; elemente?: string | null; referinte?: string | null;
+  proiect?: { denumire: string; adresa?: string | null; ac_numar?: string | null; ac_emis_la?: string | null };
+}): { descriere: string; concluzii: string } {
+  const ob = d.obiect.trim().replace(/\.$/, '');
+  const obMic = ob.charAt(0).toLowerCase() + ob.slice(1);
+  const la = d.elemente?.trim() ? ` la ${d.elemente.trim().replace(/\.$/, '')}` : '';
+  const ref = d.referinte?.trim()
+    ? `documentația de referință (${d.referinte.trim().replace(/\.$/, '')})`
+    : 'proiectul tehnic de execuție și detaliile de execuție';
+  const ac = d.proiect?.ac_numar ? `, autorizată prin autorizația de construire nr. ${d.proiect.ac_numar}${d.proiect.ac_emis_la ? ` din ${formatData(d.proiect.ac_emis_la)}` : ''}` : '';
+  const lucrarea = d.proiect ? ` în cadrul lucrării „${d.proiect.denumire}”${ac}` : '';
+  const conform = `în conformitate cu ${ref} și cu reglementările tehnice în vigoare`;
+  const materiale = 'Materialele puse în operă sunt cele aprobate prin fișele de aprobare a materialelor (FAM) și au documentele de calitate aferente.';
+
+  switch (d.tip) {
+    case 'lucrari_ascunse':
+      return {
+        descriere: `S-au executat lucrările de ${obMic}${la}${lucrarea}, ${conform}. ${materiale}`,
+        concluzii: 'Lucrările verificate sunt executate conform proiectului și pot fi acoperite. Se admite continuarea lucrărilor.',
+      };
+    case 'faza_determinanta':
+      return {
+        descriere: `S-a verificat faza determinantă „${ob}”${la}${lucrarea}, prevăzută în programul de control al calității lucrărilor. Lucrările au fost executate ${conform}. ${materiale}`,
+        concluzii: 'Faza determinantă este realizată conform proiectului și programului de control al calității. Se admite trecerea la faza următoare de execuție.',
+      };
+    case 'proba':
+      return {
+        descriere: `S-a efectuat proba de ${obMic}${la}${lucrarea}, ${conform}. Parametrii de probă și rezultatele sunt cele din buletinul de probă atașat.`,
+        concluzii: 'Proba s-a desfășurat cu rezultate corespunzătoare cerințelor proiectului. Se admite continuarea lucrărilor.',
+      };
+    case 'punere_in_functiune':
+      return {
+        descriere: `S-a realizat punerea în funcțiune a ${obMic}${la}${lucrarea}, ${conform} și cu instrucțiunile producătorului.`,
+        concluzii: 'Echipamentele și instalațiile funcționează la parametrii prevăzuți în proiect. Se admite punerea în funcțiune.',
+      };
+    case 'receptie_stadiu_fizic':
+      return {
+        descriere: `S-a constatat stadiul fizic de execuție pentru ${obMic}${la}${lucrarea}. Starea lucrărilor executate, viciile constatate, măsurile și termenele de remediere și măsurile de conservare sunt consemnate mai jos.`,
+        concluzii: 'Se preia partea de construcție în stadiul fizic constatat, cu măsurile de remediere și de conservare consemnate.',
+      };
+    case 'receptie_partiala':
+      return {
+        descriere: `Partea de construcție „${ob}”${la}${lucrarea} este distinctă din punct de vedere fizic și funcțional, a fost executată ${conform} și poate fi exploatată în condiții de siguranță.`,
+        concluzii: 'Se admite recepția parțială pentru partea de construcție descrisă.',
+      };
+    case 'receptie_terminare':
+      return {
+        descriere: `Lucrările ${obMic}${lucrarea} au fost finalizate ${conform}. Documentele recepției sunt cele prevăzute la art. 528 din Legea 169/2026 și sunt cuprinse în cartea tehnică a construcției.`,
+        concluzii: 'Se admite recepția la terminarea lucrărilor.',
+      };
+    case 'receptie_finala':
+      return {
+        descriere: `La expirarea perioadei de garanție s-a verificat comportarea lucrărilor ${obMic}${lucrarea}. Viciile apărute în perioada de garanție au fost remediate.`,
+        concluzii: 'Se admite recepția finală.',
+      };
+    default:
+      return {
+        descriere: `S-au verificat lucrările de ${obMic}${la}${lucrarea}, ${conform}.`,
+        concluzii: 'Lucrările verificate sunt conforme cu proiectul.',
+      };
+  }
+}

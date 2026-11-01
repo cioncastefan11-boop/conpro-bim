@@ -199,6 +199,14 @@ a.buton { text-decoration: none; display: inline-block; }
   .antet-pv { flex-direction: column; }
 }
 
+/* conținutul PV */
+.continut-pv { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 4px; }
+.continut-pv p { white-space: pre-line; }
+.continut-pv .concluzii { font-weight: 600; }
+.campuri-continut { display: grid; gap: 12px; margin: 8px 0 16px; }
+.rand-propunere { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.rand-propunere .discret { font-size: 13px; flex: 1 1 260px; }
+
 @media (max-width: 640px) {
   .tabel.stivuit thead { display: none; }
   .tabel.stivuit, .tabel.stivuit tbody, .tabel.stivuit tr, .tabel.stivuit td { display: block; width: 100%; }

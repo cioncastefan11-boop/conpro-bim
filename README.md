@@ -1,4 +1,4 @@
-# Conpro BIM · versiunea 0.2
+# Conpro BIM · versiunea 0.2.1
 
 Platforma în care beneficiarul, dirigintele, constructorul și proiectantul lucrează pe aceleași informații ale unei lucrări, fiecare cu contul și răspunderea lui (SR EN ISO 19650, Legea 169/2026).
 
@@ -17,6 +17,14 @@ Platforma în care beneficiarul, dirigintele, constructorul și proiectantul luc
 Următoarele module (CDE și documente, FAM, condica de betoane, încercări, echipamente COBie, Cartea tehnică) se construiesc peste această fundație.
 
 ---
+
+## Actualizare la 0.2.1 (conținutul și concluziile PV-ului)
+
+1. **GitHub:** urcați din nou tot conținutul folderului (Add file → Upload files → Commit changes).
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0003_continut_pv.sql`, lipiți și **Run**. Se poate rula și de mai multe ori.
+3. Verificare: `select count(*) from information_schema.columns where table_name = 'procese_verbale' and column_name in ('descriere_lucrari','concluzii');` trebuie să dea **2**.
+
+Ce aduce: fiecare PV are documentația de referință, descrierea lucrărilor executate și concluziile. Le completează constructorul (RTE) sau cine a convocat; butonul „Generează propunere de text” compune un text standard pe tipul de PV, din datele introduse, pe care constructorul îl verifică și îl corectează. Nimeni nu confirmă un PV fără conținut, iar după prima confirmare textul se blochează.
 
 ## Actualizare de la 0.1 la 0.2
 
@@ -91,7 +99,7 @@ Supabase trimite gratuit doar câteva emailuri pe oră. Pentru pilot e suficient
   - invitațiile se acceptă prin `accepta_invitatiile()`, doar pentru un email confirmat;
   - proiectele nu se șterg, se arhivează.
 - **Inserarea unui proiect** se face fără `returning`: politica de citire cere calitatea de membru, care apare abia în triggerul `after insert`.
-- **Teste:** `npm install && npm run test:db` rulează 85 de verificări pe un Postgres local (PGlite), cu utilizatori simulați: 40 pentru regulile de bază, 45 pentru procese verbale și registru (ordinea art. 426, participanți obligatorii, imuabilitate, vizibilitate).
+- **Teste:** `npm install && npm run test:db` rulează 94 de verificări pe un Postgres local (PGlite), cu utilizatori simulați: 40 pentru regulile de bază, 54 pentru procese verbale, conținutul lor și registru (ordinea art. 426, participanți obligatorii, imuabilitate, vizibilitate).
 - **PV-uri:** scrierea se face doar prin funcțiile `convoaca_pv`, `confirma_pv`, `anuleaza_pv` (`security definer`); tabelele au doar drept de citire pentru utilizatori. Intrările automate în registru sunt scrise de `confirma_pv`; cele manuale trec prin triggerul `verifica_intrare_registru`.
 - **Local:** copiați `.env.example` în `.env`, completați, apoi `npm run dev`.
 

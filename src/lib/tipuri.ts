@@ -78,6 +78,11 @@ export type ProcesVerbal = {
   anulat_de: string | null;
   anulat_la: string | null;
   motiv_anulare: string | null;
+  descriere_lucrari: string | null;
+  referinte_proiect: string | null;
+  concluzii: string | null;
+  completat_de: string | null;
+  completat_la: string | null;
 };
 
 export type ParticipantPv = {

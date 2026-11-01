@@ -354,6 +354,7 @@ function Istoric({ proiect, membri }: { proiect: TProiect; membri: Membru[] }) {
       const cod = codPv(proiect.cod, Number(d.numar ?? i.numar));
       if (j.operatie === 'INSERT') return `a convocat ${cod} (${tipPv(d.tip as TipPv).nume.toLowerCase()}): ${d.obiect}`;
       if (d.stare === 'anulat' && i.stare !== 'anulat') return `a anulat ${cod}: ${d.motiv_anulare}`;
+      if (d.completat_la && d.completat_la !== i.completat_la) return `a completat descrierea și concluziile pentru ${cod}`;
       if (d.stare !== i.stare) return `${cod} a trecut în starea „${String(d.stare).replace('_', ' ')}”`;
       return `a actualizat ${cod}`;
     }
