@@ -32,7 +32,8 @@ export function documenteReceptie(d: DateProiect, r: Receptie): Verificare[] {
   const proiectanti = d.membri.filter(m => m.rol === 'proiectant');
   const pv = fis(d, r, 'punct_vedere_proiectant');
   const asBuilt = fis(d, r, 'as_built').length > 0
-    || d.documente.some(x => x.capitol === 'A' && /as.?built|real executat/i.test(x.titlu));
+    || d.documente.some(x => x.capitol === 'A' && /as.?built|real executat/i.test(x.titlu))
+    || d.revizii.some(r => r.stare === 'publicat' && r.cod_stare === 'CR');
   const lipsuri = lipsuriCarte(d).filter(l => !l.text.startsWith('Procesul verbal de recepție') && !l.text.startsWith('Proiectul as-built'));
   return [
     { text: 'a) Punctul de vedere al proiectanților, pe fiecare specialitate', bine: pv.length > 0 && pv.length >= Math.min(1, proiectanti.length),

@@ -12,6 +12,7 @@ import Materiale from './Materiale';
 import Betoane from './Betoane';
 import Echipamente from './Echipamente';
 import Receptie from './Receptie';
+import Documente from './Documente';
 import CarteaTehnica from './CarteaTehnica';
 
 export default function Proiect() {
@@ -54,6 +55,7 @@ export default function Proiect() {
       </div>
       <nav className="file" aria-label="Secțiunile proiectului">
         <NavLink to="" end>Detalii</NavLink>
+        <NavLink to="documente">Documente</NavLink>
         <NavLink to="pv">Procese verbale</NavLink>
         <NavLink to="fam">Materiale (FAM)</NavLink>
         <NavLink to="beton">Betoane și încercări</NavLink>
@@ -68,6 +70,7 @@ export default function Proiect() {
         <Route index element={<Detalii proiect={proiect} admin={admin} onSalvat={incarca} />} />
         <Route path="echipa" element={<Echipa proiectId={id} membri={membri} admin={admin} uid={uid} onSchimbat={incarca} />} />
         <Route path="echipamente" element={<Echipamente proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
+        <Route path="documente/*" element={<Documente proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="receptie/*" element={<Receptie proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="carte" element={<CarteaTehnica proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="beton/*" element={<Betoane proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
@@ -422,6 +425,13 @@ function Istoric({ proiect, membri }: { proiect: TProiect; membri: Membru[] }) {
     if (j.tabel === 'obiectii_receptie') {
       if (j.operatie === 'INSERT') return `a consemnat obiecția nr. ${d.numar} la recepție: ${d.descriere}`;
       return d.stare === 'remediata' ? `a raportat remedierea obiecției nr. ${d.numar}` : d.stare === 'confirmata' ? `a confirmat remedierea obiecției nr. ${d.numar}` : `a redeschis obiecția nr. ${d.numar}`;
+    }
+    if (j.tabel === 'documente_proiect') return j.operatie === 'INSERT' ? `a adăugat documentul ${d.cod}: ${d.titlu}` : `a modificat titlul documentului ${d.cod}`;
+    if (j.tabel === 'revizii_document') {
+      const st = d.stare as string, inainte = (j.inainte ?? {}) as Record<string, unknown>;
+      if (j.operatie === 'INSERT') return `a început revizia ${d.revizie} a unui document`;
+      if (st === inainte.stare) return `a modificat revizia ${d.revizie}`;
+      return ({ partajat: inainte.stare === 'publicare_ceruta' ? `a refuzat publicarea reviziei ${d.revizie}` : `a partajat revizia ${d.revizie} (${d.cod_stare})`, publicare_ceruta: `a cerut publicarea reviziei ${d.revizie} ca ${d.cod_stare_cerut}`, publicat: `a aprobat publicarea reviziei ${d.revizie} (${d.cod_stare})`, arhivat: `revizia ${d.revizie} a fost înlocuită` } as Record<string, string>)[st] ?? `a modificat revizia ${d.revizie}`;
     }
     if (j.tabel === 'atasamente') return `a atașat documentul „${d.nume_fisier}”`;
     if (j.tabel === 'registru_intrari') return `a scris în registrul electronic (${numeTipRegistru(d.tip as TipRegistru).toLowerCase()})`;

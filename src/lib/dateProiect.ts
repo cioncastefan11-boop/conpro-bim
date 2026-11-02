@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import type {
   Atasament, DocumentCarte, Echipament, Fam, Incapere, Incercare, LivrareFam, Membru, Nivel, ParticipantPv,
-  ProcesVerbal, Proiect, TipEchipament, Turnare, Receptie, MembruComisie, ObiectieReceptie,
+  ProcesVerbal, Proiect, TipEchipament, Turnare, Receptie, MembruComisie, ObiectieReceptie, DocumentProiect, RevizieDocument,
 } from './tipuri';
 
 /** Toate datele unui proiect, pentru COBie, Cartea tehnică și arhivă. */
@@ -23,6 +23,8 @@ export type DateProiect = {
   receptii: Receptie[];
   comisii: MembruComisie[];
   obiectii: ObiectieReceptie[];
+  documenteProiect: DocumentProiect[];
+  revizii: RevizieDocument[];
 };
 
 export async function incarcaDateProiect(proiect: Proiect, membri: Membru[]): Promise<DateProiect> {
@@ -31,14 +33,15 @@ export async function incarcaDateProiect(proiect: Proiect, membri: Membru[]): Pr
     if (r.error) throw r.error;
     return (r.data ?? []) as T[];
   });
-  const [niveluri, incaperi, tipuri, echipamente, documente, pvs, participanti, famuri, livrari, turnari, incercari, atasamente, receptii, comisii, obiectii] = await Promise.all([
+  const [niveluri, incaperi, tipuri, echipamente, documente, pvs, participanti, famuri, livrari, turnari, incercari, atasamente, receptii, comisii, obiectii, documenteProiect, revizii] = await Promise.all([
     q<Nivel>('niveluri', 'ordine'), q<Incapere>('incaperi', 'cod'), q<TipEchipament>('tipuri_echipament', 'denumire'),
     q<Echipament>('echipamente', 'cod'), q<DocumentCarte>('documente_carte', 'creat_la'), q<ProcesVerbal>('procese_verbale', 'numar'),
     q<ParticipantPv>('participanti_pv'), q<Fam>('fam', 'numar'), q<LivrareFam>('livrari_fam', 'data'),
     q<Turnare>('turnari', 'numar'), q<Incercare>('incercari', 'creat_la'), q<Atasament>('atasamente', 'incarcat_la'),
     q<Receptie>('receptii', 'numar'), q<MembruComisie>('comisie_receptie', 'ordine'), q<ObiectieReceptie>('obiectii_receptie', 'numar'),
+    q<DocumentProiect>('documente_proiect', 'cod'), q<RevizieDocument>('revizii_document', 'creat_la'),
   ]);
-  return { proiect, membri, niveluri, incaperi, tipuri, echipamente, documente, pvs, participanti, famuri, livrari, turnari, incercari, atasamente, receptii, comisii, obiectii };
+  return { proiect, membri, niveluri, incaperi, tipuri, echipamente, documente, pvs, participanti, famuri, livrari, turnari, incercari, atasamente, receptii, comisii, obiectii, documenteProiect, revizii };
 }
 
 export const emailDe = (d: DateProiect, id: string | null) =>

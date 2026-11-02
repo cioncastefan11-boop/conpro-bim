@@ -18,6 +18,19 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.9 (documentele proiectului după ISO 19650)
+
+1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0010_documente_cde.sql`, lipiți și **Run**. La avertismentul „destructive operations” apăsați **Run query**: scriptul doar înlocuiește o regulă de citire a atașamentelor și extinde lista lor, nu șterge date.
+3. Verificare: `select count(*) from pg_policies where tablename in ('documente_proiect','revizii_document');` trebuie să dea **6**.
+
+Ce aduce:
+- **Tab nou „Documente”** (mediul comun de date, CDE): planșe, modele, caiete de sarcini, rapoarte, calcule, grafice, fiecare cu **codul standard ISO 19650**, compus automat: Proiect-Inițiator-Volum-Nivel-Tip-Disciplină-Număr (ex. `BLC01-SP-ZZ-01-DR-S-0101`), cu numărul următor propus.
+- **Revizii și stări:** în lucru (S0, o vede doar echipa autorului) → partajat (S1 coordonare, S2 informare, S3 comentarii, S4 aprobarea etapei) → publicat (A aprobat pentru execuție, B aprobat parțial, CR ca executat) → arhivat când e înlocuit. Fișierele unei revizii nu se mai schimbă după partajare.
+- **Aprobarea publicării:** autorul o cere, beneficiarul, dirigintele sau administratorul o aprobă sau o refuză motivat. Pe pagina documentului se vede mereu revizia **în vigoare**.
+- **Registrul documentelor** în Excel, cu filtre.
+- **Legături:** la PV-uri, „Documentația de referință” se completează alegând planșa, cu revizia în vigoare. Revizia publicată a fiecărui document intră singură în capitolul A al Cărții tehnice; o revizie CR (ca executat) bifează proiectul as-built.
+
 ## Actualizare la 0.8 (semnătura electronică calificată, etapa 1)
 
 1. **GitHub:** urcați din nou tot conținutul folderului (Add file → Upload files → Commit changes).

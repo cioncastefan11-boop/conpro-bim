@@ -10,7 +10,7 @@ import type { Atasament, ProcesVerbal } from './tipuri';
 import { genereazaCobie, lipsuriEchipament } from './cobie';
 import { excelCondica, htmlCondica as htmlCondicaBetoane } from './condica';
 import { fisiereReceptie, htmlReceptie } from './receptie';
-import { codReceptie, DECIZII_RECEPTIE, numeReceptie } from './domeniu';
+import { codReceptie, DECIZII_RECEPTIE, numeCodStare, numeReceptie, numeRolDocument, numeTipDocument } from './domeniu';
 
 export type ElementOpis = {
   id: string;
@@ -18,7 +18,7 @@ export type ElementOpis = {
   detalii?: string;
   data?: string | null;
   fisiere: Atasament[];
-  generat?: 'pv' | 'manual' | 'cobie' | 'condica' | 'fam' | 'receptie';
+  generat?: 'pv' | 'manual' | 'cobie' | 'condica' | 'fam' | 'receptie' | 'document';
   pvId?: string;
   dosar: string;                 // folderul din arhivă
 };
@@ -34,6 +34,17 @@ export function construiesteOpis(d: DateProiect): CapitolOpis[] {
 
   // A · proiectare
   if (p.ac_numar) cap.A.push({ id: 'ac', titlu: `Autorizația de construire nr. ${p.ac_numar}`, detalii: p.ac_emis_la ? `emisă la ${formatData(p.ac_emis_la)}${p.ac_prelungit_pana ? `, prelungită până la ${formatData(p.ac_prelungit_pana)}` : ''}` : undefined, data: p.ac_emis_la, fisiere: [], dosar: 'A_Proiectare' });
+
+  // A · documentele proiectului: revizia publicată a fiecăruia (CDE, ISO 19650)
+  for (const doc of d.documenteProiect) {
+    const r = d.revizii.filter(x => x.document_id === doc.id && x.stare === 'publicat').sort((a, b) => b.creat_la.localeCompare(a.creat_la))[0];
+    if (!r) continue;
+    cap.A.push({
+      id: doc.id, titlu: `${doc.cod} rev. ${r.revizie} · ${doc.titlu}`, data: r.aprobat_la?.slice(0, 10),
+      detalii: `${numeCodStare(r.cod_stare)} (${r.cod_stare}) · ${numeTipDocument(doc.tip)}, ${numeRolDocument(doc.rol).toLowerCase()}`,
+      fisiere: fis('revizie_document', r.id), dosar: `A_Proiectare/Documente/${doc.cod}`, generat: 'document',
+    });
+  }
 
   // documentele înregistrate manual, pe capitole
   for (const doc of d.documente) {
@@ -128,7 +139,7 @@ export function lipsuriCarte(d: DateProiect): Lipsa[] {
   if (!d.receptii.some(x => x.tip === 'terminare' && !x.partiala && x.stare === 'aprobata') && !d.pvs.some(x => x.tip === 'receptie_terminare' && x.stare === 'semnat'))
     l.push({ text: 'Procesul verbal de recepție la terminarea lucrărilor nu e încă aprobat', unde: 'receptie' });
   if (!p.ac_numar && !d.documente.some(x => x.capitol === 'A' && /autoriza/i.test(x.titlu))) l.push({ text: 'Autorizația de construire nu e înregistrată', unde: 'carte' });
-  if (!d.documente.some(x => x.capitol === 'A' && /as.?built|real executat/i.test(x.titlu))) l.push({ text: 'Proiectul as-built (art. 528 alin. 3 lit. g) nu e înregistrat în capitolul A', unde: 'carte' });
+  if (!d.documente.some(x => x.capitol === 'A' && /as.?built|real executat/i.test(x.titlu)) && !d.revizii.some(r => r.stare === 'publicat' && r.cod_stare === 'CR')) l.push({ text: 'Proiectul as-built (art. 528 alin. 3 lit. g) nu e înregistrat în capitolul A', unde: 'carte' });
   return l;
 }
 
