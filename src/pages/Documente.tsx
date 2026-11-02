@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Link, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { Link, Route, Routes, useNavigate, useParams, NavLink } from 'react-router-dom';
+import { MatriceResponsabilitati, PlanLivrare } from './PlanLivrare';
 import { supabase } from '../lib/supabase';
 import {
   CODURI_STARE, ROLURI_DOCUMENT, STARI_CDE, TIPURI_DOCUMENT, formatData, numeCodStare, numeRol, numeRolDocument, numeTipDocument,
@@ -16,12 +17,21 @@ const APROBATORI: Rol[] = ['beneficiar', 'diriginte', 'administrator'];
 
 export default function Documente(props: Props) {
   return (
+    <>
+      <nav className="subfile" aria-label="Documentele">
+        <NavLink to="." end>Documentele (CDE)</NavLink>
+        <NavLink to="plan">Planul de livrare</NavLink>
+        <NavLink to="matrice">Matricea de responsabilități</NavLink>
+      </nav>
     <Routes>
       <Route index element={<Lista {...props} />} />
+      <Route path="plan" element={<PlanLivrare {...props} />} />
+      <Route path="matrice" element={<MatriceResponsabilitati {...props} />} />
       <Route path="nou" element={<Nou {...props} />} />
       <Route path="incarcare" element={<IncarcareMultipla {...props} />} />
       <Route path=":documentId" element={<Detaliu {...props} />} />
     </Routes>
+    </>
   );
 }
 
