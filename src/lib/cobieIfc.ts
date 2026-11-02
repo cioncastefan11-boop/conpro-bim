@@ -2,7 +2,7 @@
 // Calculează ce e nou față de ce există deja în proiect (după GlobalId, apoi după cod),
 // fără să modifice nimic; scrierea o face pagina, pas cu pas.
 import type { StructuraIfc, EchipamentIfc } from './ifc';
-import { numeClasa, prefixClasa } from './ifc';
+import { numeClasa, prefixClasa } from './ifcClase';
 
 type Existent = { id: string; cod: string; ifc_guid?: string | null };
 type TipExistent = { id: string; denumire: string; ifc_guid?: string | null };

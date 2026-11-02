@@ -31,6 +31,7 @@ Ce aduce (ISO 19650-2, 5.6–5.7; linia BCF din harta BIM):
 - **BCF 2.1:** export și import `.bcfzip`, cu camera, elementele, captura și comentariile, ca observațiile să circule cu Revit, Archicad, BIMcollab, Solibri, Navisworks.
 - **„De făcut”:** observațiile atribuite (rolului sau persoanei) și cele rezolvate, de verificat de autor.
 - Vizualizatorul: clicul nu mai alege volumele transparente (spații, zone) din fața elementelor; un model care nu se deschide nu le mai oprește pe celelalte.
+- **Aplicația se încarcă mai repede:** motorul IFC (circa 4 MB) se descarcă doar când deschideți Modelul 3D, nu la fiecare intrare; pagina de pornire are acum aproximativ un sfert din cât avea.
 
 ## Actualizare la 0.16 (locatarii și reclamațiile)
 
