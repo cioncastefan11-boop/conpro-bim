@@ -421,3 +421,23 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
   .viz-scena { height: 60vh; }
   .viz-panou { border-left: 0; border-top: 1px solid var(--border); max-height: 50vh; }
 }
+
+/* 0.11 · convenția de denumire și De făcut */
+.lista-conventie { margin: 10px 0 14px; }
+.lista-conventie h3 { margin: 0; font-size: 15px; }
+.lista-conventie > small { display: block; margin-bottom: 6px; }
+.rand-conventie { display: grid; grid-template-columns: 110px 1fr auto; gap: 8px; margin-bottom: 6px; }
+.rand-conventie input:first-child { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; text-transform: uppercase; }
+.numar-sarcini { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; margin-left: 6px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; }
+.lista-sarcini { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 4px; }
+.lista-sarcini li { display: grid; grid-template-columns: 170px 1fr auto; gap: 12px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.lista-sarcini li:last-child { border-bottom: 0; }
+.tip-sarcina { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); }
+.tip-sarcina.t-pv, .tip-sarcina.t-receptie { color: var(--info); }
+.tip-sarcina.t-fam, .tip-sarcina.t-document { color: var(--warn); }
+.tip-sarcina.t-obiectie, .tip-sarcina.t-incercare { color: var(--bad); }
+@media (max-width: 640px) { .lista-sarcini li { grid-template-columns: 1fr; gap: 2px; } }
+@media (max-width: 640px) {
+  .bara { flex-wrap: wrap; row-gap: 4px; padding-bottom: 6px; }
+  .bara nav { width: 100%; justify-content: space-between; overflow-x: auto; margin: 0 -6px; }
+}

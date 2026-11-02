@@ -18,6 +18,18 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.11 (convenția de denumire și „De făcut”)
+
+1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0012_conventie_sarcini.sql`, lipiți și **Run**.
+3. Verificare: `select count(*) from pg_proc where proname in ('sarcinile_mele','sarcini_persoana','in_lista');` trebuie să dea **3**.
+4. **Opțional, rezumatul zilnic pe e-mail:** pașii sunt în `docs/REZUMAT-EMAIL.md` (cont Resend, funcția Edge, programarea).
+
+Ce aduce:
+- **Convenția de denumire pe proiect** (Detalii → „Convenția de denumire a documentelor”, o editează administratorul): listele de inițiatori, volume și niveluri, cu semnificația lor, numărul de cifre și **modul strict** (alte coduri se refuză, verificat și în baza de date). Butonul „Propune din echipă și niveluri” completează listele din firmele echipei și din nivelurile COBie. La „Document nou”, câmpurile devin liste.
+- **„De făcut”** în bara de sus, cu numărul de sarcini: tot ce așteaptă după dumneavoastră, în toate proiectele — PV-uri de confirmat (proiectantul abia după diriginte și RTE, art. 426), FAM-uri de avizat / aprobat / completat, turnări de vizat, rezultate de luat la cunoștință, recepții de convocat / decis / aprobat, obiecții de remediat sau de confirmat, documente de aprobat pentru publicare. Fiecare rând duce direct acolo.
+- **Rezumatul zilnic pe e-mail** (după activare): dimineața, în zilele lucrătoare, doar celor care au ceva de făcut. Fiecare îl poate opri din Profil.
+
 ## Actualizare la 0.10 (modelul 3D, IFC)
 
 1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
