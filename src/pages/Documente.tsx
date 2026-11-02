@@ -5,7 +5,7 @@ import {
   CODURI_STARE, ROLURI_DOCUMENT, STARI_CDE, TIPURI_DOCUMENT, formatData, numeCodStare, numeRol, numeRolDocument, numeTipDocument,
   revizieUrmatoare, tonCodStare, type Rol,
 } from '../lib/domeniu';
-import type { Atasament, DocumentProiect, Membru, Proiect, RevizieDocument } from '../lib/tipuri';
+import type { Atasament, DocumentProiect, ElementConventie, Membru, Proiect, RevizieDocument } from '../lib/tipuri';
 import { Eroare, Eticheta, Gol, mesajEroare } from '../components/ui';
 import Atasamente from '../components/Atasamente';
 import { descarca } from './Echipamente';
@@ -188,19 +188,48 @@ function Lista({ proiect, membri, rolulMeu }: Props) {
 }
 
 // ----------------------------------------------------------------------- Nou
+/** Un câmp al codului: listă din convenția proiectului sau text liber (cu „alt cod” când convenția nu e strictă). */
+function CampConventie({ eticheta, lista, strict, valoare, onChange, ajutor, min, max }: {
+  eticheta: string; lista?: ElementConventie[]; strict: boolean; valoare: string; onChange: (v: string) => void; ajutor: string; min: number; max: number;
+}) {
+  const [liber, setLiber] = useState(!!lista?.length && !lista.some(x => x.cod === valoare));
+  const curat = (x: string) => x.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!lista?.length || (liber && !strict)) {
+    return (
+      <label>{eticheta}
+        <input value={valoare} onChange={e => onChange(curat(e.target.value))} required minLength={min} maxLength={max} />
+        <small>{ajutor}{lista?.length ? <> <button type="button" className="legatura" onClick={() => { setLiber(false); onChange(lista[0].cod); }}>Alege din convenție</button></> : null}</small>
+      </label>
+    );
+  }
+  return (
+    <label>{eticheta}
+      <select value={valoare} onChange={e => { if (e.target.value === '__alt') { setLiber(true); onChange(''); } else onChange(e.target.value); }}>
+        {lista.map(x => <option key={x.cod} value={x.cod}>{x.cod}{x.nume ? ` · ${x.nume}` : ''}</option>)}
+        {!strict && <option value="__alt">Alt cod…</option>}
+      </select>
+      <small>{strict ? 'Din convenția proiectului.' : 'Din convenția proiectului; se poate și alt cod.'}</small>
+    </label>
+  );
+}
+
 function Nou({ proiect, membri, rolulMeu, uid }: Props) {
   const nav = useNavigate();
   const eu = membri.find(m => m.persoana_id === uid);
   const rolImplicit = rolulMeu === 'constructor' ? 'W' : rolulMeu === 'subcontractor' ? 'X' : rolulMeu === 'beneficiar' ? 'K' : rolulMeu === 'administrator' || rolulMeu === 'diriginte' ? 'Z' : 'A';
-  const [c, setC] = useState({ initiator: initialeFirma(eu?.persoane?.firme?.denumire), volum: 'ZZ', nivel: 'ZZ', tip: 'DR', rol: rolImplicit, numar: '', titlu: '', descriere: '', modificari: 'Prima emitere' });
+  const conv = proiect.standard_info ?? {};
+  const cifre = conv.cifre && conv.cifre >= 4 && conv.cifre <= 6 ? conv.cifre : 4;
+  const ini = initialeFirma(eu?.persoane?.firme?.denumire);
+  const implicit = (l: ElementConventie[] | undefined, dorit: string) => (!l?.length || l.some(x => x.cod === dorit) ? dorit : l[0].cod);
+  const [c, setC] = useState({ initiator: implicit(conv.initiatori, ini), volum: implicit(conv.volume, 'ZZ'), nivel: implicit(conv.niveluri, 'ZZ'), tip: 'DR', rol: rolImplicit, numar: '', titlu: '', descriere: '', modificari: 'Prima emitere' });
   const [existente, setExistente] = useState<DocumentProiect[]>([]);
   const [eroare, setEroare] = useState<string | null>(null);
   const [lucreaza, setLucreaza] = useState(false);
   useEffect(() => { supabase.from('documente_proiect').select('*').eq('proiect_id', proiect.id).then(({ data }) => setExistente((data as DocumentProiect[]) ?? [])); }, [proiect.id]);
   const urmator = useMemo(() => {
     const n = existente.filter(d => d.tip === c.tip && d.rol === c.rol).map(d => parseInt(d.numar, 10)).reduce((a, b) => Math.max(a, b), 0);
-    return String(n + 1).padStart(4, '0');
-  }, [existente, c.tip, c.rol]);
+    return String(n + 1).padStart(cifre, '0');
+  }, [existente, c.tip, c.rol, cifre]);
   if (!rolulMeu || rolulMeu === 'cititor') return <Gol titlu="Documentele le adaugă echipa de proiect" />;
 
   const s = (k: keyof typeof c, mari = false) => ({ value: c[k], onChange: (e: { target: { value: string } }) => setC({ ...c, [k]: mari ? e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') : e.target.value }) });
@@ -223,16 +252,19 @@ function Nou({ proiect, membri, rolulMeu, uid }: Props) {
       <h2>Document nou</h2>
       <div className="previzualizare-cod"><span>Codul documentului</span><code>{cod}</code></div>
       <div className="campuri">
-        <label>Inițiator (firma)<input {...s('initiator', true)} required minLength={2} maxLength={6} /><small>2–6 litere, ex. inițialele firmei.</small></label>
-        <label>Volum / corp<input {...s('volum', true)} required maxLength={4} /><small>ZZ = toate corpurile.</small></label>
-        <label>Nivel<input {...s('nivel', true)} required minLength={2} maxLength={4} /><small>00, 01, B1; ZZ = mai multe; XX = niciunul.</small></label>
+        <CampConventie eticheta="Inițiator (firma)" lista={conv.initiatori} strict={!!conv.strict} valoare={c.initiator} min={2} max={6}
+          onChange={x => setC({ ...c, initiator: x })} ajutor="2–6 litere, ex. inițialele firmei." />
+        <CampConventie eticheta="Volum / corp" lista={conv.volume} strict={!!conv.strict} valoare={c.volum} min={1} max={4}
+          onChange={x => setC({ ...c, volum: x })} ajutor="ZZ = toate corpurile." />
+        <CampConventie eticheta="Nivel" lista={conv.niveluri} strict={!!conv.strict} valoare={c.nivel} min={2} max={4}
+          onChange={x => setC({ ...c, nivel: x })} ajutor="00, 01, B1; ZZ = mai multe; XX = niciunul." />
         <label>Tipul
           <select {...s('tip')}>{TIPURI_DOCUMENT.map(t => <option key={t.id} value={t.id}>{t.id} · {t.nume}</option>)}</select>
         </label>
         <label>Disciplina
           <select {...s('rol')}>{ROLURI_DOCUMENT.map(t => <option key={t.id} value={t.id}>{t.id} · {t.nume}</option>)}</select>
         </label>
-        <label>Număr<input {...s('numar', true)} placeholder={urmator} inputMode="numeric" pattern="[0-9]{4,6}" maxLength={6} /><small>Următorul liber: {urmator}.</small></label>
+        <label>Număr<input {...s('numar', true)} placeholder={urmator} inputMode="numeric" pattern={conv.strict ? `[0-9]{${cifre}}` : '[0-9]{4,6}'} maxLength={6} /><small>Următorul liber: {urmator}.</small></label>
         <label className="lat">Titlu<input {...s('titlu')} required minLength={3} placeholder="ex. Plan cofraj placă peste parter" /></label>
         <label className="lat">Descriere (opțional)<textarea {...s('descriere')} rows={2} /></label>
         <label className="lat">Prima revizie: P01<input {...s('modificari')} /><small>Revizia începe în lucru (S0); fișierul îl încărcați pe pagina documentului, apoi îl partajați.</small></label>

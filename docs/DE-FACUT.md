@@ -6,7 +6,8 @@
   - Cheia API stă ca secret în Supabase (funcție Edge), niciodată în browser.
 
 ## Etape următoare
-- **Documente, completări posibile:** convenția de denumire salvată pe proiect (listă de inițiatori, volume, niveluri), încărcarea mai multor documente deodată, transmitale.
+- **Documente, completări posibile:** încărcarea mai multor documente deodată, transmitale, comentarii pe planșă la S3, documentele de management al informației (EIR, BEP, MIDP/TIDP).
+- **Rezumatul pe e-mail:** de activat după pașii din `docs/REZUMAT-EMAIL.md`.
 - **Înainte de prima lucrare reală: trecerea pe Supabase Pro** (copii de siguranță zilnice, fără oprire la inactivitate, 100 GB pentru fișiere), apoi ridicarea limitei pe fișier (comanda e în README, la 0.10).
 - **Model 3D, completări posibile:** măsurători în model, vederi salvate, legarea unui element de PV-ul sau de FAM-ul lui, modele foarte mari (fragmentare).
 - **Semnătura electronică, etapa 2:** semnarea direct din aplicație prin API-ul unui furnizor de semnătură în cloud.

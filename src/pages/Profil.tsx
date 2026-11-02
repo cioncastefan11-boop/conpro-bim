@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase';
 import { useUid } from '../lib/sesiune';
@@ -25,6 +26,8 @@ export default function Profil() {
     setDocs((c.data as DocumentPersoana[]) ?? []);
   }, [uid]);
   useEffect(() => { incarca(); }, [incarca]);
+
+  const [eroareNot, setEroareNot] = useState<string | null>(null);
 
   async function salveaza(e: FormEvent) {
     e.preventDefault(); setEroare(null);
@@ -59,6 +62,20 @@ export default function Profil() {
           <button className="buton principal">Salvează</button>
         </div>
       </form>
+
+      <div className="card formular">
+        <h2>Notificări</h2>
+        <label className="bifa">
+          <input type="checkbox" checked={p.rezumat_zilnic !== false} onChange={async e => {
+            const v = e.target.checked; setEroareNot(null);
+            const { error } = await supabase.from('persoane').update({ rezumat_zilnic: v }).eq('id', uid);
+            if (error) setEroareNot(error.message.includes('rezumat_zilnic') ? 'Rulați în Supabase scriptul 0012_conventie_sarcini.sql.' : mesajEroare(error)); else setP({ ...p, rezumat_zilnic: v });
+          }} />
+          Primesc dimineața, în zilele lucrătoare, un e-mail cu ce am de făcut în proiecte
+        </label>
+        <p className="discret">Lista completă e oricând în <Link to="/de-facut">De făcut</Link>, în bara de sus. E-mailul pleacă doar în zilele în care aveți ceva de făcut.</p>
+        <Eroare text={eroareNot} />
+      </div>
 
       <div className="card">
         <h2>Autorizații, atestate și polițe</h2>

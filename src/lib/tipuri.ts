@@ -15,6 +15,7 @@ export type Proiect = {
   ac_valabil_pana: string | null;
   ac_prelungit_pana: string | null;
   arhivat: boolean;
+  standard_info?: Conventie | null;
   creat_la: string;
 };
 
@@ -24,6 +25,7 @@ export type Persoana = {
   id: string;
   nume: string;
   email: string;
+  rezumat_zilnic?: boolean;
   telefon: string | null;
   firma_id: string | null;
   firme?: { denumire: string } | null;
@@ -201,3 +203,8 @@ export type RevizieDocument = {
   partajat_de: string | null; partajat_la: string | null; publicare_ceruta_de: string | null; publicare_ceruta_la: string | null;
   cod_stare_cerut: string | null; aprobat_de: string | null; aprobat_la: string | null; observatii_aprobare: string | null; arhivat_la: string | null;
 };
+
+// ---------- convenția de denumire a documentelor (migrarea 0012) ----------
+export type ElementConventie = { cod: string; nume: string };
+export type Conventie = { strict?: boolean; cifre?: number; initiatori?: ElementConventie[]; volume?: ElementConventie[]; niveluri?: ElementConventie[] };
+export type Sarcina = { proiect_id: string; cod_proiect: string; denumire_proiect: string; tip: string; titlu: string; cale: string; din: string | null };
