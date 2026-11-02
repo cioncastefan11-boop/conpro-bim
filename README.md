@@ -18,6 +18,19 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.14 (urmărirea comportării în timp)
+
+1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0015_urmarire.sql`, lipiți și **Run** (după 0014).
+3. Verificare: `select count(*) from pg_proc where proname in ('inregistreaza_inspectie','scadente_urmarire','scadente_urmarire_intern');` trebuie să dea **3**.
+
+Ce aduce (Legea 169/2026, programul de urmărire în timp):
+- **Exploatare → Urmărirea în timp:** verificările restante, ultima inspecție, punctele urmărite.
+- **Programul de urmărire:** ce se urmărește, zona, metoda, intervalul (cel mult 12 luni) și pragul de alarmă. Îl stabilesc proiectantul, beneficiarul, administratorul proiectului sau al clădirii. Se poate porni de la **programul tip** pentru urmărirea curentă (10 puncte). Punctele nu se șterg, se scot din program.
+- **Inspecțiile:** pentru fiecare punct, normal / atenție / alarmă / neverificat, cu constatările; concluzii, măsuri, fotografii. Nu se modifică după înregistrare. Fiecare inspecție intră automat în **jurnalul evenimentelor**; alarma o marchează „necesită expertiză”.
+- **Scadențele:** de la ultima verificare a fiecărui punct (sau de la intrarea în exploatare) plus intervalul. Ce e scadent în 14 zile apare în **„De făcut”** și în rezumatul pe e-mail al beneficiarului și al administratorului clădirii.
+- **Raportul anual** privind urmărirea comportării în timp (program, inspecții, alte evenimente, semnături) și secțiunea din **Cartea tehnică**, capitolul D.
+
 ## Actualizare la 0.13 (exploatarea construcției, etapa 1)
 
 1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.

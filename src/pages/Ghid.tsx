@@ -40,6 +40,7 @@ const ROLURI: Rol[] = [
       { ce: 'Încarcă planșele și modelele, cu revizii', unde: 'Documente', detalii: 'Fiecare revizie începe în lucru (o vede doar echipa dumneavoastră); o partajați pentru coordonare sau comentarii (S1–S4) și cereți publicarea pentru execuție (A1). Modelele IFC (tip M3) se deschid în Model 3D.' },
       { ce: 'Avizează FAM-urile', unde: 'Materiale (FAM)', detalii: 'Conform, echivalent sau neconform (cu observații, care trimit fișa înapoi la constructor).' },
       { ce: 'Confirmă fazele determinante', unde: 'Procese verbale', detalii: 'Le primiți după ce au confirmat dirigintele și RTE-ul (art. 426 alin. 3).' },
+      { ce: 'Stabilește programul de urmărire în timp', unde: 'Exploatare → Urmărirea în timp → Programul', detalii: 'Ce se urmărește, metoda, intervalul (cel mult 12 luni) și pragul de alarmă, după caietul de sarcini.' },
       { ce: 'Dă punctul de vedere pentru recepție', unde: 'Recepție → documentele de recepție', detalii: 'Atașați punctul de vedere pe specialitatea dumneavoastră (art. 528 alin. 3 lit. a).' },
     ],
   },
@@ -80,6 +81,7 @@ const ROLURI: Rol[] = [
     pe_scurt: 'Preia construcția după recepție (asociația de proprietari, administratorul sau firma de facility management): Cartea tehnică, evenimentele, echipamentele și garanțiile (ISO 19650-3).',
     pasi: [
       { ce: 'Consemnează evenimentele', unde: 'Exploatare → Eveniment nou', detalii: 'Avarii, seisme, inundații, incendii, intervenții, inspecții, cu fotografii. Intrările nu se modifică; o greșeală se corectează cu o intrare nouă. Bifați „Necesită expertiză” când degradarea poate afecta siguranța.' },
+      { ce: 'Ține urmărirea comportării în timp', unde: 'Exploatare → Urmărirea în timp', detalii: 'Programul (de la proiectant sau programul tip), inspecțiile la scadență, cu starea fiecărui punct: normal, atenție sau alarmă. Verificările scadente apar în „De făcut”; la final de an tipăriți raportul anual.' },
       { ce: 'Consultă echipamentele și mentenanța', unde: 'Echipamente', detalii: 'Fiecare echipament cu încăperea, producătorul, garanția și intervalul de mentenanță; se exportă în COBie.' },
       { ce: 'Urmărește garanțiile și recepția finală', unde: 'Recepție', detalii: 'Perioada de garanție curge de la recepția la terminarea lucrărilor.' },
       { ce: 'Păstrează Cartea tehnică', unde: 'Cartea tehnică', detalii: 'Descărcați arhiva electronică; se păstrează pe toată durata de existență a construcției.' },
