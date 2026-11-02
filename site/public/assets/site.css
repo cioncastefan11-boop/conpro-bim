@@ -1,0 +1,232 @@
+/* Conpro BIM · site de prezentare. Limbajul vizual al planșei tehnice: cerneală, beton, calc, portocaliul de siguranță. */
+@font-face { font-family: Barlow; font-weight: 400; font-display: swap; src: url(fonts/barlow-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+20A0-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: Barlow; font-weight: 400; font-display: swap; src: url(fonts/barlow-latin-400-normal.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2212; }
+@font-face { font-family: Barlow; font-weight: 500; font-display: swap; src: url(fonts/barlow-latin-ext-500-normal.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+A720-A7FF; }
+@font-face { font-family: Barlow; font-weight: 500; font-display: swap; src: url(fonts/barlow-latin-500-normal.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC; }
+@font-face { font-family: Barlow; font-weight: 600; font-display: swap; src: url(fonts/barlow-latin-ext-600-normal.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+A720-A7FF; }
+@font-face { font-family: Barlow; font-weight: 600; font-display: swap; src: url(fonts/barlow-latin-600-normal.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC; }
+@font-face { font-family: 'Barlow Semi Condensed'; font-weight: 600; font-display: swap; src: url(fonts/barlow-semi-condensed-latin-ext-600-normal.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+A720-A7FF; }
+@font-face { font-family: 'Barlow Semi Condensed'; font-weight: 600; font-display: swap; src: url(fonts/barlow-semi-condensed-latin-600-normal.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC; }
+@font-face { font-family: 'Barlow Semi Condensed'; font-weight: 700; font-display: swap; src: url(fonts/barlow-semi-condensed-latin-ext-700-normal.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+A720-A7FF; }
+@font-face { font-family: 'Barlow Semi Condensed'; font-weight: 700; font-display: swap; src: url(fonts/barlow-semi-condensed-latin-700-normal.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC; }
+
+:root {
+  --cerneala: #1c2b3a;      /* textul, liniile planșei */
+  --cerneala-2: #4a5a69;    /* text secundar */
+  --beton: #eef0f1;         /* fundalul paginii */
+  --beton-2: #dfe3e6;       /* fundal alternativ, separatoare */
+  --hartie: #ffffff;
+  --calc: #2f5d8a;          /* legături, linii de cotă */
+  --siguranta: #f26b1d;     /* doar acțiunile principale */
+  --siguranta-inchis: #c94f0c;
+  --linie: #b9c1c8;
+  --verificat: #16a34a; --in-verificare: #eab308; --executat: #2563eb; --observatie: #dc2626;
+  --corp: Barlow, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --titlu: 'Barlow Semi Condensed', Barlow, 'Arial Narrow', system-ui, sans-serif;
+  --lat: 1160px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--beton); color: var(--cerneala); font: 400 18px/1.55 var(--corp); }
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--calc); text-underline-offset: 3px; }
+a:hover { color: var(--cerneala); }
+:focus-visible { outline: 3px solid var(--siguranta); outline-offset: 2px; }
+.ascuns { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sari { position: absolute; left: 16px; top: -60px; background: var(--hartie); padding: 8px 12px; z-index: 50; }
+.sari:focus { top: 8px; }
+
+h1, h2, h3 { font-family: var(--titlu); font-weight: 700; line-height: 1.08; margin: 0; letter-spacing: -0.005em; }
+h1 { font-size: clamp(2.4rem, 5.2vw, 4.1rem); max-width: 15ch; }
+h2 { font-size: clamp(1.8rem, 3.2vw, 2.6rem); max-width: 22ch; }
+h3 { font-size: 1.35rem; font-weight: 600; line-height: 1.2; }
+p { margin: 0 0 1em; max-width: 66ch; }
+.lead { font-size: 1.22rem; line-height: 1.5; color: var(--cerneala); max-width: 52ch; }
+
+.cadru { max-width: var(--lat); margin: 0 auto; padding: 0 24px; }
+@media (max-width: 640px) { .cadru { padding: 0 16px; } body { font-size: 17px; } }
+
+/* --------------------------------------------------------------- antet */
+.antet { background: var(--beton); border-bottom: 1px solid var(--linie); position: sticky; top: 0; z-index: 20; }
+.antet .cadru { display: flex; align-items: center; gap: 28px; min-height: 68px; }
+.marca { font-family: var(--titlu); font-weight: 700; font-size: 1.45rem; color: var(--cerneala); text-decoration: none; letter-spacing: 0.02em; display: flex; align-items: center; gap: 10px; }
+.marca b { color: var(--siguranta-inchis); font-weight: 700; }
+.marca svg { flex: none; }
+.meniu { display: flex; gap: 22px; margin-left: auto; align-items: center; }
+.meniu a { color: var(--cerneala); text-decoration: none; font-weight: 500; font-size: 1rem; }
+.meniu a:hover, .meniu a[aria-current] { text-decoration: underline; text-decoration-thickness: 2px; text-decoration-color: var(--siguranta); }
+.meniu-telefon { display: none; margin-left: auto; }
+.meniu-telefon summary { list-style: none; cursor: pointer; font-weight: 600; padding: 8px 12px; border: 1.5px solid var(--cerneala); }
+.meniu-telefon summary::-webkit-details-marker { display: none; }
+.meniu-telefon[open] nav { position: absolute; left: 0; right: 0; top: 68px; background: var(--hartie); border-bottom: 1.5px solid var(--cerneala); padding: 8px 16px 16px; display: grid; }
+.meniu-telefon nav a { padding: 12px 0; border-bottom: 1px solid var(--beton-2); color: var(--cerneala); text-decoration: none; font-weight: 500; }
+@media (max-width: 960px) { .meniu { display: none; } .meniu-telefon { display: block; } }
+
+/* --------------------------------------------------------------- butoane */
+.buton { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: 600 1.02rem/1 var(--corp); padding: 15px 22px; border: 2px solid var(--cerneala); background: transparent; color: var(--cerneala); text-decoration: none; cursor: pointer; border-radius: 2px; }
+.buton:hover { background: var(--hartie); color: var(--cerneala); }
+.buton.principal { background: var(--siguranta); border-color: var(--siguranta); color: var(--cerneala); }
+.buton.principal:hover { background: #ff8238; border-color: #ff8238; }
+.buton.mic { padding: 10px 14px; font-size: 0.95rem; }
+.actiuni { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+
+/* --------------------------------------------------------------- hero și cartușul */
+.hero { padding: 64px 0 72px; }
+.hero .cadru { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 56px; align-items: center; }
+.hero .lead { margin-top: 22px; }
+.hero .sub { margin-top: 18px; color: var(--cerneala-2); font-size: 1rem; max-width: 52ch; }
+@media (max-width: 960px) { .hero .cadru { grid-template-columns: 1fr; gap: 36px; } .hero { padding: 40px 0 48px; } }
+
+.plansa { background: var(--hartie); border: 2px solid var(--cerneala); }
+.plansa .desen { padding: 18px; background: #f3f5f7; border-bottom: 2px solid var(--cerneala); position: relative; }
+.plansa .desen img { margin: 0 auto; }
+/* cartușul: câmpurile unei planșe, cu eticheta mică deasupra valorii */
+.cartus { display: grid; grid-template-columns: 1.3fr 1fr 0.7fr; font-size: 0.95rem; }
+.cartus > div { padding: 8px 12px 10px; border-right: 1px solid var(--cerneala); border-bottom: 1px solid var(--cerneala); min-width: 0; }
+.cartus > div:nth-child(3n) { border-right: 0; }
+.cartus > .lat { grid-column: 1 / -1; border-right: 0; border-bottom: 0; }
+.cartus small { display: block; color: var(--cerneala-2); font-size: 0.78rem; line-height: 1.2; margin-bottom: 2px; }
+.cartus strong { font-weight: 600; display: block; line-height: 1.25; overflow-wrap: anywhere; }
+.legenda { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 4px 0 0; padding: 0; list-style: none; }
+.legenda li { display: flex; align-items: center; gap: 7px; font-weight: 500; }
+.legenda i { width: 14px; height: 14px; display: inline-block; border: 1px solid rgba(0,0,0,.25); }
+@media (max-width: 520px) { .cartus { grid-template-columns: 1fr 1fr; } .cartus > div:nth-child(3n) { border-right: 1px solid var(--cerneala); } .cartus > div:nth-child(2n) { border-right: 0; } .cartus > .ascunde-mic { display: none; } }
+
+/* --------------------------------------------------------------- secțiuni */
+.sectiune { padding: 80px 0; }
+.sectiune.alba { background: var(--hartie); border-top: 1px solid var(--linie); border-bottom: 1px solid var(--linie); }
+.sectiune > .cadru > p.intro { margin-top: 16px; font-size: 1.12rem; color: var(--cerneala-2); }
+@media (max-width: 640px) { .sectiune { padding: 56px 0; } }
+
+/* drumul informației: o secvență reală, de la șantier la Cartea tehnică */
+.drum { list-style: none; padding: 0; margin: 44px 0 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); counter-reset: pas; position: relative; }
+.drum::before { content: ''; position: absolute; left: 0; right: 0; top: 19px; border-top: 2px solid var(--cerneala); }
+.drum li { counter-increment: pas; padding: 0 18px 0 0; position: relative; }
+.drum li::before { content: counter(pas); display: grid; place-items: center; width: 40px; height: 40px; background: var(--beton); border: 2px solid var(--cerneala); font: 700 1.1rem/1 var(--titlu); position: relative; margin-bottom: 18px; }
+.sectiune.alba .drum li::before { background: var(--hartie); }
+.drum h3 { font-size: 1.18rem; margin-bottom: 6px; }
+.drum p { font-size: 0.98rem; color: var(--cerneala-2); margin: 0; }
+@media (max-width: 900px) {
+  .drum { grid-template-columns: 1fr; gap: 26px; }
+  .drum::before { left: 19px; right: auto; top: 0; bottom: 0; border-top: 0; border-left: 2px solid var(--cerneala); }
+  .drum li { padding: 0 0 0 64px; }
+  .drum li::before { position: absolute; left: 0; top: 0; margin: 0; }
+}
+
+/* rolurile */
+.roluri { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 40px; border: 2px solid var(--cerneala); background: var(--hartie); }
+.roluri > a { display: flex; flex-direction: column; padding: 26px 24px 24px; color: var(--cerneala); text-decoration: none; border-right: 1px solid var(--cerneala); }
+.roluri > a:last-child { border-right: 0; }
+.roluri > a:hover { background: #f7f8f9; }
+.roluri h3 { margin-bottom: 12px; }
+.roluri ul { margin: 0 0 20px; padding-left: 18px; font-size: 1rem; }
+.roluri li { margin-bottom: 6px; }
+.roluri .mai-mult { margin-top: auto; font-weight: 600; color: var(--calc); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 900px) { .roluri { grid-template-columns: 1fr; } .roluri > a { border-right: 0; border-bottom: 1px solid var(--cerneala); } .roluri > a:last-child { border-bottom: 0; } }
+
+/* capturile din aplicație */
+.capturi { display: grid; gap: 72px; margin-top: 48px; }
+.captura { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 48px; align-items: start; }
+.captura:nth-child(even) { grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); }
+.captura:nth-child(even) .text { order: 2; }
+.captura figure { margin: 0; border: 2px solid var(--cerneala); background: var(--hartie); }
+.captura figure img { width: 100%; }
+.captura .text { padding-top: 6px; }
+.captura h3 { font-size: 1.6rem; margin-bottom: 12px; }
+.captura ul { padding-left: 20px; margin: 0; }
+.captura li { margin-bottom: 8px; }
+@media (max-width: 900px) { .captura, .captura:nth-child(even) { grid-template-columns: 1fr; gap: 20px; } .captura:nth-child(even) .text { order: 0; } }
+
+/* liste de funcții pe pagina unui rol */
+.functii { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 48px; margin-top: 44px; }
+.functii > div { border-top: 2px solid var(--cerneala); padding-top: 16px; }
+.functii h3 { margin-bottom: 8px; }
+.functii p { margin: 0; color: var(--cerneala-2); font-size: 1.02rem; }
+.functii .unde { display: block; margin-top: 10px; font-size: 0.92rem; color: var(--calc); font-weight: 500; }
+@media (max-width: 760px) { .functii { grid-template-columns: 1fr; } }
+
+/* tabelul de conformitate, ca un tabel din caietul de sarcini */
+.tabel-wrap { overflow-x: auto; margin-top: 36px; border: 2px solid var(--cerneala); background: var(--hartie); }
+table.specificatie { border-collapse: collapse; width: 100%; font-size: 1rem; min-width: 620px; }
+.specificatie th, .specificatie td { text-align: left; vertical-align: top; padding: 12px 16px; border-bottom: 1px solid var(--linie); }
+.specificatie thead th { font-weight: 600; border-bottom: 2px solid var(--cerneala); background: #f3f5f7; }
+.specificatie tbody th { font-weight: 600; width: 32%; }
+.specificatie tr:last-child th, .specificatie tr:last-child td { border-bottom: 0; }
+.specificatie td:last-child { color: var(--cerneala-2); width: 26%; }
+
+/* date și securitate */
+.garantii { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 48px; margin: 36px 0 0; padding: 0; list-style: none; }
+.garantii li { padding-left: 30px; position: relative; }
+.garantii li::before { content: ''; position: absolute; left: 0; top: 7px; width: 14px; height: 14px; border: 2px solid var(--cerneala); background: var(--verificat); }
+.garantii b { display: block; }
+@media (max-width: 760px) { .garantii { grid-template-columns: 1fr; } }
+
+/* întrebări */
+.intrebari { margin-top: 36px; border-top: 2px solid var(--cerneala); max-width: 860px; }
+.intrebari details { border-bottom: 1px solid var(--linie); }
+.intrebari summary { cursor: pointer; padding: 18px 40px 18px 0; font-weight: 600; font-size: 1.1rem; position: relative; list-style: none; }
+.intrebari summary::-webkit-details-marker { display: none; }
+.intrebari summary::after { content: '+'; position: absolute; right: 6px; top: 12px; font: 600 1.6rem/1 var(--corp); }
+.intrebari details[open] summary::after { content: '–'; }
+.intrebari details p { margin: 0 0 18px; color: var(--cerneala-2); }
+
+/* context, pe pagina beneficiarilor */
+.repere { margin-top: 32px; border-left: 4px solid var(--siguranta); padding: 4px 0 4px 20px; max-width: 70ch; }
+.repere p:last-child { margin-bottom: 0; }
+.sursa { font-size: 0.9rem; color: var(--cerneala-2); }
+
+/* --------------------------------------------------------------- formularul */
+.demo { background: var(--cerneala); color: #fff; padding: 80px 0; }
+.demo .cadru { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 56px; }
+.demo h2 { color: #fff; margin-bottom: 18px; }
+.demo .lead { color: #fff; }
+.demo p { color: #d5dde4; }
+.demo a { color: #fff; }
+.demo .contact { margin-top: 28px; font-size: 1rem; color: #d5dde4; }
+.demo .contact b { color: #fff; font-weight: 600; }
+.formular { background: var(--hartie); color: var(--cerneala); padding: 28px; border: 2px solid #fff; display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; }
+.formular label { display: grid; gap: 6px; font-weight: 600; font-size: 0.98rem; }
+.formular label span { font-weight: 400; color: var(--cerneala-2); }
+.formular label .et { font-weight: 600; color: var(--cerneala); }
+.formular label { align-content: start; }
+.formular .lat { grid-column: 1 / -1; }
+.formular input, .formular select, .formular textarea { font: inherit; font-weight: 400; font-size: 1rem; padding: 11px 12px; border: 1.5px solid var(--cerneala-2); border-radius: 2px; background: #fff; color: var(--cerneala); width: 100%; }
+.formular textarea { min-height: 96px; resize: vertical; }
+.formular input:focus, .formular select:focus, .formular textarea:focus { outline: 3px solid var(--siguranta); outline-offset: 0; border-color: var(--cerneala); }
+.formular .acord { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; font-size: 0.95rem; }
+.formular .acord input { width: 20px; height: 20px; margin-top: 2px; flex: none; }
+.formular .acord a { color: var(--calc); }
+.formular .buton { justify-self: start; }
+.formular .nota { font-size: 0.88rem; color: var(--cerneala-2); margin: 0; }
+@media (max-width: 900px) { .demo .cadru { grid-template-columns: 1fr; gap: 32px; } }
+@media (max-width: 560px) { .formular { grid-template-columns: 1fr; padding: 20px 16px; } }
+
+/* --------------------------------------------------------------- subsol */
+.subsol { padding: 44px 0 56px; font-size: 0.95rem; color: var(--cerneala-2); }
+.subsol .cadru { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 32px; }
+.subsol h3 { font-size: 1.05rem; color: var(--cerneala); margin-bottom: 10px; }
+.subsol ul { list-style: none; margin: 0; padding: 0; }
+.subsol li { margin-bottom: 6px; }
+.subsol a, .subsol button.legatura { color: var(--cerneala-2); }
+.subsol a:hover, .subsol button.legatura:hover { color: var(--cerneala); }
+button.legatura { background: none; border: 0; padding: 0; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+@media (max-width: 760px) { .subsol .cadru { grid-template-columns: 1fr; } }
+
+/* --------------------------------------------------------------- pagini simple */
+.pagina-text { padding: 56px 0 80px; }
+.pagina-text h1 { font-size: clamp(2rem, 4vw, 3rem); max-width: 24ch; margin-bottom: 20px; }
+.pagina-text h2 { font-size: 1.6rem; margin: 36px 0 12px; }
+.tabel-simplu { overflow-x: auto; }
+.pagina-text table { border-collapse: collapse; margin: 12px 0 20px; font-size: 0.98rem; background: var(--hartie); }
+.pagina-text th, .pagina-text td { border: 1px solid var(--linie); padding: 8px 12px; text-align: left; vertical-align: top; }
+
+/* --------------------------------------------------------------- consimțământul pentru cookie-uri */
+.consimtamant { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 60; max-width: 760px; margin: 0 auto; background: var(--hartie); border: 2px solid var(--cerneala); padding: 20px 22px; box-shadow: 0 6px 0 var(--cerneala); }
+.consimtamant h2 { font-size: 1.3rem; margin-bottom: 8px; }
+.consimtamant p { font-size: 0.98rem; margin: 0 0 14px; }
+.consimtamant .optiuni { display: grid; gap: 10px; margin: 0 0 14px; }
+.consimtamant .optiuni label { display: flex; gap: 10px; align-items: flex-start; font-size: 0.96rem; }
+.consimtamant .optiuni input { width: 20px; height: 20px; margin-top: 1px; flex: none; }
+.consimtamant .butoane { display: flex; flex-wrap: wrap; gap: 10px; }
+.consimtamant .buton { padding: 11px 16px; font-size: 0.98rem; }
