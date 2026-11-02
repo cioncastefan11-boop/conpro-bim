@@ -10,6 +10,7 @@ import { incarcaDateProiect, numeDe, type DateProiect } from '../lib/dateProiect
 import { documenteReceptie, htmlReceptie, propunereConstatari, termenReceptieFinala, verificariPregatire, type Verificare } from '../lib/receptie';
 import { Eroare, Eticheta, Gol, mesajEroare } from '../components/ui';
 import Atasamente from '../components/Atasamente';
+import DocumentSemnat from '../components/DocumentSemnat';
 
 type Props = { proiect: Proiect; membri: Membru[]; rolulMeu?: Rol; uid: string };
 
@@ -248,7 +249,7 @@ function Detaliu({ proiect, membri, rolulMeu }: Props) {
   const verif = verificariPregatire(d, r);
   const docs = documenteReceptie(d, r);
   const tipuriAtas = rolulMeu === 'proiectant' ? ['punct_vedere_proiectant']
-    : dir ? ['punct_vedere_diriginte', 'pv_receptie_semnat', 'fisa_instruire', 'as_built', 'instiintare_finalizare', 'altul']
+    : dir ? ['punct_vedere_diriginte', 'fisa_instruire', 'as_built', 'instiintare_finalizare', 'altul']
     : exec ? ['as_built', 'fisa_instruire', 'altul']
     : rolulMeu === 'beneficiar' ? ['raport_comportare', 'altul'] : [];
   const term = r.tip === 'finala' ? d.receptii.find(x => x.id === r.receptie_terminare_id) : undefined;
@@ -298,7 +299,7 @@ function Detaliu({ proiect, membri, rolulMeu }: Props) {
         <ListaVerificari lista={docs} />
         <Atasamente proiectId={proiect.id} entitate="receptie" entitateId={r.id} membri={membri}
           poateIncarca={tipuriAtas.length > 0 && r.stare !== 'anulata'} tipuri={tipuriAtas.length ? tipuriAtas : ['altul']}
-          titlu="Documente atașate la recepție" gol="Punctele de vedere, fișele de instruire, as-built-ul și PV-ul semnat se atașează aici." />
+          titlu="Documente atașate la recepție" excludeTipuri={['pv_receptie_semnat']} gol="Punctele de vedere, fișele de instruire, as-built-ul și PV-ul semnat se atașează aici." />
 
         <h3>{r.tip === 'finala' ? 'Defecte constatate' : 'Obiecții'}</h3>
         <Obiectii r={r} obiectii={obiectii} d={d} dir={dir} exec={exec} proiect={proiect} membri={membri} rpc={rpc} onGata={incarca} setEroare={setEroare} />
@@ -316,6 +317,16 @@ function Detaliu({ proiect, membri, rolulMeu }: Props) {
               <small className="discret">Consemnată de {numeDe(d, r.decis_de)}, {r.decis_la ? new Date(r.decis_la).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' }) : ''}</small>
             </div>
           </>
+        )}
+
+        {r.decizie && (
+          <DocumentSemnat proiectId={proiect.id} entitate="receptie" entitateId={r.id} tip="pv_receptie_semnat" membri={membri}
+            titlu="Procesul verbal semnat electronic"
+            semnatari={[
+              ...comisie.filter(m => !calitate(m.calitate).invitat).map(m => ({ nume: m.nume, calitate: calitate(m.calitate).nume })),
+              ...membri.filter(m => m.rol === 'diriginte').map(m => ({ nume: m.persoane?.nume || m.persoane?.email || '', calitate: 'Secretariatul comisiei', persoana_id: m.persoana_id })),
+            ]}
+            poateIncarca={dir} deschideDocument={() => deschide(htmlReceptie(d, r))} />
         )}
 
         {r.stare === 'decisa' && rolulMeu === 'beneficiar' && <Aprobare r={r} rpc={rpc} />}

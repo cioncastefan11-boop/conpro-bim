@@ -17,7 +17,7 @@ create table storage.objects (id uuid primary key default gen_random_uuid(), buc
 alter table storage.objects enable row level security;
 `);
 for (const f of ['0001_fundatie.sql', '0002_procese_verbale.sql', '0003_continut_pv.sql', '0004_fam.sql', '0005_betoane_incercari.sql',
-  '0006_echipamente_carte.sql', '0007_condica_betoane.sql', '0008_receptie.sql'])
+  '0006_echipamente_carte.sql', '0007_condica_betoane.sql', '0008_receptie.sql', '0009_semnatura_electronica.sql'])
   await db.exec(fs.readFileSync(new URL(`../supabase/migrations/${f}`, import.meta.url), 'utf8'));
 
 const U = {
@@ -181,6 +181,25 @@ await ok('proiectantul poate atașa punctul de vedere la recepție', async () =>
 await ok('un străin nu poate atașa', async () => one(await as('strain', `select poate_atasa('receptie', $1, $2) ok`, [R.id, P])).ok === false);
 await ok('la o obiecție confirmată nu se mai atașează', async () =>
   one(await as('rte', `select poate_atasa('obiectie_receptie', $1, $2) ok`, [O.id, P])).ok === false);
+
+console.log('Semnături electronice (0009)');
+const atas = (user, tip) => as(user, `insert into atasamente (proiect_id, entitate, entitate_id, tip_document, nume_fisier, cale, marime)
+  values ($1::uuid, 'receptie', $2::uuid, $3, 'PV.pdf', $4, 1000)`, [P, R.id, tip, `${P}/receptie/${R.id}/${tip}-PV.pdf`]);
+await atas('dir', 'pv_receptie_semnat');
+const A1 = one(await db.query(`select id from atasamente where tip_document = 'pv_receptie_semnat'`)).id;
+await atas('dir', 'punct_vedere_diriginte');
+const A2 = one(await db.query(`select id from atasamente where tip_document = 'punct_vedere_diriginte'`)).id;
+const semn = (user, a, ordine = 1, persoana = null) => as(user,
+  `insert into semnaturi_electronice (atasament_id, proiect_id, ordine, semnatar, emitent, calificata, integra, acopera_tot, persoana_id)
+   values ($1, $2, $3, 'Ion Popescu', 'CA Test', true, true, true, $4)`, [a, P, ordine, persoana]);
+await ok('cel care a încărcat PV-ul semnat înregistrează semnăturile', async () => (await semn('dir', A1, 1, U.benef)).affectedRows === 1);
+await refuses('altcineva nu înregistrează semnături pe documentul lui', () => semn('rte', A1, 2), 'cel care l-a încărcat');
+await refuses('doar PV-urile semnate au semnături înregistrate', () => semn('dir', A2), 'procesele verbale');
+await refuses('persoana recunoscută trebuie să fie din proiect', () => semn('dir', A1, 3, U.strain), 'nu face parte');
+await ok('membrii proiectului văd semnăturile', async () => (await as('proi', `select id from semnaturi_electronice`)).rows.length === 1);
+await ok('un străin nu le vede', async () => (await as('strain', `select id from semnaturi_electronice`)).rows.length === 0);
+await refuses('semnăturile nu se modifică', () => as('dir', `update semnaturi_electronice set calificata = false`), 'permission');
+await refuses('semnăturile nu se șterg', () => as('dir', `delete from semnaturi_electronice`), 'permission');
 
 console.log(`\n${pass} trecute, ${fail} picate`);
 process.exit(fail ? 1 : 0);

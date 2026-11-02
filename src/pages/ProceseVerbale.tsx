@@ -8,6 +8,7 @@ import {
 import type { Membru, ParticipantPv, ProcesVerbal, Proiect } from '../lib/tipuri';
 import { Eroare, Eticheta, Gol, mesajEroare } from '../components/ui';
 import Atasamente from '../components/Atasamente';
+import DocumentSemnat from '../components/DocumentSemnat';
 
 type Props = { proiect: Proiect; membri: Membru[]; rolulMeu?: Rol; uid: string };
 const POT_CONVOCA: Rol[] = ['constructor', 'diriginte', 'administrator'];
@@ -319,8 +320,14 @@ function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
         {pv.stare === 'anulat' && <p className="mesaj info">Anulat de {om(pv.anulat_de)}: {pv.motiv_anulare}</p>}
         <Atasamente proiectId={proiect.id} entitate="pv" entitateId={pv.id} membri={membri}
           poateIncarca={pv.stare !== 'anulat' && (pv.convocat_de === uid || parti.some(p => p.persoana_id === uid))}
-          tipuri={['pv_semnat', 'poza', 'altul']} titlu="Documente și fotografii"
-          gol="Se pot atașa PV-ul semnat (scan sau semnat electronic calificat) și fotografiile de pe șantier." />
+          tipuri={['poza', 'pv_scanat', 'altul']} titlu="Documente și fotografii" excludeTipuri={['pv_semnat']}
+          gol="Se pot atașa fotografiile de pe șantier și, dacă e cazul, PV-ul semnat olograf (scan)." />
+        {pv.stare === 'semnat' && (
+          <DocumentSemnat proiectId={proiect.id} entitate="pv" entitateId={pv.id} tip="pv_semnat" membri={membri}
+            semnatari={parti.map(p => ({ nume: om(p.persoana_id), calitate: numeRol(p.rol), persoana_id: p.persoana_id }))}
+            poateIncarca={pv.convocat_de === uid || parti.some(p => p.persoana_id === uid)}
+            deschideDocument={() => window.print()} />
+        )}
         <p className="nota doar-tipar">Document generat din Conpro BIM. Confirmările sunt înregistrate cu contul fiecărui participant, cu data și ora.</p>
       </article>
 

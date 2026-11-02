@@ -18,6 +18,19 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.8 (semnătura electronică calificată, etapa 1)
+
+1. **GitHub:** urcați din nou tot conținutul folderului (Add file → Upload files → Commit changes).
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0009_semnatura_electronica.sql`, lipiți și **Run**.
+3. Verificare: `select count(*) from pg_policies where tablename = 'semnaturi_electronice';` trebuie să dea **2**.
+
+Ce aduce (art. 581 alin. 4: Legea 214/2024 și Regulamentul eIDAS):
+- **La procesele verbale semnate și la recepții:** secțiunea „Semnătura electronică calificată”. Documentul se salvează ca PDF, fiecare semnatar îl semnează pe rând cu certificatul calificat (Adobe Reader sau aplicația furnizorului), apoi PDF-ul semnat de toți se încarcă în aplicație.
+- **Verificarea în browser, la încărcare și la fiecare deschidere:** integritatea documentului și a fiecărei semnături, semnatarul, emitentul, valabilitatea certificatului, dacă e calificat (QES, eIDAS), momentul semnării și marca temporală. Un PDF modificat după semnare e refuzat.
+- **Potrivirea cu oamenii din proiect:** aplicația recunoaște după nume participanții la PV, respectiv membrii comisiei de recepție și dirigintele, și arată cine nu a semnat încă.
+- Fișierele semnate nu se pot modifica sau șterge; semnăturile citite se păstrează în baza de date. Validarea completă până la Lista de încredere a UE se poate face cu instrumentul DSS al Comisiei Europene (legătură în aplicație).
+- La documentele PV, scanul unui PV semnat olograf are acum tipul lui („PV semnat olograf (scan)”).
+
 ## Actualizare la 0.7 (recepția construcției)
 
 1. **GitHub:** urcați din nou tot conținutul folderului (Add file → Upload files → Commit changes).
