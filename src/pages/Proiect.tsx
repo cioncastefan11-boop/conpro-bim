@@ -17,6 +17,7 @@ import Model from './Model';
 import Conventie from '../components/Conventie';
 import CarteaTehnica from './CarteaTehnica';
 import Exploatare from './Exploatare';
+import LectiiInvatate from '../components/LectiiInvatate';
 
 export default function Proiect() {
   const { id = '' } = useParams();
@@ -72,7 +73,7 @@ export default function Proiect() {
       </nav>
       <Eroare text={eroare} />
       <Routes>
-        <Route index element={<><Detalii proiect={proiect} admin={admin} onSalvat={incarca} /><Conventie proiect={proiect} membri={membri} admin={admin} onSalvat={incarca} /></>} />
+        <Route index element={<><Detalii proiect={proiect} admin={admin} onSalvat={incarca} /><Conventie proiect={proiect} membri={membri} admin={admin} onSalvat={incarca} /><LectiiInvatate proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} /></>} />
         <Route path="echipa" element={<Echipa proiectId={id} membri={membri} admin={admin} uid={uid} onSchimbat={incarca} />} />
         <Route path="echipamente" element={<Echipamente proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="model/*" element={<Model proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />

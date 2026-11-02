@@ -56,6 +56,7 @@ const ROLURI: Rol[] = [
     pasi: [
       { ce: 'Aprobă recepția', unde: 'Recepție', detalii: 'După decizia comisiei: aprobați sau respingeți motivat. De la aprobare curge garanția; aplicația arată când trebuie făcută recepția finală.' },
       { ce: 'Aprobă publicarea documentelor', unde: 'Documente', detalii: 'Când proiectantul cere publicarea unei planșe pentru execuție.' },
+      { ce: 'Stabilește ce informații cere la predare', unde: 'Cartea tehnică → Cerințele de predare', detalii: 'Datele obligatorii ale echipamentelor (producător, serie, garanție, mentenanță, fișe) și documentele (as-built, avize, certificate). Aplicația arată cât sunt îndeplinite și le trece în „Ce mai lipsește” la recepție.' },
       { ce: 'Urmărește lucrarea', unde: 'toate filele, Istoric', detalii: 'Vedeți PV-urile, materialele, betoanele, documentele și cine ce a făcut.' },
       { ce: 'Primește Cartea tehnică', unde: 'Cartea tehnică', detalii: 'Arhiva electronică, pe capitole, cu toate documentele (art. 529–530).' },
       { ce: 'Trece construcția în exploatare', unde: 'Exploatare', detalii: 'După ce aprobați recepția la terminarea lucrărilor. De atunci răspundeți de ținerea la zi a Cărții tehnice și de urmărirea comportării în timp; invitați în proiect administratorul clădirii.' },
@@ -126,6 +127,7 @@ export default function Ghid({ public: pub }: { public?: boolean }) {
           <li><b>Contul.</b> Administratorul proiectului vă adaugă în echipă cu adresa de e-mail. Intrați pe aplicație, „Creează cont” cu <b>aceeași adresă</b>, confirmați e-mailul primit și intrați: proiectul apare singur.</li>
           <li><b>Profilul.</b> Completați numele, telefonul și firma (din Profil). Numele apare pe procesele verbale și în semnături.</li>
           <li><b>De făcut.</b> În bara de sus, „De făcut” arată tot ce așteaptă după dumneavoastră, în toate proiectele; fiecare rând duce direct acolo. Dimineața primiți și un rezumat pe e-mail (se poate opri din Profil).</li>
+          <li><b>Lecțiile învățate.</b> În Detaliile proiectului, oricine din echipă notează ce a mers bine și ce nu, cu recomandarea pentru proiectul următor.</li>
           <li><b>Semnătura electronică.</b> PV-urile și recepțiile se pot semna cu semnătura electronică calificată: salvați documentul ca PDF, semnați-l pe rând cu certificatul calificat și încărcați-l; aplicația verifică fiecare semnătură.</li>
         </ol>
       </div>

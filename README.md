@@ -18,6 +18,17 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.20 (cerințele de predare și lecțiile învățate)
+
+1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0021_cerinte_lectii.sql`, lipiți și **Run** (după 0020).
+3. Verificare: `select count(*) from pg_proc where proname in ('cerinta_verifica','lectie_verifica');` trebuie să dea **2**.
+
+Ce aduce:
+- **Cartea tehnică → Cerințele de predare (AIR / EIR):** ce cere beneficiarul la predare. La echipamente, câmpurile COBie (producător, model, serie, încăpere, punere în funcțiune, garanție, mentenanță, fișă tehnică, instrucțiuni, certificat de garanție), pe toate sau pe o categorie; la documente, titlul, cuvintele după care se recunoaște sau codul exact din CDE. Le stabilesc beneficiarul sau administratorul; se poate porni de la setul tip.
+- **Verificarea automată:** pentru fiecare cerință, îndeplinită / parțial / lipsă, cu echipamentele la care lipsește. Cele obligatorii neîndeplinite intră în „Ce mai lipsește” și în pregătirea recepției.
+- **Detalii → Lecții învățate** (ISO 19650-2, 5.8.2): ce a mers bine și ce nu, cu recomandarea pentru proiectul următor, pe domenii și stadii.
+
 ## Actualizare la 0.19 (planul de livrare și matricea de responsabilități)
 
 1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.

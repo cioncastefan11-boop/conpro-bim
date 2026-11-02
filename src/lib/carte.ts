@@ -12,6 +12,7 @@ import { excelCondica, htmlCondica as htmlCondicaBetoane } from './condica';
 import { fisiereReceptie, htmlReceptie } from './receptie';
 import { codEveniment, codInspectie, codInterventie, numeEveniment, numeInterventie, stareConstatare } from './domeniu';
 import { scadente } from './urmarire';
+import { CAMPURI_CERINTA, evalueazaCerinte } from './cerinte';
 import { codReceptie, DECIZII_RECEPTIE, numeCodStare, numeReceptie, numeRolDocument, numeTipDocument } from './domeniu';
 
 export type ElementOpis = {
@@ -165,6 +166,13 @@ export function lipsuriCarte(d: DateProiect): Lipsa[] {
   if (!d.tipuri.length) l.push({ text: 'Nu sunt înregistrate echipamente, deci nici manualul de mentenanță', unde: 'echipamente' });
   if (!d.receptii.some(x => x.tip === 'terminare' && !x.partiala && x.stare === 'aprobata') && !d.pvs.some(x => x.tip === 'receptie_terminare' && x.stare === 'semnat'))
     l.push({ text: 'Procesul verbal de recepție la terminarea lucrărilor nu e încă aprobat', unde: 'receptie' });
+  // cerințele de predare ale beneficiarului (AIR / EIR) neîndeplinite
+  for (const r of evalueazaCerinte(d, d.cerinte.filter(c => c.obligatorie))) {
+    if (r.indeplinita) continue;
+    l.push(r.cerinta.categorie === 'echipament'
+      ? { text: `Cerința de predare „${CAMPURI_CERINTA[r.cerinta.camp!]}”${r.cerinta.aplicabil_la ? ` (${r.cerinta.aplicabil_la})` : ''}: ${r.total ? `lipsește la ${r.lipsa.length} din ${r.total} echipamente (${r.lipsa.slice(0, 5).join(', ')}${r.lipsa.length > 5 ? '…' : ''})` : 'niciun echipament înregistrat'}`, unde: 'echipamente' }
+      : { text: `Cerința de predare „${r.cerinta.titlu}”: ${r.detalii}`, unde: 'carte' });
+  }
   if (!p.ac_numar && !d.documente.some(x => x.capitol === 'A' && /autoriza/i.test(x.titlu))) l.push({ text: 'Autorizația de construire nu e înregistrată', unde: 'carte' });
   if (!d.documente.some(x => x.capitol === 'A' && /as.?built|real executat/i.test(x.titlu)) && !d.revizii.some(r => r.stare === 'publicat' && r.cod_stare === 'CR')) l.push({ text: 'Proiectul as-built (art. 528 alin. 3 lit. g) nu e înregistrat în capitolul A', unde: 'carte' });
   return l;
