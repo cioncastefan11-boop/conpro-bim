@@ -12,7 +12,7 @@ export const OPERATOR: Record<string, string> = {
   OPERATOR_EMAIL: 'office@conpro.ro',
   OPERATOR_REPREZENTANT: 'Cionca Stefan Vlad',
   LIMITA_RASPUNDERE: 'SRL',
-  PRET: '',
+  PRET: 'La cerere',
 };
 
 /** Înlocuiește {{CAMP}} cu datele operatorului și [[VERSIUNE]] cu versiunea; câmpurile necompletate rămân marcate. */
