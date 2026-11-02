@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /multumim/
+
+Sitemap: https://bim.conpro.ro/sitemap.xml

@@ -18,6 +18,10 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Site-ul de prezentare (bim.conpro.ro)
+
+În folderul `site/` e site-ul public de prezentare: pagina principală, câte o pagină pentru diriginți, constructori și beneficiari publici, formularul de demonstrație și cookie-urile. Se publică pe un al doilea site Netlify, din același depozit; pașii sunt în `site/README.md`. Aplicația trece pe `app.conpro.ro`.
+
 ## Actualizare la 0.23 (EIR și BEP generate din aplicație)
 
 1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
