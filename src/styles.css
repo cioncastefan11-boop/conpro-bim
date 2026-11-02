@@ -434,7 +434,7 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
 .lista-sarcini li:last-child { border-bottom: 0; }
 .tip-sarcina { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); }
 .tip-sarcina.t-pv, .tip-sarcina.t-receptie, .tip-sarcina.t-exploatare { color: var(--info); }
-.tip-sarcina.t-fam, .tip-sarcina.t-document { color: var(--warn); }
+.tip-sarcina.t-fam, .tip-sarcina.t-document, .tip-sarcina.t-urmarire { color: var(--warn); }
 .tip-sarcina.t-obiectie, .tip-sarcina.t-incercare { color: var(--bad); }
 @media (max-width: 640px) { .lista-sarcini li { grid-template-columns: 1fr; gap: 2px; } }
 @media (max-width: 640px) {
@@ -518,3 +518,26 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
 }
 .eveniment-nou > label { display: block; margin-bottom: 12px; }
 .eveniment-nou > label.bifa { display: flex; }
+
+/* 0.14 · urmărirea în timp */
+.subfile { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 16px; }
+.subfile a { border: 1px solid var(--border); background: #fff; border-radius: 999px; padding: 6px 14px; font-size: 14px; color: var(--text); text-decoration: none; }
+.subfile a.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+.rezumat-exploatare > div.alerta { border-color: var(--bad); background: var(--bad-bg); }
+.tabel tr.inactiv td { opacity: .55; }
+.constatari { list-style: none; padding: 0; margin: 4px 0 14px; display: grid; gap: 8px; }
+.constatari li { border: 1px solid var(--border); border-left: 4px solid var(--ok); border-radius: 8px; padding: 10px 12px; display: grid; gap: 8px; }
+.constatari li.c-atentie { border-left-color: var(--warn); }
+.constatari li.c-alarma { border-left-color: var(--bad); background: #fff7f7; }
+.constatari li.c-neverificat { border-left-color: var(--border); }
+.constatare-sus { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+.constatare-sus small { display: block; font-size: 12.5px; margin-top: 2px; }
+.comutator { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
+.comutator button { border: 0; background: #fff; padding: 5px 11px; font: inherit; font-size: 13px; cursor: pointer; color: var(--muted); }
+.comutator button + button { border-left: 1px solid var(--border); }
+.comutator button.activ.ok { background: var(--ok-bg); color: var(--ok); font-weight: 600; }
+.comutator button.activ.atentie { background: var(--warn-bg); color: var(--warn); font-weight: 600; }
+.comutator button.activ.alerta { background: var(--bad-bg); color: var(--bad); font-weight: 600; }
+.comutator button.activ.neutru { background: #f1f5f9; color: #334155; font-weight: 600; }
+.actiuni.rand-formular { align-items: flex-end; }
+.actiuni.rand-formular label { min-width: 110px; }

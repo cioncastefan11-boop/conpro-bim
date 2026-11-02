@@ -10,7 +10,8 @@ import type { Atasament, ProcesVerbal } from './tipuri';
 import { genereazaCobie, lipsuriEchipament } from './cobie';
 import { excelCondica, htmlCondica as htmlCondicaBetoane } from './condica';
 import { fisiereReceptie, htmlReceptie } from './receptie';
-import { codEveniment, numeEveniment } from './domeniu';
+import { codEveniment, codInspectie, numeEveniment, stareConstatare } from './domeniu';
+import { scadente } from './urmarire';
 import { codReceptie, DECIZII_RECEPTIE, numeCodStare, numeReceptie, numeRolDocument, numeTipDocument } from './domeniu';
 
 export type ElementOpis = {
@@ -19,7 +20,7 @@ export type ElementOpis = {
   detalii?: string;
   data?: string | null;
   fisiere: Atasament[];
-  generat?: 'pv' | 'manual' | 'cobie' | 'condica' | 'fam' | 'receptie' | 'document' | 'evenimente';
+  generat?: 'pv' | 'manual' | 'cobie' | 'condica' | 'fam' | 'receptie' | 'document' | 'evenimente' | 'urmarire';
   pvId?: string;
   dosar: string;                 // folderul din arhivă
 };
@@ -117,6 +118,15 @@ export function construiesteOpis(d: DateProiect): CapitolOpis[] {
       data: p.exploatare_din, fisiere: ev.flatMap(e => fis('eveniment_exploatare', e.id)), generat: 'evenimente', dosar: 'D_Exploatare/Jurnal_evenimente' });
   }
 
+  // D · urmărirea comportării în timp: programul și inspecțiile
+  if (p.exploatare_din && (d.puncte.length || d.inspectii.length)) {
+    const ani = [...new Set(d.inspectii.map(i => i.data_inspectiei.slice(0, 4)))];
+    cap.D.push({ id: 'urmarire', titlu: 'Programul de urmărire în timp și inspecțiile',
+      detalii: `${d.puncte.filter(x => x.activ).length} puncte urmărite · ${d.inspectii.length} ${d.inspectii.length === 1 ? 'inspecție' : 'inspecții'}${ani.length ? ` (${ani.sort().join(', ')})` : ''}`,
+      data: d.inspectii[d.inspectii.length - 1]?.data_inspectiei ?? p.exploatare_din,
+      fisiere: d.inspectii.flatMap(i => fis('inspectie_urmarire', i.id)), generat: 'urmarire', dosar: 'D_Exploatare/Urmarire_in_timp' });
+  }
+
   const sortat = (l: ElementOpis[]) => [...l].sort((a, b) => (a.data ?? '9999').localeCompare(b.data ?? '9999'));
   return CAPITOLE_CARTE.map(c => ({ ...c, elemente: sortat(cap[c.id]) }));
 }
@@ -181,6 +191,7 @@ export function htmlOpis(d: DateProiect, capitole: CapitolOpis[]): string {
         e.generat === 'condica' ? 'B_Executie/Condica_betoane/Condica-betoane.html<br>B_Executie/Condica_betoane/Condica-betoane.xlsx' : '',
         e.generat === 'receptie' ? `${esc(e.dosar)}/${esc(e.titlu.split(' · ')[0])}.html` : '',
         e.generat === 'evenimente' ? 'D_Exploatare/Jurnal_evenimente/Jurnalul-evenimentelor.html' : '',
+        e.generat === 'urmarire' ? 'D_Exploatare/Urmarire_in_timp/Urmarirea-comportarii-in-timp.html' : '',
         e.generat === 'fam' ? `B_Executie/FAM/${esc(e.titlu.split(' · ')[0].replace('/', '-'))}.html` : '',
         ...e.fisiere.map(f => `${esc(e.dosar)}/${esc(numeInArhiva(f))}`),
       ].filter(Boolean).join('<br>')}</td></tr>`;
@@ -313,6 +324,7 @@ export async function genereazaArhiva(d: DateProiect, progres: (text: string) =>
     radacina.file('B_Executie/Condica_betoane/Condica-betoane.xlsx', await excelCondica(d));
   }
   if (d.proiect.exploatare_din) radacina.file('D_Exploatare/Jurnal_evenimente/Jurnalul-evenimentelor.html', htmlJurnalEvenimente(d));
+  if (d.proiect.exploatare_din && (d.puncte.length || d.inspectii.length)) radacina.file('D_Exploatare/Urmarire_in_timp/Urmarirea-comportarii-in-timp.html', htmlUrmarire(d));
   if (d.tipuri.length) {
     radacina.file('D_Exploatare/Manual-utilizare-mentenanta.html', htmlManual(d));
     progres('Fișierul COBie…');
@@ -349,3 +361,44 @@ export function htmlJurnalEvenimente(d: DateProiect): string {
   }
   return doc(`Jurnalul evenimentelor ${p.cod}`, corp + '</table>');
 }
+
+/** Raportul privind urmărirea comportării în timp: programul, inspecțiile și evenimentele (pe un an sau pe toată perioada). */
+export function htmlUrmarire(d: DateProiect, an?: number): string {
+  const p = d.proiect;
+  const inAn = (s: string) => !an || s.startsWith(String(an));
+  const insp = d.inspectii.filter(i => inAn(i.data_inspectiei));
+  const ev = d.evenimente.filter(e => e.tip !== 'inspectie' && inAn(e.data_eveniment));
+  const sc = scadente(d.proiect, d.puncte, d.inspectii, d.constatari);
+  const titlu = an ? `Raportul privind urmărirea comportării în timp · anul ${an}` : 'Urmărirea comportării în timp';
+  let corp = antet(d, titlu);
+  corp += `<p>Construcția este în exploatare din <b>${formatData(p.exploatare_din)}</b>.${p.clasa_consecinte === 'CC1' ? ' Construcțiile din CC1 nu au obligația urmăririi în timp; programul se ține facultativ.' : ' Urmărirea curentă are caracter permanent și se face la intervale de cel mult un an (Legea 169/2026, programul de urmărire în timp); de ea răspunde beneficiarul.'}</p>`;
+  corp += '<h2>Programul de urmărire</h2>';
+  if (!d.puncte.length) corp += '<p class="discret">Programul nu a fost încă introdus.</p>';
+  else {
+    corp += '<table><tr><th>Nr.</th><th>Ce se urmărește</th><th>Metoda</th><th>Interval</th><th>Prag de alarmă</th><th>Ultima verificare</th><th>Următoarea</th></tr>';
+    d.puncte.forEach((x, i) => {
+      const s = sc.find(y => y.punct_id === x.id);
+      corp += `<tr><td>${i + 1}</td><td><b>${esc(x.ce)}</b>${x.zona ? `<br><span class="discret">${esc(x.zona)}</span>` : ''}${x.categorie === 'speciala' ? '<br><i>urmărire specială</i>' : ''}${x.activ ? '' : '<br><i>scos din program</i>'}</td>
+<td>${esc(x.metoda ?? '')}</td><td>${x.interval_luni} ${x.interval_luni === 1 ? 'lună' : 'luni'}</td><td>${esc(x.prag_alarma ?? '')}</td>
+<td>${s?.ultima ? formatData(s.ultima) : '—'}</td><td>${x.activ && s ? `${formatData(s.urmatoarea)}${s.urmatoarea < laIsoAzi() ? ' <b>(restantă)</b>' : ''}` : '—'}</td></tr>`;
+    });
+    corp += '</table>';
+  }
+  corp += `<h2>Inspecțiile${an ? ` din ${an}` : ''}</h2>`;
+  if (!insp.length) corp += '<p class="discret">Nicio inspecție înregistrată în această perioadă.</p>';
+  for (const i of insp) {
+    const cs = d.constatari.filter(c => c.inspectie_id === i.id);
+    corp += `<h3>${esc(codInspectie(p.cod, i.numar))} · ${formatData(i.data_inspectiei)} · ${esc(stareConstatare(i.stare).nume)}</h3>
+<p>Efectuată de: ${esc(i.efectuata_de)}<br><span class="discret">Înregistrată de ${esc(numeDe(d, i.creat_de))}</span></p>
+<table><tr><th>Ce s-a urmărit</th><th>Starea</th><th>Constatări</th></tr>${cs.map(c => {
+      const x = d.puncte.find(y => y.id === c.punct_id);
+      return `<tr><td>${esc(x?.ce ?? '')}</td><td>${c.stare === 'alarma' ? '<b>ALARMĂ</b>' : esc(stareConstatare(c.stare).nume)}</td><td>${esc(c.observatii ?? '')}</td></tr>`;
+    }).join('')}</table>
+<p><b>Concluzii:</b> ${esc(i.concluzii)}</p>${i.masuri ? `<p><b>Măsuri:</b> ${esc(i.masuri)}</p>` : ''}`;
+  }
+  corp += `<h2>Alte evenimente${an ? ` din ${an}` : ''}</h2>`;
+  corp += ev.length ? `<ul>${ev.map(e => `<li>${esc(codEveniment(p.cod, e.numar))} · ${formatData(e.data_eveniment)} · <b>${esc(numeEveniment(e.tip))}: ${esc(e.titlu)}</b>${e.necesita_expertiza ? ' · necesită expertiză' : ''}</li>`).join('')}</ul>` : '<p class="discret">Niciun alt eveniment consemnat.</p>';
+  if (an) corp += `<div class="bloc-semnaturi"><h3>Întocmit</h3><div class="semnaturi"><div class="semnatura"><span class="calitate">Beneficiar / proprietar</span><span class="linie">nume, semnătură, data</span></div><div class="semnatura"><span class="calitate">Administratorul clădirii</span><span class="linie">nume, semnătură, data</span></div></div></div>`;
+  return doc(titlu, corp);
+}
+const laIsoAzi = () => new Date().toISOString().slice(0, 10);

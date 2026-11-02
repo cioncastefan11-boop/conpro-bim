@@ -133,7 +133,7 @@ export type LivrareFam = {
 };
 
 export type Atasament = {
-  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte' | 'receptie' | 'obiectie_receptie' | 'revizie_document' | 'eveniment_exploatare'; entitate_id: string;
+  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte' | 'receptie' | 'obiectie_receptie' | 'revizie_document' | 'eveniment_exploatare' | 'inspectie_urmarire'; entitate_id: string;
   tip_document: string; nume_fisier: string; cale: string; marime: number | null; incarcat_de: string; incarcat_la: string;
 };
 
@@ -220,3 +220,16 @@ export type EvenimentExploatare = {
   necesita_expertiza: boolean; executant: string | null; corecteaza_id: string | null;
   creat_de: string; creat_la: string;
 };
+
+// ---------- urmărirea în timp (migrarea 0015) ----------
+export type StareConstatare = 'normal' | 'atentie' | 'alarma' | 'neverificat';
+export type PunctUrmarire = {
+  id: string; proiect_id: string; ordine: number; ce: string; zona: string | null; categorie: 'curenta' | 'speciala';
+  metoda: string | null; interval_luni: number; prag_alarma: string | null; activ: boolean; creat_de: string; creat_la: string;
+};
+export type InspectieUrmarire = {
+  id: string; proiect_id: string; numar: number; data_inspectiei: string; efectuata_de: string; concluzii: string;
+  masuri: string | null; stare: Exclude<StareConstatare, 'neverificat'>; eveniment_id: string | null; creat_de: string; creat_la: string;
+};
+export type ConstatareInspectie = { inspectie_id: string; punct_id: string; proiect_id: string; stare: StareConstatare; observatii: string | null };
+export type ScadentaUrmarire = { punct_id: string; ce: string; interval_luni: number; ultima: string | null; urmatoarea: string };

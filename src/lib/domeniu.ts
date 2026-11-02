@@ -402,3 +402,27 @@ export const TIPURI_EVENIMENT: { id: import('./tipuri').TipEveniment; nume: stri
 ];
 export const numeEveniment = (t: string) => TIPURI_EVENIMENT.find(x => x.id === t)?.nume ?? t;
 export const codEveniment = (codProiect: string, numar: number) => `${codProiect}-EV-${String(numar).padStart(3, '0')}`;
+
+// ---------- urmărirea în timp (migrarea 0015) ----------
+export const STARI_CONSTATARE: { id: import('./tipuri').StareConstatare; nume: string; ton: 'ok' | 'atentie' | 'alerta' | 'neutru' }[] = [
+  { id: 'normal', nume: 'Normal', ton: 'ok' },
+  { id: 'atentie', nume: 'Atenție', ton: 'atentie' },
+  { id: 'alarma', nume: 'Alarmă', ton: 'alerta' },
+  { id: 'neverificat', nume: 'Neverificat', ton: 'neutru' },
+];
+export const stareConstatare = (s: string) => STARI_CONSTATARE.find(x => x.id === s) ?? STARI_CONSTATARE[3];
+export const codInspectie = (codProiect: string, numar: number) => `${codProiect}-UT-${String(numar).padStart(3, '0')}`;
+
+/** Programul tip pentru urmărirea curentă (examinare vizuală, anual). Proiectantul îl adaptează după caietul de sarcini. */
+export const PROGRAM_TIP_URMARIRE: { ce: string; zona: string; metoda: string; prag_alarma: string }[] = [
+  { ce: 'Fisuri, crăpături și deformații la elementele structurale', zona: 'Stâlpi, grinzi, pereți structurali, plăci, scări', metoda: 'Examinare vizuală directă; fisurile se marchează, se măsoară și se fotografiază', prag_alarma: 'Fisuri noi sau care se deschid, desprinderi de beton, armături aparente, deformații vizibile' },
+  { ce: 'Tasări, înclinări și deplasări ale construcției', zona: 'Fundații, soclu, colțurile clădirii, rosturi', metoda: 'Examinare vizuală; reperi de tasare, dacă sunt prevăzuți în proiect', prag_alarma: 'Tasări inegale, înclinări vizibile, fisuri la legătura cu terenul' },
+  { ce: 'Starea rosturilor de tasare și seismice', zona: 'Rosturile dintre corpuri', metoda: 'Examinare vizuală', prag_alarma: 'Rost închis, obturat sau cu deplasări între corpuri' },
+  { ce: 'Infiltrații și umiditate', zona: 'Terasă, acoperiș, subsol, fațade, băi', metoda: 'Examinare vizuală, după perioade ploioase', prag_alarma: 'Infiltrații active în elemente structurale sau în subsol' },
+  { ce: 'Învelitoarea, hidroizolația și scurgerea apelor pluviale', zona: 'Terasă / acoperiș, jgheaburi, burlane, guri de scurgere', metoda: 'Examinare vizuală, înainte și după sezonul rece', prag_alarma: 'Hidroizolație străpunsă, scurgeri înfundate, apă stagnantă' },
+  { ce: 'Fațadele, tencuielile și placajele', zona: 'Fațade, balcoane, atice, cornișe', metoda: 'Examinare vizuală de la sol și de pe balcoane', prag_alarma: 'Desprinderi care pot cădea pe căile de circulație' },
+  { ce: 'Coroziunea elementelor metalice', zona: 'Balustrade, structuri metalice, ancoraje, copertine', metoda: 'Examinare vizuală', prag_alarma: 'Coroziune cu pierdere de secțiune, ancoraje slăbite' },
+  { ce: 'Trotuarul de gardă și sistematizarea verticală', zona: 'Perimetrul clădirii', metoda: 'Examinare vizuală', prag_alarma: 'Apa băltește lângă fundații, trotuar desprins sau fisurat' },
+  { ce: 'Pierderi din instalațiile de apă și canalizare care pot afecta fundațiile', zona: 'Subsol, cămine, racorduri', metoda: 'Examinare vizuală, citirea contoarelor', prag_alarma: 'Scurgeri continue în subsol sau la fundații' },
+  { ce: 'Încărcări și modificări față de proiect', zona: 'Toată construcția', metoda: 'Examinare vizuală; verificarea lucrărilor neautorizate', prag_alarma: 'Pereți structurali străpunși, depozitări grele, schimbări de destinație fără proiect' },
+];

@@ -1,7 +1,7 @@
 // Stadiul 7 · exploatarea construcției (Legea 169/2026, ISO 19650-3):
-// trecerea în exploatare după recepție și jurnalul evenimentelor.
+// trecerea în exploatare după recepție, jurnalul evenimentelor și urmărirea în timp (Urmarire.tsx).
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Link, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { Link, NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { TIPURI_EVENIMENT, codEveniment, formatData, laIso, azi, numeEveniment, zilePana, type Rol } from '../lib/domeniu';
 import type { EvenimentExploatare, Membru, Proiect, TipEveniment } from '../lib/tipuri';
@@ -9,6 +9,7 @@ import { incarcaDateProiect } from '../lib/dateProiect';
 import { htmlJurnalEvenimente } from '../lib/carte';
 import { Eroare, Gol, mesajEroare } from '../components/ui';
 import Atasamente from '../components/Atasamente';
+import Urmarire from './Urmarire';
 
 type Props = { proiect: Proiect; membri: Membru[]; rolulMeu?: Rol; uid: string; onSchimbat: () => void };
 type RecAprobata = { id: string; aprobat_la: string; garantie_pana: string | null };
@@ -36,8 +37,13 @@ export default function Exploatare(props: Props) {
   return (
     <>
       <Eroare text={eroare} />
+      <nav className="subfile" aria-label="Exploatarea">
+        <NavLink to="." end>Jurnalul evenimentelor</NavLink>
+        <NavLink to="urmarire">Urmărirea în timp</NavLink>
+      </nav>
       <Routes>
         <Route index element={<Jurnal {...props} rec={rec} ev={ev} />} />
+        <Route path="urmarire/*" element={<Urmarire {...props} onEveniment={incarca} />} />
         <Route path="nou" element={<EvenimentNou {...props} ev={ev} onSalvat={incarca} />} />
         <Route path=":evId" element={<Detaliu {...props} ev={ev} />} />
       </Routes>
