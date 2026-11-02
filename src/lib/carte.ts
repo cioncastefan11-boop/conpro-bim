@@ -234,16 +234,31 @@ export function htmlFam(d: DateProiect, famId: string): string {
   let corp = antet(d, `${codFam(d.proiect.cod, f.numar, f.revizie)} · Fișă de aprobare a materialului`);
   const r = (k: string, v: unknown) => (v ? `<tr><th>${k}</th><td>${esc(v)}</td></tr>` : '');
   corp += `<table>${r('Materialul', f.material)}${r('Utilizare', f.utilizare)}${r('Cerințe proiect', f.cerinte_proiect)}${r('Producător', f.producator)}${r('Produs', f.produs)}${r('Furnizor', f.furnizor)}${r('Performanțe declarate', f.performante_declarate)}${r('Date de mediu', f.date_mediu)}${r('Declarația de performanță', f.dop_numar)}${r('Agrement tehnic', f.agrement_numar)}${r('Alte documente', f.alte_documente)}</table>`;
-  corp += `<h3>Circuitul de aprobare</h3><table><tr><th>Depus</th><td>${esc(numeDe(d, f.depus_de))}, ${f.depus_la ? new Date(f.depus_la).toLocaleString('ro-RO') : ''}</td></tr>
-<tr><th>Avizul proiectantului</th><td>${f.aviz ? `${esc(AVIZE[f.aviz])}, ${esc(numeDe(d, f.avizat_de))}, ${new Date(f.avizat_la!).toLocaleString('ro-RO')}${f.aviz_observatii ? `<br>${esc(f.aviz_observatii)}` : ''}` : 'nu e cazul'}</td></tr>
-<tr><th>Decizia dirigintelui</th><td>${f.decizie ? `${esc(STARI_FAM[f.decizie].eticheta)}, ${esc(numeDe(d, f.decis_de))}, ${new Date(f.decis_la!).toLocaleString('ro-RO')}${f.decizie_observatii ? `<br>${esc(f.decizie_observatii)}` : ''}` : ''}</td></tr></table>`;
+  // observațiile, doar dacă există; semnăturile în josul paginii
+  const obs = [f.aviz_observatii?.trim() && `<li><b>${esc(numeDe(d, f.avizat_de))}</b> (Proiectant): ${esc(f.aviz_observatii)}</li>`,
+    f.decizie_observatii?.trim() && `<li><b>${esc(numeDe(d, f.decis_de))}</b> (Diriginte de șantier): ${esc(f.decizie_observatii)}</li>`].filter(Boolean);
+  const fara = !d.membri.some(m => m.rol === 'proiectant');
+  const firma = (id: string | null) => d.membri.find(m => m.persoana_id === id)?.persoane?.firme?.denumire ?? '';
+  const semn = [
+    { rol: 'constructor', eticheta: 'Întocmit · Constructor / RTE', cine: f.depus_de, cand: f.depus_la, mentiune: '' },
+    ...(fara ? [] : [{ rol: 'proiectant', eticheta: 'Avizat · Proiectant', cine: f.avizat_de, cand: f.avizat_la, mentiune: f.aviz ? AVIZE[f.aviz] : '' }]),
+    { rol: 'diriginte', eticheta: 'Aprobat · Diriginte de șantier', cine: f.decis_de, cand: f.decis_la, mentiune: f.decizie ? STARI_FAM[f.decizie].eticheta : '' },
+  ];
+  let bloc = obs.length ? `<h3>Observații</h3><ul>${obs.join('')}</ul>` : '';
+  bloc += `<div class="bloc-semnaturi"><h3>Semnături</h3><div class="semnaturi" style="grid-template-columns:repeat(${semn.length},1fr)">`;
+  for (const x of semn) {
+    const id = x.cine ?? d.membri.find(m => m.rol === x.rol)?.persoana_id ?? null;
+    bloc += `<div class="semnatura"><span class="calitate">${x.eticheta}</span><b>${esc(id ? numeDe(d, id) : '—')}</b>${firma(id) ? `<span>${esc(firma(id))}</span>` : ''}<div class="linie">Semnătura</div>${x.mentiune ? `<small>${esc(x.mentiune)}</small>` : ''}${x.cand ? `<small>Înregistrat în Conpro BIM la ${new Date(x.cand).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' })}</small>` : ''}</div>`;
+  }
+  bloc += '</div></div>';
   const liv = d.livrari.filter(l => l.fam_id === f.id);
   if (liv.length) {
     corp += '<h3>Verificarea la livrare</h3><table><tr><th>Data</th><th>Cantitate</th><th>Lot</th><th>Document</th><th>Rezultat</th></tr>';
     for (const l of liv) corp += `<tr><td>${formatData(l.data)}</td><td>${esc(l.cantitate ?? '')}</td><td>${esc(l.lot ?? '')}</td><td>${esc(l.document_insotire ?? '')}</td><td>${l.conform ? 'conform' : 'NECONFORM'}${l.observatii ? `<br>${esc(l.observatii)}` : ''}</td></tr>`;
     corp += '</table>';
   }
-  return doc(codFam(d.proiect.cod, f.numar, f.revizie), corp);
+  corp += bloc;
+  return doc(codFam(d.proiect.cod, f.numar, f.revizie), corp).replace('<body>', '<body class="pv">');
 }
 
 // ------------------------------------------------------------------ Arhiva

@@ -264,7 +264,26 @@ function Detaliu({ proiect, membri, rolulMeu }: Props) {
           </p>
         )}
 
-        <FormularFam v={v} set={setV} blocat={!editabil} />
+        <div className="nu-tipari"><FormularFam v={v} set={setV} blocat={!editabil} /></div>
+        <div className="doar-tipar fam-tiparit">
+          {[
+            ['Ce cere proiectul', [['Materialul', f.material], ['Unde se pune în operă', f.utilizare], ['Performanțele cerute în proiect', f.cerinte_proiect]]],
+            ['Produsul propus', [['Producător', f.producator], ['Produs', f.produs], ['Furnizor', f.furnizor], ['Performanțele declarate', f.performante_declarate], ['Date de mediu', f.date_mediu]]],
+            ['Documente însoțitoare (art. 563)', [
+              ['Declarația de performanță', f.dop_numar ? `nr. ${f.dop_numar}${f.dop_data ? ` din ${formatData(f.dop_data)}` : ''}` : null],
+              ['Marcaj CE', f.marcaj_ce ? 'Da' : null],
+              ['Agrement tehnic', f.agrement_numar ? `nr. ${f.agrement_numar}${f.agrement_valabil_pana ? `, valabil până la ${formatData(f.agrement_valabil_pana)}` : ''}` : null],
+              ['Alte documente', f.alte_documente]]],
+          ].map(([titlu, randuri]) => {
+            const pline = (randuri as [string, string | null][]).filter(r => r[1]?.toString().trim());
+            return pline.length ? (
+              <section key={titlu as string}>
+                <h3>{titlu as string}</h3>
+                <dl className="date-pv">{pline.map(([k, val]) => <div key={k}><dt>{k}</dt><dd>{val}</dd></div>)}</dl>
+              </section>
+            ) : null;
+          })}
+        </div>
 
         {editabil && (
           <div className="actiuni stanga nu-tipari">
@@ -280,8 +299,8 @@ function Detaliu({ proiect, membri, rolulMeu }: Props) {
           tipuri={['fisa_tehnica', 'dop', 'agrement', 'certificat', 'instructiuni', 'altul']}
           gol={editabil ? 'Atașați fișa tehnică și declarația de performanță.' : 'Niciun document atașat.'} />
 
-        <h3>Circuitul de aprobare</h3>
-        <ol className="circuit">
+        <h3 className="nu-tipari">Circuitul de aprobare</h3>
+        <ol className="circuit nu-tipari">
           <li className={f.depus_la ? 'facut' : ''}>
             <b>Depus</b> {f.depus_la ? <>de {om(f.depus_de)}, {cand(f.depus_la)}</> : <span className="discret">de constructor</span>}
           </li>
@@ -296,6 +315,39 @@ function Detaliu({ proiect, membri, rolulMeu }: Props) {
               : <span className="discret">în așteptare</span>}
           </li>
         </ol>
+
+        {(f.aviz_observatii?.trim() || f.decizie_observatii?.trim()) && (
+          <section className="observatii-pv doar-tipar">
+            <h3>Observații</h3>
+            <ul>
+              {f.aviz_observatii?.trim() && <li><b>{om(f.avizat_de)}</b> (Proiectant): {f.aviz_observatii}</li>}
+              {f.decizie_observatii?.trim() && <li><b>{om(f.decis_de)}</b> (Diriginte de șantier): {f.decizie_observatii}</li>}
+            </ul>
+          </section>
+        )}
+        <section className="semnaturi-pv doar-tipar">
+          <h3>Semnături</h3>
+          <div className={`semnaturi-grila ${fara ? '' : 'trei'}`}>
+            {[
+              { rol: 'constructor' as Rol, eticheta: 'Întocmit · Constructor / RTE', cine: f.depus_de, cand: f.depus_la, mentiune: null as string | null },
+              ...(fara ? [] : [{ rol: 'proiectant' as Rol, eticheta: 'Avizat · Proiectant', cine: f.avizat_de, cand: f.avizat_la, mentiune: f.aviz ? AVIZE[f.aviz] : null }]),
+              { rol: 'diriginte' as Rol, eticheta: 'Aprobat · Diriginte de șantier', cine: f.decis_de, cand: f.decis_la, mentiune: f.decizie ? STARI_FAM[f.decizie].eticheta : null },
+            ].map(x => {
+              const id = x.cine ?? membri.find(m => m.rol === x.rol)?.persoana_id ?? null;
+              const firma = membri.find(m => m.persoana_id === id)?.persoane?.firme?.denumire;
+              return (
+                <div key={x.rol} className="semnatura-pv">
+                  <span className="calitate">{x.eticheta}</span>
+                  <b>{id ? om(id) : '—'}</b>
+                  {firma && <span>{firma}</span>}
+                  <div className="linie-semnatura">Semnătura</div>
+                  {x.mentiune && <small>{x.mentiune}</small>}
+                  {x.cand && <small>Înregistrat în Conpro BIM la {cand(x.cand)}</small>}
+                </div>
+              );
+            })}
+          </div>
+        </section>
       </article>
 
       <div className="nu-tipari">
