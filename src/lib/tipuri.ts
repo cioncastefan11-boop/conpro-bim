@@ -26,6 +26,8 @@ export type Persoana = {
   nume: string;
   email: string;
   rezumat_zilnic?: boolean;
+  termeni_versiune?: string | null;
+  termeni_acceptati_la?: string | null;
   telefon: string | null;
   firma_id: string | null;
   firme?: { denumire: string } | null;

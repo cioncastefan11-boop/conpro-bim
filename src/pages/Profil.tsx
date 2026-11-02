@@ -77,6 +77,8 @@ export default function Profil() {
         <Eroare text={eroareNot} />
       </div>
 
+      <DateleMele termeni={p.termeni_versiune ?? null} acceptatLa={p.termeni_acceptati_la ?? null} />
+
       <div className="card">
         <h2>Autorizații, atestate și polițe</h2>
         <p className="discret">Colegii din proiectele dumneavoastră văd aceste documente, ca beneficiarul să poată verifica autorizația și asigurarea (art. 456, 459 și 556 din Legea 169/2026).</p>
@@ -200,5 +202,31 @@ function SchimbaParola() {
       </div>
       {mesaj && <p className={`mesaj ${mesaj.ton}`}>{mesaj.text}</p>}
     </form>
+  );
+}
+
+// Dreptul de acces și la portabilitate (art. 15 și 20 GDPR): un fișier JSON cu datele persoanei.
+function DateleMele({ termeni, acceptatLa }: { termeni: string | null; acceptatLa: string | null }) {
+  const [eroare, setEroare] = useState<string | null>(null);
+  const [lucreaza, setLucreaza] = useState(false);
+  async function descarca() {
+    setEroare(null); setLucreaza(true);
+    const { data, error } = await supabase.rpc('datele_mele');
+    setLucreaza(false);
+    if (error) { setEroare(error.message.includes('datele_mele') ? 'Rulați în Supabase scriptul 0013_gdpr.sql.' : mesajEroare(error)); return; }
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+    const a = document.createElement('a'); a.href = url; a.download = `datele-mele-conpro-bim-${new Date().toISOString().slice(0, 10)}.json`; a.click();
+    URL.revokeObjectURL(url);
+  }
+  return (
+    <div className="card formular">
+      <h2>Datele mele</h2>
+      <p className="discret">Descărcați tot ce păstrează aplicația despre dumneavoastră: profilul, autorizațiile, proiectele și rolurile, acțiunile din istoric.
+        Pentru ștergerea contului scrieți administratorului aplicației; documentele de lucrare deja confirmate rămân, pentru că legea cere păstrarea lor
+        (vedeți <Link to="/confidentialitate">politica de confidențialitate</Link>).</p>
+      {termeni && <p className="discret">Ați acceptat termenii și politica, versiunea {termeni.split('-').reverse().join('.')}{acceptatLa ? `, la ${formatData(acceptatLa.slice(0, 10))}` : ''}.</p>}
+      <Eroare text={eroare} />
+      <div className="actiuni"><button className="buton" onClick={descarca} disabled={lucreaza}>{lucreaza ? 'Se pregătește…' : 'Descarcă datele mele'}</button></div>
+    </div>
   );
 }

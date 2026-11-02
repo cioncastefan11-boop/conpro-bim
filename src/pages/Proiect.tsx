@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
-import { NavLink, Route, Routes, useParams } from 'react-router-dom';
+import { Link, NavLink, Route, Routes, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useUid } from '../lib/sesiune';
 import {
@@ -279,12 +279,14 @@ function Echipa({ proiectId, membri, admin, uid, onSchimbat }:
             </label>
             <button className="buton principal">Invită</button>
           </form>
-          <p className="discret">{ROLURI.find(r => r.id === rol)?.descriere}</p>
+          <p className="discret">{ROLURI.find(r => r.id === rol)?.descriere}{' '}
+            <Link to={`/ghid#${ancoraGhid(rol)}`} target="_blank">Ce face acest rol în aplicație</Link></p>
           <Eroare text={eroare} />
           {invitatii.length > 0 && (
             <>
               <h3>Invitații în așteptare</h3>
-              <p className="discret">Trimiteți persoanei linkul. Când își face cont sau intră cu acest email, intră automat în proiect cu rolul ales.</p>
+              <p className="discret">Trimiteți persoanei linkul. Când își face cont sau intră cu acest email, intră automat în proiect cu rolul ales.
+                Trimiteți-i și ghidul: <b>{window.location.origin}/ghid</b></p>
               <ul className="lista-invitatii">
                 {invitatii.map(i => (
                   <li key={i.id}>
@@ -462,3 +464,5 @@ function Istoric({ proiect, membri }: { proiect: TProiect; membri: Membru[] }) {
     </div>
   );
 }
+
+const ancoraGhid = (r: Rol) => r;  // ancorele din ghid au aceleași nume ca rolurile
