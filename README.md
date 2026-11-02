@@ -18,6 +18,19 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.22 (verificarea modelului după reguli, IDS)
+
+1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0022_verificare_model.sql`, lipiți și **Run** (după 0021).
+3. Verificare: `select count(*) from pg_proc where proname in ('regula_model_verifica','verificare_model_verifica');` trebuie să dea **2**.
+
+Ce aduce:
+- **Model 3D → Verificarea modelului:** regulile de informații ale proiectului (cerințele EIR, ISO 19650-2, 5.2.1), pe clase IFC (cu subtipurile): un atribut completat (Name, LongName, Description, ObjectType, Tag), o proprietate dintr-un set (pe element sau moștenită din tip; și cantitățile Qto), o clasificare, un material, nivelul. Valoarea cerută e opțională, cu variante „a|b”; regula poate fi obligatorie sau recomandată. Le stabilesc beneficiarul, administratorul sau dirigintele; se poate porni de la șabloane (spații, arhitectură, structură, instalații / COBie).
+- **IDS 1.0 (buildingSMART):** exportul regulilor ca fișier `.ids`, validat față de schema oficială, pentru proiectanți și pentru Revit, Archicad, Solibri, BIMcollab; importul unui IDS primit (cerințele simple se preiau, restul se raportează).
+- **Verificarea pe modelele deschise:** în panoul de lângă model, procentul de verificări care trec, elementele neconforme și, pe fiecare regulă, elementele care nu trec cu motivul („lipsește setul Pset_WallCommon”). Modelul se colorează: verde trec, roșu nu trec o regulă obligatorie; „Arată” duce la elemente.
+- **Rapoartele de verificare:** salvate ca dovadă (cine, când, ce revizii, rezultatul pe reguli), tipărire; nu se mai modifică.
+- Corectură: pe telefon, tabelele late nu mai împing pagina proiectului în lateral.
+
 ## Actualizare la 0.21 (prezentarea proiectului și meniul nou)
 
 Nu are script SQL; codul ajunge pe site singur, după unirea în `main`.

@@ -610,7 +610,7 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
 .meniu-proiect-mobil { display: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 @media (max-width: 980px) {
-  .proiect-cadru { grid-template-columns: 1fr; gap: 12px; }
+  .proiect-cadru { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .meniu-proiect { display: none; }
   .meniu-proiect-mobil { display: block; position: sticky; top: 64px; z-index: 4; }
   .meniu-proiect-mobil select { width: 100%; font-weight: 600; padding: 10px 12px; border: 2px solid var(--accent); background: #fff; border-radius: 10px; }
@@ -644,3 +644,25 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
 .activitate { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 6px; font-size: 14px; }
 .activitate li { display: flex; gap: 10px; flex-wrap: wrap; }
 @media (max-width: 760px) { .prez-stare { grid-template-columns: 1fr 1fr; } }
+
+/* Verificarea modelului (0.22) */
+.text-ok { color: var(--ok); font-weight: 600; }
+.text-alerta { color: var(--bad); font-weight: 600; }
+.text-atentie { color: var(--warn, #b45309); font-weight: 600; }
+.sabloane-reguli { margin-top: 12px; gap: 8px; }
+.celula-actiuni { white-space: nowrap; text-align: right; }
+.celula-actiuni .legatura + .legatura { margin-left: 12px; }
+.salvare-raport { align-items: center; }
+.doar-mobil { display: none; }
+@media (max-width: 700px) {
+  .ascuns-mobil { display: none; }
+  .doar-mobil { display: inline; }
+  .celula-actiuni .legatura { display: block; margin: 0 0 6px; }
+  .celula-actiuni .legatura + .legatura { margin-left: 0; }
+}
+.rezultate-verificare tr.activ td { background: var(--info-bg); }
+.rezultate-verificare tr.activ td:first-child { box-shadow: inset 3px 0 0 var(--info); }
+.rezultate-verificare td:nth-child(n+2) { white-space: nowrap; }
+.neconforme { margin: 6px 0 0; padding-left: 18px; max-height: 240px; overflow: auto; }
+.neconforme li { margin: 2px 0; }
+.nota-raport { flex: 1 1 240px; min-width: 0; }
