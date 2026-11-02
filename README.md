@@ -18,6 +18,18 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.19 (planul de livrare și matricea de responsabilități)
+
+1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0020_plan_livrare.sql`, lipiți și **Run** (după 0019).
+3. Verificare: `select count(*) from pg_proc where proname in ('livrabile_stare','livrabil_verifica','moment_verifica');` trebuie să dea **3**.
+
+Ce aduce (ISO 19650-2: 5.1.3, 5.4.2, 5.4.4, 5.4.5):
+- **Documente → Planul de livrare:** momentele de livrare a informațiilor (le stabilesc beneficiarul sau administratorul), cu progresul fiecăruia; planul general (MIDP), filtrabil pe echipă (TIDP), cu codul din convenție, momentul, termenul, responsabilul, starea cerută (partajat / publicat) și nivelul necesar de informații.
+- **Legătura cu CDE:** aplicația găsește documentul cu același cod și arată starea lui (neînceput, în lucru, partajat, publicat) și ce e întârziat. „Preia documentele din CDE” pornește planul din documentele existente. Planul se tipărește.
+- **Documente → Matricea de responsabilități:** pe rânduri echipa și disciplina, pe coloane momentele; în celule, câte documente sunt livrate din cele planificate și ce întârzie.
+- **„De făcut”:** livrabilele scadente în 7 zile sau întârziate, la responsabil; cele întârziate fără responsabil, la administrator.
+
 ## Actualizare la 0.18 (legăturile cu modelul și starea execuției)
 
 1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.

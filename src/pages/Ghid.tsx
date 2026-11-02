@@ -43,6 +43,7 @@ const ROLURI: Rol[] = [
     pasi: [
       { ce: 'Încarcă planșele și modelele, cu revizii', unde: 'Documente', detalii: 'Fiecare revizie începe în lucru (o vede doar echipa dumneavoastră); o partajați pentru coordonare sau comentarii (S1–S4) și cereți publicarea pentru execuție (A1). Modelele IFC (tip M3) se deschid în Model 3D.' },
       { ce: 'Răspunde la întrebări și observații', unde: 'Model 3D → Observații pe model', detalii: 'Cele atribuite proiectantului apar în „De făcut”. Se pot exporta în BCF, rezolva în Revit / Archicad și importa înapoi.' },
+      { ce: 'Își planifică livrabilele', unde: 'Documente → Planul de livrare', detalii: 'Planșele și modelele echipei (TIDP), cu momentul, termenul și starea cerută (partajat sau publicat); „Preia documentele din CDE” pornește planul din ce există deja.' },
       { ce: 'Avizează FAM-urile', unde: 'Materiale (FAM)', detalii: 'Conform, echivalent sau neconform (cu observații, care trimit fișa înapoi la constructor).' },
       { ce: 'Confirmă fazele determinante', unde: 'Procese verbale', detalii: 'Le primiți după ce au confirmat dirigintele și RTE-ul (art. 426 alin. 3).' },
       { ce: 'Stabilește programul de urmărire în timp', unde: 'Exploatare → Urmărirea în timp → Programul', detalii: 'Ce se urmărește, metoda, intervalul (cel mult 12 luni) și pragul de alarmă, după caietul de sarcini.' },
@@ -66,6 +67,7 @@ const ROLURI: Rol[] = [
     pasi: [
       { ce: 'Creează proiectul', unde: 'Proiecte → Proiect nou', detalii: 'Codul (3–6 caractere, ex. BLC01), denumirea, apoi în Detalii: autorizația de construire, clasa de consecințe și stadiul.' },
       { ce: 'Invită echipa', unde: 'Echipa', detalii: 'Adresa de e-mail și rolul fiecăruia. Spuneți-i persoanei să-și facă cont cu aceeași adresă: intră automat în proiect.' },
+      { ce: 'Stabilește momentele de livrare și urmărește planul', unde: 'Documente → Planul de livrare', detalii: 'Momentele la care beneficiarul are nevoie de informații (autorizare, PTE, execuție, recepție). Fiecare echipă își planifică documentele cu codul din convenție; aplicația le găsește în CDE, arată ce întârzie și matricea de responsabilități.' },
       { ce: 'Stabilește convenția de denumire', unde: 'Detalii → Convenția de denumire a documentelor', detalii: 'Inițiatorii, volumele, nivelurile; în modul strict alte coduri se refuză.' },
       { ce: 'Aprobă publicarea documentelor', unde: 'Documente' },
       { ce: 'Urmărește cine ce a făcut', unde: 'Istoric' },
