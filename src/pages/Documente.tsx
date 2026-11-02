@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import DocumenteBim from './DocumenteBim';
 import { Link, Route, Routes, useNavigate, useParams, NavLink } from 'react-router-dom';
 import { MatriceResponsabilitati, PlanLivrare } from './PlanLivrare';
 import { supabase } from '../lib/supabase';
@@ -22,11 +23,13 @@ export default function Documente(props: Props) {
         <NavLink to="." end>Documentele (CDE)</NavLink>
         <NavLink to="plan">Planul de livrare</NavLink>
         <NavLink to="matrice">Matricea de responsabilități</NavLink>
+        <NavLink to="eir-bep">EIR și BEP</NavLink>
       </nav>
     <Routes>
       <Route index element={<Lista {...props} />} />
       <Route path="plan" element={<PlanLivrare {...props} />} />
       <Route path="matrice" element={<MatriceResponsabilitati {...props} />} />
+      <Route path="eir-bep" element={<DocumenteBim {...props} />} />
       <Route path="nou" element={<Nou {...props} />} />
       <Route path="incarcare" element={<IncarcareMultipla {...props} />} />
       <Route path=":documentId" element={<Detaliu {...props} />} />

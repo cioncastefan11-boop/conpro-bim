@@ -18,6 +18,19 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.23 (EIR și BEP generate din aplicație)
+
+1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0023_documente_bim.sql`, lipiți și **Run** (după 0022).
+3. Verificare: `select count(*) from pg_proc where proname = 'document_bim_verifica';` trebuie să dea **1**.
+
+Ce aduce:
+- **Documente → EIR și BEP:** cele două documente ISO 19650-2 se generează din datele proiectului, gata de tipărit (PDF) sau de deschis în Word.
+  - **EIR** (cerințele de schimb de informații, 5.2.1): datele proiectului, echipa beneficiarului, momentele de livrare, standardul informațiilor (convenția de denumire, stările CDE, codurile de stare), procedurile, regulile modelului (cu anexa IDS), cerințele de predare (AIR), formatele de schimb, criteriile de acceptare.
+  - **BEP** (planul de execuție BIM, 5.3.2 și 5.4.1): echipa de livrare, managerul informațiilor, strategia de livrare și de federare, matricea de responsabilități, planul general de livrare (MIDP) pe momente, procedurile, coordonarea, răspunsul la fiecare cerință din EIR, software-ul, riscurile.
+- Textele pe care aplicația nu le are (scopul, strategia, software-ul, riscurile…) pornesc de la un text implicit și se modifică pe secțiuni; versiunea crește la fiecare modificare. EIR-ul îl scriu beneficiarul, administratorul sau dirigintele; BEP-ul, administratorul, constructorul sau proiectantul.
+- „De completat înainte de emitere”: ce lipsește din proiect pentru un document complet, cu legătura la locul unde se completează.
+
 ## Actualizare la 0.22 (verificarea modelului după reguli, IDS)
 
 1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
