@@ -294,8 +294,8 @@ function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
         ) : <p className="mesaj atentie-bloc nu-tipari">Descrierea lucrărilor și concluziile nu sunt încă completate.</p>}
         {t.ordine426 && <p className="nota">La acest tip de proces verbal, proiectantul confirmă după dirigintele de șantier și responsabilul tehnic cu execuția (art. 426 alin. 3 din Legea 169/2026).</p>}
 
-        <h3>Confirmări</h3>
-        <div className="tabel-wrap">
+        <h3 className="nu-tipari">Confirmări</h3>
+        <div className="tabel-wrap nu-tipari">
           <table className="tabel">
             <thead><tr><th>Participant</th><th>Calitatea</th><th>Decizia</th><th>Observații</th><th>Data și ora</th></tr></thead>
             <tbody>
@@ -314,10 +314,37 @@ function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
         </div>
 
         {pv.stare === 'semnat' && pv.semnat_la && (
-          <p className="mesaj ok">Semnat de toți participanții din aplicație la {new Date(pv.semnat_la).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' })}. Nu se mai modifică.</p>
+          <p className="mesaj ok nu-tipari">Semnat de toți participanții din aplicație la {new Date(pv.semnat_la).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' })}. Nu se mai modifică.</p>
         )}
         {pv.stare === 'contestat' && <p className="mesaj alerta">Un participant a refuzat. Procesul verbal se anulează și, după remediere, se convoacă unul nou.</p>}
         {pv.stare === 'anulat' && <p className="mesaj info">Anulat de {om(pv.anulat_de)}: {pv.motiv_anulare}</p>}
+        {sortati.some(p => p.observatii?.trim()) && (
+          <section className="observatii-pv doar-tipar">
+            <h3>Observații</h3>
+            <ul>
+              {sortati.filter(p => p.observatii?.trim()).map(p => (
+                <li key={p.id}><b>{om(p.persoana_id)}</b> ({p.rol === 'constructor' ? 'Constructor / RTE' : numeRol(p.rol)}): {p.observatii}</li>
+              ))}
+            </ul>
+          </section>
+        )}
+        <section className="semnaturi-pv doar-tipar">
+          <h3>Semnături</h3>
+          <div className="semnaturi-grila">
+            {sortati.map(p => (
+              <div key={p.id} className="semnatura-pv">
+                <span className="calitate">{p.rol === 'constructor' ? 'Constructor / RTE' : numeRol(p.rol)}</span>
+                <b>{om(p.persoana_id)}</b>
+                {firma(p.persoana_id) && <span>{firma(p.persoana_id)}</span>}
+                <div className="linie-semnatura">Semnătura</div>
+                {p.decizie === 'confirm_cu_observatii' && <small>Confirmă cu observații</small>}
+                {p.decizie === 'refuz' && <small>A refuzat confirmarea</small>}
+                {p.confirmat_la && <small>Confirmat în Conpro BIM la {new Date(p.confirmat_la).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' })}</small>}
+              </div>
+            ))}
+          </div>
+        </section>
+        <div className="nu-tipari">
         <Atasamente proiectId={proiect.id} entitate="pv" entitateId={pv.id} membri={membri}
           poateIncarca={pv.stare !== 'anulat' && (pv.convocat_de === uid || parti.some(p => p.persoana_id === uid))}
           tipuri={['poza', 'pv_scanat', 'altul']} titlu="Documente și fotografii" excludeTipuri={['pv_semnat']}
@@ -328,6 +355,7 @@ function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
             poateIncarca={pv.convocat_de === uid || parti.some(p => p.persoana_id === uid)}
             deschideDocument={() => window.print()} />
         )}
+        </div>
         <p className="nota doar-tipar">Document generat din Conpro BIM. Confirmările sunt înregistrate cu contul fiecărui participant, cu data și ora.</p>
       </article>
 
