@@ -8,6 +8,8 @@ import { IfcAPI } from 'web-ifc';
 import wasmUrl from 'web-ifc/web-ifc.wasm?url';
 import { citesteStructura, numeClasa, proprietati, type ProprietatiIfc, type StructuraIfc } from '../lib/ifc';
 import type { PunctVedere } from '../lib/bcf';
+import type { RegulaModel, RezultatRegula } from '../lib/ids';
+import { verificaModel } from '../lib/verificareIfc';
 
 export type ModelDeAfisat = { cheie: string; nume: string; culoare: string; date: ArrayBuffer };
 export type ModelIncarcat = { cheie: string; nume: string; structura: StructuraIfc; elemente: number };
@@ -18,6 +20,8 @@ export type ControlVizualizator = {
   arata: (pv: PunctVedere | null, guiduri: string[]) => Promise<number>;
   /** Colorează elementele după GlobalId; celelalte devin transparente. null = culorile modelului. */
   coloreaza: (culori: Map<string, string> | null) => void;
+  /** Rulează regulile de informații pe fiecare model deschis. */
+  verifica: (reguli: RegulaModel[]) => { cheie: string; nume: string; rezultat: RezultatRegula[] }[];
 };
 type Props = { modele: ModelDeAfisat[]; onIncarcate?: (m: ModelIncarcat[]) => void; onSelectie?: (e: ElementAles[]) => void };
 
@@ -41,7 +45,8 @@ function apiIfc() {
 
 const Vizualizator = forwardRef<ControlVizualizator, Props>(function Vizualizator({ modele, onIncarcate, onSelectie }, ref) {
   const gazda = useRef<HTMLDivElement>(null);
-  const laSelectie = useRef(onSelectie); laSelectie.current = onSelectie;   // clicul e legat o singură dată, la crearea scenei
+  const laSelectie = useRef(onSelectie); laSelectie.current = onSelectie;
+  const modeleCurente = useRef(modele); modeleCurente.current = modele;   // clicul e legat o singură dată, la crearea scenei
   const st = useRef<Stare | null>(null);
   const [progres, setProgres] = useState<string | null>('Se pregătește vizualizarea…');
   const [eroare, setEroare] = useState<string | null>(null);
@@ -192,6 +197,10 @@ const Vizualizator = forwardRef<ControlVizualizator, Props>(function Vizualizato
       }
       // selecția rămâne evidențiată peste culori
       const uniq = new Map(alese.map(a => [`${a.model}#${a.id}`, a])); evidentiaza([...uniq.values()]);
+    },
+    verifica(reguli) {
+      const s = st.current!;
+      return [...s.grupuri].map(([k, g]) => ({ cheie: k, nume: modeleCurente.current.find(m => m.cheie === k)?.nume ?? k, rezultat: verificaModel(s.api, g.modelID, reguli) }));
     },
     async arata(pv, guiduri) {
       const s = st.current!;

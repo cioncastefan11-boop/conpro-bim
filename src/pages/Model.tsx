@@ -10,6 +10,7 @@ import Observatii, { CampuriObservatie, EticObs, cuiI, incarcaObservatii, lucrea
 import { codFam, codObservatie, codPv } from '../lib/domeniu';
 import { STARI_ELEMENT, numaraStari, stariElemente, trasabilitate, type DateExecutie, type StareElement } from '../lib/executie';
 import { planificaImport, type PlanImport } from '../lib/cobieIfc';
+import VerificareModel, { PanouVerificare } from './VerificareModel';
 
 const Vizualizator = lazy(() => import('../components/Vizualizator'));
 type Props = { proiect: Proiect; membri: Membru[]; rolulMeu?: Rol; uid: string };
@@ -28,10 +29,12 @@ export default function Model(props: Props) {
       <nav className="subfile" aria-label="Modelul">
         <NavLink to="." end>Modelul 3D</NavLink>
         <NavLink to="observatii">Observații pe model{nObs ? ` (${nObs})` : ''}</NavLink>
+        <NavLink to="verificare">Verificarea modelului</NavLink>
       </nav>
       <Routes>
         <Route index element={<VedereModel {...props} />} />
         <Route path="observatii/*" element={<Observatii {...props} />} />
+        <Route path="verificare" element={<VerificareModel {...props} />} />
       </Routes>
     </>
   );
@@ -138,6 +141,7 @@ function VedereModel({ proiect, membri, rolulMeu, uid }: Props) {
         </Suspense>
       )}
 
+      {incarcate.length > 0 && <PanouVerificare proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} ctrl={ctrl} incarcate={incarcate} />}
       {incarcate.length > 0 && <PanouExecutie proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} ctrl={ctrl} selectie={selectie} legCeruta={legCeruta} />}
       {incarcate.length > 0 && <PanouObservatii proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} ctrl={ctrl} selectie={selectie} obsCeruta={obsCeruta} />}
 
