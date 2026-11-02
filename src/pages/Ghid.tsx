@@ -82,8 +82,9 @@ const ROLURI: Rol[] = [
     pasi: [
       { ce: 'Consemnează evenimentele', unde: 'Exploatare → Eveniment nou', detalii: 'Avarii, seisme, inundații, incendii, intervenții, inspecții, cu fotografii. Intrările nu se modifică; o greșeală se corectează cu o intrare nouă. Bifați „Necesită expertiză” când degradarea poate afecta siguranța.' },
       { ce: 'Ține urmărirea comportării în timp', unde: 'Exploatare → Urmărirea în timp', detalii: 'Programul (de la proiectant sau programul tip), inspecțiile la scadență, cu starea fiecărui punct: normal, atenție sau alarmă. Verificările scadente apar în „De făcut”; la final de an tipăriți raportul anual.' },
-      { ce: 'Consultă echipamentele și mentenanța', unde: 'Echipamente', detalii: 'Fiecare echipament cu încăperea, producătorul, garanția și intervalul de mentenanță; se exportă în COBie.' },
-      { ce: 'Urmărește garanțiile și recepția finală', unde: 'Recepție', detalii: 'Perioada de garanție curge de la recepția la terminarea lucrărilor.' },
+      { ce: 'Ține la zi echipamentele', unde: 'Echipamente', detalii: 'Echipamentele noi sau înlocuite, cu încăperea, producătorul, garanția și intervalul de mentenanță; se exportă în COBie.' },
+      { ce: 'Înregistrează reviziile și reparațiile', unde: 'Exploatare → Mentenanță și garanții', detalii: 'Reviziile, verificările periodice (ISCIR, PSI), reparațiile, înlocuirile și defectele, cu fișele atașate. Mentenanța scadentă și garanțiile care expiră apar în „De făcut”.' },
+      { ce: 'Urmărește garanțiile și recepția finală', unde: 'Exploatare → Mentenanță și garanții', detalii: 'Garanția de bună execuție (de la recepție) și garanția fiecărui echipament; defectele apărute în garanție se semnalează constructorului sau garantului.' },
       { ce: 'Păstrează Cartea tehnică', unde: 'Cartea tehnică', detalii: 'Descărcați arhiva electronică; se păstrează pe toată durata de existență a construcției.' },
     ],
   },

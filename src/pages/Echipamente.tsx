@@ -9,7 +9,7 @@ import { genereazaCobie, lipsuriEchipament } from '../lib/cobie';
 
 type Props = { proiect: Proiect; membri: Membru[]; rolulMeu?: Rol; uid: string };
 const SPATII: Rol[] = ['administrator', 'proiectant', 'constructor'];
-const ECHIP: Rol[] = ['administrator', 'constructor', 'subcontractor'];
+const ECHIP: Rol[] = ['administrator', 'constructor', 'subcontractor', 'administrator_cladire'];
 const nr = (v: string) => (v.trim() === '' ? null : Number(v.replace(',', '.')));
 
 export function descarca(blob: Blob, nume: string) {

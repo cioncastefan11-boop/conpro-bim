@@ -426,3 +426,14 @@ export const PROGRAM_TIP_URMARIRE: { ce: string; zona: string; metoda: string; p
   { ce: 'Pierderi din instalațiile de apă și canalizare care pot afecta fundațiile', zona: 'Subsol, cămine, racorduri', metoda: 'Examinare vizuală, citirea contoarelor', prag_alarma: 'Scurgeri continue în subsol sau la fundații' },
   { ce: 'Încărcări și modificări față de proiect', zona: 'Toată construcția', metoda: 'Examinare vizuală; verificarea lucrărilor neautorizate', prag_alarma: 'Pereți structurali străpunși, depozitări grele, schimbări de destinație fără proiect' },
 ];
+
+// ---------- mentenanța și garanțiile (migrarea 0016) ----------
+export const TIPURI_INTERVENTIE: { id: import('./tipuri').TipInterventie; nume: string; ajutor: string }[] = [
+  { id: 'revizie', nume: 'Revizie / mentenanță planificată', ajutor: 'După instrucțiunile producătorului; mută scadența următoarei revizii.' },
+  { id: 'verificare_periodica', nume: 'Verificare periodică obligatorie', ajutor: 'De ex. ISCIR, PSI (stingătoare, hidranți, detecție), instalația de paratrăsnet; mută scadența.' },
+  { id: 'reparatie', nume: 'Reparație', ajutor: 'Remedierea unui defect.' },
+  { id: 'inlocuire', nume: 'Înlocuire', ajutor: 'Echipamentul sau o componentă majoră a fost înlocuită; actualizați și datele echipamentului.' },
+  { id: 'defect', nume: 'Defect constatat', ajutor: 'Defectul se consemnează; reparația se înregistrează separat.' },
+];
+export const numeInterventie = (t: string) => TIPURI_INTERVENTIE.find(x => x.id === t)?.nume ?? t;
+export const codInterventie = (codProiect: string, numar: number) => `${codProiect}-IN-${String(numar).padStart(3, '0')}`;

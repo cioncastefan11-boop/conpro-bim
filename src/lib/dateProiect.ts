@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import type {
   Atasament, DocumentCarte, Echipament, Fam, Incapere, Incercare, LivrareFam, Membru, Nivel, ParticipantPv,
-  ProcesVerbal, Proiect, TipEchipament, EvenimentExploatare, PunctUrmarire, InspectieUrmarire, ConstatareInspectie, Turnare, Receptie, MembruComisie, ObiectieReceptie, DocumentProiect, RevizieDocument,
+  ProcesVerbal, Proiect, TipEchipament, EvenimentExploatare, PunctUrmarire, InspectieUrmarire, ConstatareInspectie, InterventieEchipament, Turnare, Receptie, MembruComisie, ObiectieReceptie, DocumentProiect, RevizieDocument,
 } from './tipuri';
 
 /** Toate datele unui proiect, pentru COBie, Cartea tehnică și arhivă. */
@@ -29,6 +29,7 @@ export type DateProiect = {
   puncte: PunctUrmarire[];
   inspectii: InspectieUrmarire[];
   constatari: ConstatareInspectie[];
+  interventii: InterventieEchipament[];
 };
 
 export async function incarcaDateProiect(proiect: Proiect, membri: Membru[]): Promise<DateProiect> {
@@ -37,7 +38,7 @@ export async function incarcaDateProiect(proiect: Proiect, membri: Membru[]): Pr
     if (r.error) throw r.error;
     return (r.data ?? []) as T[];
   });
-  const [niveluri, incaperi, tipuri, echipamente, documente, pvs, participanti, famuri, livrari, turnari, incercari, atasamente, receptii, comisii, obiectii, documenteProiect, revizii, evenimente, puncte, inspectii, constatari] = await Promise.all([
+  const [niveluri, incaperi, tipuri, echipamente, documente, pvs, participanti, famuri, livrari, turnari, incercari, atasamente, receptii, comisii, obiectii, documenteProiect, revizii, evenimente, puncte, inspectii, constatari, interventii] = await Promise.all([
     q<Nivel>('niveluri', 'ordine'), q<Incapere>('incaperi', 'cod'), q<TipEchipament>('tipuri_echipament', 'denumire'),
     q<Echipament>('echipamente', 'cod'), q<DocumentCarte>('documente_carte', 'creat_la'), q<ProcesVerbal>('procese_verbale', 'numar'),
     q<ParticipantPv>('participanti_pv'), q<Fam>('fam', 'numar'), q<LivrareFam>('livrari_fam', 'data'),
@@ -48,8 +49,9 @@ export async function incarcaDateProiect(proiect: Proiect, membri: Membru[]): Pr
     proiect.exploatare_din ? q<PunctUrmarire>('puncte_urmarire', 'ordine') : Promise.resolve([] as PunctUrmarire[]),
     proiect.exploatare_din ? q<InspectieUrmarire>('inspectii_urmarire', 'numar') : Promise.resolve([] as InspectieUrmarire[]),
     proiect.exploatare_din ? q<ConstatareInspectie>('constatari_inspectie', 'inspectie_id') : Promise.resolve([] as ConstatareInspectie[]),
+    proiect.exploatare_din ? q<InterventieEchipament>('interventii_echipament', 'numar') : Promise.resolve([] as InterventieEchipament[]),
   ]);
-  return { proiect, membri, niveluri, incaperi, tipuri, echipamente, documente, pvs, participanti, famuri, livrari, turnari, incercari, atasamente, receptii, comisii, obiectii, documenteProiect, revizii, evenimente, puncte, inspectii, constatari };
+  return { proiect, membri, niveluri, incaperi, tipuri, echipamente, documente, pvs, participanti, famuri, livrari, turnari, incercari, atasamente, receptii, comisii, obiectii, documenteProiect, revizii, evenimente, puncte, inspectii, constatari, interventii };
 }
 
 export const emailDe = (d: DateProiect, id: string | null) =>
