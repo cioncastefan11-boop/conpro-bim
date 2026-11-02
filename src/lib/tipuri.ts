@@ -128,7 +128,7 @@ export type LivrareFam = {
 };
 
 export type Atasament = {
-  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte' | 'receptie' | 'obiectie_receptie'; entitate_id: string;
+  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte' | 'receptie' | 'obiectie_receptie' | 'revizie_document'; entitate_id: string;
   tip_document: string; nume_fisier: string; cale: string; marime: number | null; incarcat_de: string; incarcat_la: string;
 };
 
@@ -187,4 +187,17 @@ export type ObiectieReceptie = {
   id: string; receptie_id: string; proiect_id: string; numar: number; descriere: string; termen: string; responsabil: string | null;
   stare: 'deschisa' | 'remediata' | 'confirmata'; remediere: string | null; remediat_de: string | null; remediat_la: string | null;
   confirmat_de: string | null; confirmat_la: string | null; creat_de: string; creat_la: string;
+};
+
+// ---------- documentele proiectului, CDE (migrarea 0010) ----------
+export type DocumentProiect = {
+  id: string; proiect_id: string; initiator: string; volum: string; nivel: string; tip: string; rol: string; numar: string;
+  cod: string; titlu: string; descriere: string | null; autor_rol: import('./domeniu').Rol; creat_de: string; creat_la: string;
+};
+export type StareRevizie = 'wip' | 'partajat' | 'publicare_ceruta' | 'publicat' | 'arhivat';
+export type RevizieDocument = {
+  id: string; document_id: string; proiect_id: string; revizie: string; stare: StareRevizie; cod_stare: string;
+  modificari: string | null; autor_rol: import('./domeniu').Rol; creat_de: string; creat_la: string;
+  partajat_de: string | null; partajat_la: string | null; publicare_ceruta_de: string | null; publicare_ceruta_la: string | null;
+  cod_stare_cerut: string | null; aprobat_de: string | null; aprobat_la: string | null; observatii_aprobare: string | null; arhivat_la: string | null;
 };

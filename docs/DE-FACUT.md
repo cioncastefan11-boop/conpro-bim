@@ -6,7 +6,7 @@
   - Cheia API stă ca secret în Supabase (funcție Edge), niciodată în browser.
 
 ## Etape următoare
-- **Documentele proiectului după ISO 19650 (CDE):** denumire standard, revizii, stări (WIP / partajat / publicat / arhivat), aprobare pentru publicare, registrul documentelor, legături din PV și FAM la planșa exactă.
+- **Documente, completări posibile:** convenția de denumire salvată pe proiect (listă de inițiatori, volume, niveluri), încărcarea mai multor documente deodată, transmitale.
 - **Vizualizarea modelului IFC în browser** și preluarea nivelurilor, spațiilor și echipamentelor în COBie. Atenție la limita de 50 MB pe fișier din planul gratuit Supabase.
 - **Semnătura electronică, etapa 2:** semnarea direct din aplicație prin API-ul unui furnizor de semnătură în cloud.
 - **Opțional:** rularea automată a scripturilor SQL în Supabase la fiecare unire în `main` (GitHub Actions, cu cheile ca secrete în GitHub).

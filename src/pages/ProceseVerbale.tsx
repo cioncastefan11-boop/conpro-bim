@@ -206,7 +206,7 @@ function Convocare({ proiect, membri, rolulMeu, uid }: Props) {
       <h3>Conținutul procesului verbal</h3>
       <p className="discret">Îl completează constructorul (RTE). Se poate lăsa și pentru după convocare, dar fără el nimeni nu poate confirma.</p>
       <CampuriContinut valoare={continut} onChange={setContinut}
-        propune={() => propunereContinutPv({ tip, obiect, elemente, referinte: continut.referinte, proiect })} poatePropune={obiect.trim().length >= 3} />
+        propune={() => propunereContinutPv({ tip, obiect, elemente, referinte: continut.referinte, proiect })} poatePropune={obiect.trim().length >= 3} proiectId={proiect.id} />
       {lipsa.length > 0 && lipsaDinEchipa.length === 0 && <p className="mesaj alerta">Lipsește de pe listă: {lipsa.map(numeRol).join(', ')}.</p>}
       <Eroare text={eroare} />
       <div className="actiuni">
@@ -438,9 +438,28 @@ function Anulare({ pvId, onGata }: { pvId: string; onGata: () => void }) {
 // ------------------------------------------------------- Conținutul PV-ului
 type Continut = { descriere: string; referinte: string; concluzii: string };
 
-function CampuriContinut({ valoare, onChange, propune, poatePropune }:
-  { valoare: Continut; onChange: (c: Continut) => void; propune: () => { descriere: string; concluzii: string }; poatePropune: boolean }) {
+/** Documentele care pot fi citate: revizia publicată (în vigoare) sau, dacă nu există, cea partajată. */
+function useDocumenteCitabile(proiectId: string) {
+  const [lista, setLista] = useState<{ cod: string; revizie: string; cod_stare: string; titlu: string }[]>([]);
+  useEffect(() => {
+    Promise.all([
+      supabase.from('documente_proiect').select('id, cod, titlu').eq('proiect_id', proiectId).order('cod'),
+      supabase.from('revizii_document').select('document_id, revizie, cod_stare, stare, creat_la').eq('proiect_id', proiectId).in('stare', ['publicat', 'partajat']).order('creat_la', { ascending: false }),
+    ]).then(([a, b]) => {
+      const rev = (b.data ?? []) as { document_id: string; revizie: string; cod_stare: string; stare: string }[];
+      setLista(((a.data ?? []) as { id: string; cod: string; titlu: string }[]).flatMap(d => {
+        const r = rev.find(x => x.document_id === d.id && x.stare === 'publicat') ?? rev.find(x => x.document_id === d.id);
+        return r ? [{ cod: d.cod, titlu: d.titlu, revizie: r.revizie, cod_stare: r.cod_stare }] : [];
+      }));
+    });
+  }, [proiectId]);
+  return lista;
+}
+
+function CampuriContinut({ valoare, onChange, propune, poatePropune, proiectId }:
+  { valoare: Continut; onChange: (c: Continut) => void; propune: () => { descriere: string; concluzii: string }; poatePropune: boolean; proiectId: string }) {
   const [generat, setGenerat] = useState(false);
+  const citabile = useDocumenteCitabile(proiectId);
   const set = (k: keyof Continut, v: string) => onChange({ ...valoare, [k]: v });
   function genereaza() {
     if ((valoare.descriere.trim() || valoare.concluzii.trim())
@@ -456,6 +475,19 @@ function CampuriContinut({ valoare, onChange, propune, poatePropune }:
           placeholder="ex. Proiect tehnic nr. 12/2026, planșele R-03, R-04; caietul de sarcini CS-02" />
         <small>Se folosește și în textul propus.</small>
       </label>
+      {citabile.length > 0 && (
+        <label>Adaugă un document din proiect
+          <select value="" onChange={e => {
+            const d = citabile.find(x => x.cod === e.target.value); if (!d) return;
+            const ref = `${d.cod} rev. ${d.revizie} (${d.titlu})`;
+            if (!valoare.referinte.includes(d.cod)) set('referinte', valoare.referinte.trim() ? `${valoare.referinte.trim().replace(/[;,.]$/, '')}; ${ref}` : ref);
+          }}>
+            <option value="">— alegeți planșa sau documentul —</option>
+            {citabile.map(d => <option key={d.cod} value={d.cod}>{d.cod} · {d.revizie} ({d.cod_stare}) · {d.titlu}</option>)}
+          </select>
+          <small>Se adaugă codul cu revizia în vigoare, ca să fie clar după ce planșă s-a verificat.</small>
+        </label>
+      )}
       <div className="rand-propunere">
         <button type="button" className="buton" onClick={genereaza} disabled={!poatePropune}>Generează propunere de text</button>
         <span className="discret">Din tipul PV-ului, obiect, elemente, referințe și datele lucrării. Verificați și corectați înainte de salvare.</span>
@@ -492,7 +524,7 @@ function EditareContinut({ pv, proiect, eroareInitiala, onGata }:
     <form className="card formular confirmare" onSubmit={salveaza}>
       <h3>Descrierea lucrărilor și concluziile</h3>
       <p className="discret">Se pot modifica până la prima confirmare. După aceea, toți confirmă exact acest text.</p>
-      <CampuriContinut valoare={c} onChange={setC} poatePropune
+      <CampuriContinut valoare={c} onChange={setC} poatePropune proiectId={proiect.id}
         propune={() => propunereContinutPv({ tip: pv.tip, obiect: pv.obiect, elemente: pv.elemente, referinte: c.referinte, proiect })} />
       <Eroare text={eroare} />
       <div className="actiuni">

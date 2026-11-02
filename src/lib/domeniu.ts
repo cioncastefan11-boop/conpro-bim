@@ -341,3 +341,48 @@ export const numeReceptie = (r: Pick<Receptie, 'tip' | 'partiala'>) =>
   (r.tip === 'terminare' ? 'Recepția la terminarea lucrărilor' : 'Recepția finală') + (r.partiala ? ' (parțială)' : '');
 export const codReceptie = (proiect: string, numar: number) => `REC-${proiect}-${String(numar).padStart(2, '0')}`;
 export const adaugaZile = (iso: string, zile: number) => { const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + zile); return d.toISOString().slice(0, 10); };
+
+// ---------- documentele proiectului după ISO 19650 (migrarea 0010) ----------
+// Codurile din anexa națională la ISO 19650-2 (tipuri, roluri, stări), cu denumiri în română.
+export const TIPURI_DOCUMENT: { id: string; nume: string }[] = [
+  { id: 'DR', nume: 'Planșă (desen)' }, { id: 'M3', nume: 'Model 3D' }, { id: 'M2', nume: 'Model 2D' },
+  { id: 'SP', nume: 'Caiet de sarcini / specificație' }, { id: 'RP', nume: 'Raport' }, { id: 'CA', nume: 'Calcule' },
+  { id: 'SH', nume: 'Tabel / listă' }, { id: 'BQ', nume: 'Antemăsurătoare' }, { id: 'SU', nume: 'Studiu, ridicare topo, geotehnic' },
+  { id: 'MS', nume: 'Procedură / metodă de execuție' }, { id: 'PR', nume: 'Grafic de execuție' }, { id: 'RI', nume: 'Cerere de informații (RFI)' },
+  { id: 'MI', nume: 'Minută de ședință' }, { id: 'CO', nume: 'Corespondență' }, { id: 'HS', nume: 'Sănătate și securitate' },
+  { id: 'VS', nume: 'Vizualizare / randare' }, { id: 'CR', nume: 'Raport de coordonare (clash)' }, { id: 'IE', nume: 'Fișier de schimb (IFC, COBie)' },
+];
+export const ROLURI_DOCUMENT: { id: string; nume: string }[] = [
+  { id: 'A', nume: 'Arhitectură' }, { id: 'S', nume: 'Rezistență (structură)' }, { id: 'M', nume: 'Instalații mecanice (HVAC)' },
+  { id: 'E', nume: 'Instalații electrice' }, { id: 'P', nume: 'Instalații sanitare' }, { id: 'H', nume: 'Încălzire și ventilare' },
+  { id: 'C', nume: 'Inginerie civilă, drumuri' }, { id: 'D', nume: 'Canalizare, drenaj' }, { id: 'G', nume: 'Topografie, geotehnică' },
+  { id: 'L', nume: 'Peisagistică' }, { id: 'I', nume: 'Design interior' }, { id: 'Q', nume: 'Devize, cantități' },
+  { id: 'F', nume: 'Administrare clădire' }, { id: 'K', nume: 'Beneficiar' }, { id: 'W', nume: 'Constructor' },
+  { id: 'X', nume: 'Subcontractor' }, { id: 'Y', nume: 'Proiectant de specialitate' }, { id: 'Z', nume: 'General (mai multe discipline)' },
+];
+export const CODURI_STARE: Record<string, { nume: string; ton: Stare['ton'] }> = {
+  S0: { nume: 'Lucru în curs', ton: 'neutru' },
+  S1: { nume: 'Pentru coordonare', ton: 'atentie' },
+  S2: { nume: 'Pentru informare', ton: 'atentie' },
+  S3: { nume: 'Pentru verificare și comentarii', ton: 'atentie' },
+  S4: { nume: 'Pentru aprobarea etapei', ton: 'atentie' },
+  A: { nume: 'Aprobat pentru execuție', ton: 'ok' },
+  B: { nume: 'Aprobat parțial, cu comentarii', ton: 'ok' },
+  CR: { nume: 'Ca executat (as-built)', ton: 'ok' },
+};
+export const numeCodStare = (c: string) => CODURI_STARE[c]?.nume ?? CODURI_STARE[c.replace(/[0-9]+$/, '')]?.nume ?? c;
+export const tonCodStare = (c: string): Stare['ton'] => CODURI_STARE[c]?.ton ?? CODURI_STARE[c.replace(/[0-9]+$/, '')]?.ton ?? 'neutru';
+export const STARI_CDE: Record<import('./tipuri').StareRevizie, { eticheta: string; ton: Stare['ton'] }> = {
+  wip: { eticheta: 'În lucru', ton: 'neutru' },
+  partajat: { eticheta: 'Partajat', ton: 'atentie' },
+  publicare_ceruta: { eticheta: 'La aprobare', ton: 'atentie' },
+  publicat: { eticheta: 'Publicat', ton: 'ok' },
+  arhivat: { eticheta: 'Arhivat', ton: 'neutru' },
+};
+export const numeTipDocument = (t: string) => TIPURI_DOCUMENT.find(x => x.id === t)?.nume ?? t;
+export const numeRolDocument = (r: string) => ROLURI_DOCUMENT.find(x => x.id === r)?.nume ?? r;
+/** Următoarea revizie: P01 → P02 în lucru și partajare; C01, C02 după publicare. */
+export function revizieUrmatoare(existente: string[], publicata: boolean): string {
+  const nr = (pref: string) => existente.filter(r => r.startsWith(pref)).map(r => parseInt(r.slice(1, 3), 10)).reduce((a, b) => Math.max(a, b), 0);
+  return publicata ? `C${String(nr('C') + 1).padStart(2, '0')}` : `P${String(nr('P') + 1).padStart(2, '0')}`;
+}
