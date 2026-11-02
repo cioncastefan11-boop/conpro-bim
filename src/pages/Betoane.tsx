@@ -7,6 +7,7 @@ import {
 import type { Fam, Incercare, Membru, ProcesVerbal, Proiect, Turnare } from '../lib/tipuri';
 import { Eroare, Eticheta, Gol, mesajEroare } from '../components/ui';
 import Atasamente from '../components/Atasamente';
+import ElementeModel from '../components/ElementeModel';
 import { descarca } from './Echipamente';
 import { excelCondica, htmlCondica, puncteLucru } from '../lib/condica';
 
@@ -319,7 +320,7 @@ function TurnareNoua({ proiect, membri, rolulMeu, uid }: Props) {
 }
 
 // ------------------------------------------------------------ Detaliul turnării
-function DetaliuTurnare({ proiect, membri, rolulMeu }: Props) {
+function DetaliuTurnare({ proiect, membri, rolulMeu, uid }: Props) {
   const { turnareId = '' } = useParams();
   const [t, setT] = useState<Turnare | null>(null);
   const [c, setC] = useState<CampuriT>(golT());
@@ -405,6 +406,7 @@ function DetaliuTurnare({ proiect, membri, rolulMeu }: Props) {
           <IncercareNoua proiectId={proiect.id} turnare={t} codProiect={proiect.cod} onGata={incarca} />
         )}
 
+        <ElementeModel proiectId={proiect.id} entitate="turnare" entitateId={t.id} uid={uid} rolulMeu={rolulMeu} />
         <Atasamente proiectId={proiect.id} entitate="turnare" entitateId={t.id} membri={membri}
           poateIncarca={!!rolulMeu && ['constructor', 'subcontractor', 'diriginte'].includes(rolulMeu)}
           tipuri={['bon_livrare', 'poza', 'altul']} titlu="Bonuri și fotografii" gol="Se pot atașa bonurile de livrare și fotografii de la turnare." />

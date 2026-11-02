@@ -8,6 +8,7 @@ import {
 import type { Fam, LivrareFam, Membru, Proiect } from '../lib/tipuri';
 import { Eroare, Eticheta, Gol, mesajEroare } from '../components/ui';
 import Atasamente from '../components/Atasamente';
+import ElementeModel from '../components/ElementeModel';
 
 type Props = { proiect: Proiect; membri: Membru[]; rolulMeu?: Rol; uid: string };
 const AUTORI: Rol[] = ['constructor', 'subcontractor'];
@@ -187,7 +188,7 @@ function FamNou({ proiect, rolulMeu, uid }: Props) {
 }
 
 // ------------------------------------------------------------------- Detaliu
-function Detaliu({ proiect, membri, rolulMeu }: Props) {
+function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
   const { famId = '' } = useParams();
   const nav = useNavigate();
   const [f, setF] = useState<Fam | null>(null);
@@ -295,6 +296,7 @@ function Detaliu({ proiect, membri, rolulMeu }: Props) {
         )}
         <Eroare text={eroare} />
 
+        <ElementeModel proiectId={proiect.id} entitate="fam" entitateId={f.id} uid={uid} rolulMeu={rolulMeu} />
         <Atasamente proiectId={proiect.id} entitate="fam" entitateId={f.id} poateIncarca={editabil} membri={membri}
           tipuri={['fisa_tehnica', 'dop', 'agrement', 'certificat', 'instructiuni', 'altul']}
           gol={editabil ? 'Atașați fișa tehnică și declarația de performanță.' : 'Niciun document atașat.'} />

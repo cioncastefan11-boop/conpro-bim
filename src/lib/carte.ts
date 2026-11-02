@@ -220,6 +220,7 @@ ${pv.alti_participanti ? `<tr><th>Alți participanți</th><td>${esc(pv.alti_part
   if (pv.referinte_proiect) corp += `<h3>Documentația de referință</h3><p>${esc(pv.referinte_proiect)}</p>`;
   if (pv.descriere_lucrari) corp += `<h3>Descrierea lucrărilor</h3><p>${esc(pv.descriere_lucrari)}</p>`;
   if (pv.concluzii) corp += `<h3>Concluzii</h3><p><b>${esc(pv.concluzii)}</b></p>`;
+  corp += elementeModel(d, 'pv', pv.id);
   if (t.ordine426) corp += '<p class="discret">Proiectantul a confirmat după dirigintele de șantier și responsabilul tehnic cu execuția (art. 426 alin. 3 din Legea 169/2026).</p>';
   // semnăturile, în ordinea art. 426: diriginte, RTE, ceilalți, proiectantul la final
   const ord = (r: string) => (r === 'diriginte' ? 0 : r === 'constructor' ? 1 : r === 'proiectant' && t.ordine426 ? 9 : 5);
@@ -292,6 +293,7 @@ export function htmlFam(d: DateProiect, famId: string): string {
     bloc += `<div class="semnatura"><span class="calitate">${x.eticheta}</span><b>${esc(id ? numeDe(d, id) : '—')}</b>${firma(id) ? `<span>${esc(firma(id))}</span>` : ''}<div class="linie">Semnătura</div>${x.mentiune ? `<small>${esc(x.mentiune)}</small>` : ''}${x.cand ? `<small>Înregistrat în Conpro BIM la ${new Date(x.cand).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' })}</small>` : ''}</div>`;
   }
   bloc += '</div></div>';
+  corp += elementeModel(d, 'fam', f.id);
   const liv = d.livrari.filter(l => l.fam_id === f.id);
   if (liv.length) {
     corp += '<h3>Verificarea la livrare</h3><table><tr><th>Data</th><th>Cantitate</th><th>Lot</th><th>Document</th><th>Rezultat</th></tr>';
@@ -427,4 +429,11 @@ export function htmlInterventii(d: DateProiect): string {
 <td>${esc(i.executant ?? '')}</td><td>${esc(numeDe(d, i.creat_de))}</td></tr>`;
   }
   return doc(`Registrul intervențiilor ${p.cod}`, corp + '</table>');
+}
+
+/** Elementele din modelul IFC legate de un document (trasabilitatea), pentru documentele tipărite. */
+function elementeModel(d: DateProiect, entitate: string, id: string): string {
+  const l = d.legaturi.filter(x => x.entitate === entitate && x.entitate_id === id);
+  if (!l.length) return '';
+  return `<h3>Elementele din modelul IFC</h3><p class="discret">${l.map(x => `${esc(x.nume || x.clasa || 'element')} (<span class="cod">${esc(x.guid)}</span>)`).join('; ')}</p>`;
 }

@@ -8,6 +8,7 @@ import {
 import type { Membru, ParticipantPv, ProcesVerbal, Proiect } from '../lib/tipuri';
 import { Eroare, Eticheta, Gol, mesajEroare } from '../components/ui';
 import Atasamente from '../components/Atasamente';
+import ElementeModel from '../components/ElementeModel';
 import DocumentSemnat from '../components/DocumentSemnat';
 
 type Props = { proiect: Proiect; membri: Membru[]; rolulMeu?: Rol; uid: string };
@@ -345,6 +346,7 @@ function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
           </div>
         </section>
         <div className="nu-tipari">
+        <ElementeModel proiectId={proiect.id} entitate="pv" entitateId={pv.id} uid={uid} rolulMeu={rolulMeu} />
         <Atasamente proiectId={proiect.id} entitate="pv" entitateId={pv.id} membri={membri}
           poateIncarca={pv.stare !== 'anulat' && (pv.convocat_de === uid || parti.some(p => p.persoana_id === uid))}
           tipuri={['poza', 'pv_scanat', 'altul']} titlu="Documente și fotografii" excludeTipuri={['pv_semnat']}

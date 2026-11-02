@@ -16,6 +16,8 @@ export type ElementAles = { guid: string; nume: string; clasa: string; model: st
 export type ControlVizualizator = {
   capteaza: () => { punct_vedere: PunctVedere; captura: () => Promise<Blob | null> };
   arata: (pv: PunctVedere | null, guiduri: string[]) => Promise<number>;
+  /** Colorează elementele după GlobalId; celelalte devin transparente. null = culorile modelului. */
+  coloreaza: (culori: Map<string, string> | null) => void;
 };
 type Props = { modele: ModelDeAfisat[]; onIncarcate?: (m: ModelIncarcat[]) => void; onSelectie?: (e: ElementAles[]) => void };
 
@@ -27,7 +29,8 @@ type Stare = {
   api: IfcAPI; scena: THREE.Scene; camera: THREE.PerspectiveCamera; randare: THREE.WebGLRenderer; control: OrbitControls;
   grupuri: Map<string, { grup: THREE.Group; modelID: number; structura: StructuraIfc }>;
   plan: THREE.Plane; cutie: THREE.Box3; decalaj: THREE.Vector3 | null; materiale: Set<THREE.Material>; ales: THREE.Mesh[]; original: Map<THREE.Mesh, THREE.Material>;
-  selectie: Map<string, ElementAles>; guiduri: Map<string, { model: string; id: number }> | null;
+  selectie: Map<string, ElementAles>; guiduri: Map<string, { model: string; id: number }> | null; inapoi: Map<string, string> | null;
+  colorate: Map<THREE.Mesh, THREE.Material>;
 };
 
 let apiGlobal: Promise<IfcAPI> | null = null;
@@ -67,7 +70,7 @@ const Vizualizator = forwardRef<ControlVizualizator, Props>(function Vizualizato
     const grila = new THREE.GridHelper(200, 100, '#cbd5e1', '#e2e8f0'); grila.position.y = -0.01; scena.add(grila);
 
     const s: Stare = { api: null as unknown as IfcAPI, scena, camera, randare, control, grupuri: new Map(), plan: new THREE.Plane(new THREE.Vector3(0, -1, 0), 0),
-      cutie: new THREE.Box3(), decalaj: null, materiale: new Set(), ales: [], original: new Map(), selectie: new Map(), guiduri: null };
+      cutie: new THREE.Box3(), decalaj: null, materiale: new Set(), ales: [], original: new Map(), selectie: new Map(), guiduri: null, inapoi: null, colorate: new Map() };
     st.current = s;
     const marime = () => { const w = el.clientWidth, h = el.clientHeight; randare.setSize(w, h, false); camera.aspect = w / Math.max(h, 1); camera.updateProjectionMatrix(); };
     const ro = new ResizeObserver(marime); ro.observe(el); marime();
@@ -144,6 +147,7 @@ const Vizualizator = forwardRef<ControlVizualizator, Props>(function Vizualizato
       ids.forEach(id => { try { const v = (s.api.GetLine(g.modelID, id) as { GlobalId?: { value: string } }).GlobalId?.value; if (v) m.set(v, { model: k, id }); } catch { /* fără GlobalId */ } });
     });
     s.guiduri = m;
+    s.inapoi = new Map([...m].map(([g, v]) => [`${v.model}#${v.id}`, g]));
     return m;
   }
 
@@ -158,6 +162,36 @@ const Vizualizator = forwardRef<ControlVizualizator, Props>(function Vizualizato
         punct_vedere: { camera_view_point: laIfc(poz), camera_direction: laIfc(dir), camera_up_vector: laIfc(up), field_of_view: Math.round(s.camera.fov) },
         captura: () => new Promise<Blob | null>(r => { s.randare.render(s.scena, s.camera); s.randare.domElement.toBlob(b => r(b), 'image/png'); }),
       };
+    },
+    coloreaza(culori) {
+      const s = st.current!;
+      const alese = s.ales.map(x => x.userData as { model: string; id: number });
+      evidentiaza([]);
+      s.colorate.forEach((mat, me) => { me.material = mat; });
+      s.colorate.clear();
+      if (culori) {
+        indexGuid();
+        const plan = [...s.materiale][0]?.clippingPlanes ?? [];
+        const cache = new Map<string, THREE.Material>();
+        const material = (c: string) => {
+          let m = cache.get(c);
+          if (!m) {
+            m = c === 'fantoma'
+              ? new THREE.MeshLambertMaterial({ color: '#cbd5e1', transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide, clippingPlanes: plan })
+              : new THREE.MeshLambertMaterial({ color: c, side: THREE.DoubleSide, clippingPlanes: plan });
+            cache.set(c, m); s.materiale.add(m);
+          }
+          return m;
+        };
+        s.grupuri.forEach((g, k) => g.grup.traverse(o => {
+          const me = o as THREE.Mesh; if (!me.isMesh) return;
+          const guid = s.inapoi!.get(`${k}#${me.userData.id}`);
+          s.colorate.set(me, me.material as THREE.Material);
+          me.material = material(guid && culori.get(guid) ? culori.get(guid)! : 'fantoma');
+        }));
+      }
+      // selecția rămâne evidențiată peste culori
+      const uniq = new Map(alese.map(a => [`${a.model}#${a.id}`, a])); evidentiaza([...uniq.values()]);
     },
     async arata(pv, guiduri) {
       const s = st.current!;
@@ -242,7 +276,7 @@ const Vizualizator = forwardRef<ControlVizualizator, Props>(function Vizualizato
           });
           const structura = citesteStructura(s.api, modelID);
           s.grupuri.set(m.cheie, { grup, modelID, structura });
-          s.guiduri = null;
+          s.guiduri = null; s.inapoi = null;
           grup.updateMatrixWorld(true);
           if (!s.decalaj) { const b = new THREE.Box3().setFromObject(grup); s.decalaj = b.isEmpty() ? new THREE.Vector3() : new THREE.Vector3(b.getCenter(new THREE.Vector3()).x, b.min.y, b.getCenter(new THREE.Vector3()).z); }
           grup.position.copy(s.decalaj).multiplyScalar(-1);
