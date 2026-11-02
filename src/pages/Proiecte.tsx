@@ -17,6 +17,7 @@ export default function Proiecte() {
   const [formular, setFormular] = useState(false);
   const [invitatiiNoi, setInvitatiiNoi] = useState(0);
   const [deConfirmat, setDeConfirmat] = useState<DeConfirmat[]>([]);
+  const [deFacut, setDeFacut] = useState<Map<string, number>>(new Map());
 
   const incarca = useCallback(async () => {
     // Întâi se acceptă invitațiile primite pe emailul contului.
@@ -35,6 +36,9 @@ export default function Proiecte() {
       .eq('persoana_id', uid).is('confirmat_la', null)
       .in('procese_verbale.stare', ['convocat', 'in_semnare']);
     setDeConfirmat((pv.data as unknown as DeConfirmat[]) ?? []);
+    const { data: sar } = await supabase.rpc('sarcinile_mele');
+    const nr = new Map<string, number>(); ((sar as { proiect_id: string }[]) ?? []).forEach(x => nr.set(x.proiect_id, (nr.get(x.proiect_id) ?? 0) + 1));
+    setDeFacut(nr);
   }, [uid]);
 
   useEffect(() => { incarca(); }, [incarca]);
@@ -84,6 +88,7 @@ export default function Proiecte() {
                   {p.clasa_consecinte && <span className="eticheta neutru">{p.clasa_consecinte}</span>}
                   {p.regim_legal && <span className="eticheta neutru">{p.regim_legal}</span>}
                   {(p.ac_valabil_pana || p.ac_prelungit_pana) && <Eticheta stare={ac} />}
+                  {deFacut.get(p.id) ? <span className="eticheta atentie">{deFacut.get(p.id)} de făcut</span> : null}
                   {p.exploatare_din && <span className="eticheta ok">În exploatare</span>}
                   {p.arhivat && <span className="eticheta neutru">Arhivat</span>}
                 </div>
