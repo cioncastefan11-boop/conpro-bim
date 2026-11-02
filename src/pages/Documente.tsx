@@ -7,7 +7,8 @@ import {
 } from '../lib/domeniu';
 import type { Atasament, DocumentProiect, ElementConventie, Membru, Proiect, RevizieDocument } from '../lib/tipuri';
 import { Eroare, Eticheta, Gol, mesajEroare } from '../components/ui';
-import Atasamente from '../components/Atasamente';
+import Atasamente, { BUCKET, MAX, numeSigur } from '../components/Atasamente';
+import { codDin, evalueaza, recunoaste, type RandIncarcare } from '../lib/incarcare';
 import { descarca } from './Echipamente';
 
 type Props = { proiect: Proiect; membri: Membru[]; rolulMeu?: Rol; uid: string };
@@ -18,6 +19,7 @@ export default function Documente(props: Props) {
     <Routes>
       <Route index element={<Lista {...props} />} />
       <Route path="nou" element={<Nou {...props} />} />
+      <Route path="incarcare" element={<IncarcareMultipla {...props} />} />
       <Route path=":documentId" element={<Detaliu {...props} />} />
     </Routes>
   );
@@ -131,6 +133,7 @@ function Lista({ proiect, membri, rolulMeu }: Props) {
           </div>
           <div className="actiuni-antet">
             {docs.length > 0 && <button className="buton" onClick={registru}>Registrul (Excel)</button>}
+            {poateAdauga && <Link className="buton" to="incarcare">Încarcă mai multe</Link>}
             {poateAdauga && <Link className="buton principal" to="nou">Document nou</Link>}
           </div>
         </div>
@@ -436,5 +439,150 @@ function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
         {rev.length === 0 && <p className="discret">Nicio revizie vizibilă încă: revizia în lucru o vede doar echipa care o produce.</p>}
       </article>
     </>
+  );
+}
+
+// --------------------------------------------------------- Încărcare multiplă
+function IncarcareMultipla({ proiect, membri, rolulMeu, uid }: Props) {
+  const { docs, revizii, incarca } = useDocumente(proiect.id);
+  const [randuri, setRanduri] = useState<RandIncarcare[]>([]);
+  const [partajare, setPartajare] = useState('');
+  const [lucreaza, setLucreaza] = useState(false);
+  const [stari, setStari] = useState<Record<string, { ok: boolean; text: string }>>({});
+  const [peste, setPeste] = useState(false);
+  const conv = proiect.standard_info ?? {};
+  const eu = membri.find(m => m.persoana_id === uid);
+  const rolImplicit = rolulMeu === 'constructor' ? 'W' : rolulMeu === 'subcontractor' ? 'X' : rolulMeu === 'beneficiar' ? 'K' : rolulMeu === 'administrator' || rolulMeu === 'diriginte' ? 'Z' : 'A';
+  const iniImplicit = (() => { const i = initialeFirma(eu?.persoane?.firme?.denumire); return !conv.initiatori?.length || conv.initiatori.some(x => x.cod === i) ? i : conv.initiatori[0].cod; })();
+  const cifre = conv.cifre && conv.cifre >= 4 && conv.cifre <= 6 ? conv.cifre : 4;
+  if (!rolulMeu || rolulMeu === 'cititor') return <Gol titlu="Documentele le adaugă echipa de proiect" />;
+  if (!docs) return <p className="discret">Se încarcă…</p>;
+  const eaEchipa = (d: DocumentProiect) => echipa(d, uid, rolulMeu);
+  const reevalueaza = (l: RandIncarcare[]) => l.map(r => evalueaza(r, proiect.cod, docs, revizii, conv, eaEchipa));
+
+  function adauga(lista: FileList | File[]) {
+    const noi = [...randuri];
+    const urmator = new Map<string, number>();
+    const nr = (tip: string, rol: string) => {
+      const k = `${tip}-${rol}`;
+      const max = Math.max(urmator.get(k) ?? 0, ...docs!.filter(d => d.tip === tip && d.rol === rol).map(d => parseInt(d.numar, 10)), ...noi.filter(x => x.tip === tip && x.rol === rol).map(x => parseInt(x.numar, 10) || 0), 0);
+      urmator.set(k, max + 1);
+      return String(max + 1).padStart(cifre, '0');
+    };
+    for (const f of Array.from(lista)) {
+      if (f.size > MAX) { setStari(s => ({ ...s, ['mare-' + f.name]: { ok: false, text: `${f.name} are peste 50 MB (limita planului gratuit Supabase).` } })); continue; }
+      const c = recunoaste(f.name, proiect.cod);
+      const existent = c.recunoscut ? noi.find(x => codDin(proiect.cod, x) === codDin(proiect.cod, c) && (x.revizie === (c.revizie ?? x.revizie))) : undefined;
+      if (existent) { existent.fisiere = [...existent.fisiere, f]; continue; }
+      const rol = c.rol || rolImplicit;
+      noi.push({ ...c, initiator: c.initiator || iniImplicit, rol, numar: c.numar || nr(c.tip, rol), cheie: crypto.randomUUID(), fisiere: [f], revizie: c.revizie ?? '',
+        actiune: 'eroare', documentId: null, revizieId: null, mesaj: null });
+    }
+    setRanduri(reevalueaza(noi));
+  }
+  const schimba = (cheie: string, k: keyof RandIncarcare, v: string) => setRanduri(reevalueaza(randuri.map(r => (r.cheie === cheie ? { ...r, [k]: k === 'titlu' ? v : v.toUpperCase().replace(/[^A-Z0-9.]/g, '') } : r))));
+  const scoate = (cheie: string) => setRanduri(randuri.filter(r => r.cheie !== cheie));
+
+  async function urca(revId: string, f: File) {
+    const cale = `${proiect.id}/revizie_document/${revId}/${crypto.randomUUID().slice(0, 8)}-${numeSigur(f.name)}`;
+    const up = await supabase.storage.from(BUCKET).upload(cale, f, { contentType: f.type || undefined, upsert: false });
+    if (up.error) throw new Error(`${f.name}: ${up.error.message}`);
+    const { error } = await supabase.from('atasamente').insert({ proiect_id: proiect.id, entitate: 'revizie_document', entitate_id: revId, tip_document: 'document', nume_fisier: f.name, cale, marime: f.size });
+    if (error) throw error;
+  }
+  async function porneste() {
+    setLucreaza(true);
+    for (const r of randuri.filter(x => x.actiune !== 'eroare' && !stari[x.cheie]?.ok)) {
+      const st = (ok: boolean, text: string) => setStari(s => ({ ...s, [r.cheie]: { ok, text } }));
+      try {
+        st(true, 'Se încarcă…');
+        let docId = r.documentId, revId = r.revizieId;
+        if (r.actiune === 'document_nou') {
+          const { error } = await supabase.from('documente_proiect').insert({ proiect_id: proiect.id, initiator: r.initiator, volum: r.volum, nivel: r.nivel, tip: r.tip, rol: r.rol, numar: r.numar, titlu: r.titlu.trim() });
+          if (error) throw error;
+          docId = (await supabase.from('documente_proiect').select('id').eq('proiect_id', proiect.id).eq('cod', codDin(proiect.cod, r)).single()).data?.id ?? null;
+        }
+        if (r.actiune === 'document_nou' || r.actiune === 'revizie_noua') {
+          const { error } = await supabase.from('revizii_document').insert({ document_id: docId, revizie: r.revizie, modificari: r.actiune === 'document_nou' ? 'Prima emitere' : null });
+          if (error) throw error;
+          revId = (await supabase.from('revizii_document').select('id').eq('document_id', docId).eq('revizie', r.revizie).single()).data?.id ?? null;
+        }
+        if (!revId) throw new Error('Revizia nu a putut fi creată.');
+        for (const f of r.fisiere) await urca(revId, f);
+        if (partajare) { const { error } = await supabase.rpc('revizie_partajeaza', { p_rev: revId, p_cod_stare: partajare }); if (error) throw error; }
+        st(true, partajare ? `Încărcat și partajat (${partajare}).` : 'Încărcat, în lucru.');
+      } catch (e) {
+        st(false, mesajEroare(e as { message?: string }) ?? 'Eroare');
+      }
+    }
+    setLucreaza(false);
+    incarca();
+  }
+
+  const valide = randuri.filter(r => r.actiune !== 'eroare');
+  const gata = randuri.length > 0 && randuri.every(r => stari[r.cheie]?.ok && stari[r.cheie].text !== 'Se încarcă…');
+  const ETICHETE = { document_nou: { eticheta: 'Document nou', ton: 'ok' }, revizie_noua: { eticheta: 'Revizie nouă', ton: 'atentie' }, adauga_la_wip: { eticheta: 'La revizia în lucru', ton: 'neutru' }, eroare: { eticheta: 'De corectat', ton: 'alerta' } } as const;
+
+  return (
+    <div className="card formular">
+      <p><Link to=".." className="inapoi">← Documentele proiectului</Link></p>
+      <h2>Încarcă mai multe documente</h2>
+      <p className="discret">Dacă numele fișierelor încep cu codul documentului (ex. <code>{proiect.cod}-SP-ZZ-01-DR-S-0101-P02 - Plan cofraj.pdf</code>), aplicația recunoaște codul, revizia și titlul. Fișierele cu același cod (ex. PDF și DWG) intră în aceeași revizie. Pentru celelalte, completați codul în tabel.</p>
+      <label className={`zona-fisiere ${peste ? 'peste' : ''}`}
+        onDragOver={e => { e.preventDefault(); setPeste(true); }} onDragLeave={() => setPeste(false)}
+        onDrop={e => { e.preventDefault(); setPeste(false); adauga(e.dataTransfer.files); }}>
+        <b>Trageți fișierele aici</b> sau dați clic pentru a le alege
+        <input type="file" multiple onChange={e => { if (e.target.files) adauga(e.target.files); e.target.value = ''; }} />
+      </label>
+      {Object.entries(stari).filter(([k]) => k.startsWith('mare-')).map(([k, v]) => <p key={k} className="mesaj alerta">{v.text}</p>)}
+      {randuri.length > 0 && (
+        <>
+          <div className="tabel-wrap">
+            <table className="tabel stivuit tabel-incarcare">
+              <thead><tr><th>Fișiere</th><th>Cod</th><th>Titlu</th><th>Revizia</th><th>Ce se întâmplă</th><th /></tr></thead>
+              <tbody>
+                {randuri.map(r => {
+                  const s = stari[r.cheie];
+                  const blocat = lucreaza || !!s?.ok;
+                  return (
+                    <tr key={r.cheie}>
+                      <td data-eticheta="Fișiere">{r.fisiere.map(f => <div key={f.name} className="nume-fisier">{f.name}</div>)}</td>
+                      <td data-eticheta="Cod">
+                        <div className="cod-editabil">
+                          <span>{proiect.cod}</span>
+                          {(['initiator', 'volum', 'nivel', 'tip', 'rol', 'numar'] as const).map(k => (
+                            <input key={k} value={r[k]} disabled={blocat} onChange={e => schimba(r.cheie, k, e.target.value)} aria-label={k} title={k}
+                              style={{ width: `${Math.max(2, r[k].length) + 1.5}ch` }} />
+                          ))}
+                        </div>
+                        {r.recunoscut && <small className="linia2">recunoscut din numele fișierului</small>}
+                      </td>
+                      <td data-eticheta="Titlu"><input value={r.titlu} disabled={blocat || r.actiune !== 'document_nou'} onChange={e => schimba(r.cheie, 'titlu', e.target.value)} /></td>
+                      <td data-eticheta="Revizia"><b>{r.revizie || '—'}</b></td>
+                      <td data-eticheta="Ce se întâmplă">
+                        {s ? <span className={s.ok ? 'stare-ok' : 'stare-eroare'}>{s.text}</span>
+                          : <><Eticheta stare={ETICHETE[r.actiune]} />{r.mesaj && <small className="linia2">{r.mesaj}</small>}</>}
+                      </td>
+                      <td>{!blocat && <button className="buton mic" onClick={() => scoate(r.cheie)}>Scoate</button>}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="actiuni stanga">
+            <label className="fara-eticheta">După încărcare
+              <select value={partajare} onChange={e => setPartajare(e.target.value)} disabled={lucreaza}>
+                <option value="">rămân în lucru (S0), le verific și partajez după</option>
+                {['S1', 'S2', 'S3', 'S4'].map(k => <option key={k} value={k}>partajează direct: {k} · {CODURI_STARE[k].nume}</option>)}
+              </select>
+            </label>
+            {gata ? <Link className="buton principal" to="..">Gata, înapoi la documente</Link>
+              : <button className="buton principal" onClick={porneste} disabled={lucreaza || valide.length === 0}>{lucreaza ? 'Se încarcă…' : `Încarcă ${valide.length} ${valide.length === 1 ? 'document' : 'documente'}`}</button>}
+            {randuri.length > valide.length && !gata && <small className="discret">{randuri.length - valide.length} de corectat în tabel</small>}
+          </div>
+        </>
+      )}
+    </div>
   );
 }

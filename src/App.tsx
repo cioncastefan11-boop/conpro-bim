@@ -9,6 +9,9 @@ import Profil from './pages/Profil';
 import Configurare from './pages/Configurare';
 import Registru from './pages/Registru';
 import DeFacut, { incarcaSarcini } from './pages/DeFacut';
+import Ghid from './pages/Ghid';
+import { CadruPublic, PaginaLegala, Subsol } from './pages/PaginaPublica';
+import { AcceptareTermeni } from './components/AcceptareTermeni';
 
 export default function App() {
   const { sesiune, incarcare } = useSesiune();
@@ -24,6 +27,10 @@ export default function App() {
     return (
       <Routes>
         <Route path="/autentificare" element={<Autentificare />} />
+        <Route path="/ghid" element={<CadruPublic><Ghid public /></CadruPublic>} />
+        <Route path="/confidentialitate" element={<CadruPublic><PaginaLegala text="confidentialitate" /></CadruPublic>} />
+        <Route path="/termeni" element={<CadruPublic><PaginaLegala text="termeni" /></CadruPublic>} />
+        <Route path="/acord-prelucrare" element={<CadruPublic><PaginaLegala text="acord" /></CadruPublic>} />
         <Route path="*" element={<Navigate to="/autentificare" replace />} />
       </Routes>
     );
@@ -50,9 +57,15 @@ export default function App() {
           <Route path="/registru" element={<Registru />} />
           <Route path="/de-facut" element={<DeFacut />} />
           <Route path="/profil" element={<Profil />} />
+          <Route path="/ghid" element={<Ghid />} />
+          <Route path="/confidentialitate" element={<PaginaLegala text="confidentialitate" />} />
+          <Route path="/termeni" element={<PaginaLegala text="termeni" />} />
+          <Route path="/acord-prelucrare" element={<PaginaLegala text="acord" />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      <Subsol />
+      <AcceptareTermeni />
     </div>
   );
 }

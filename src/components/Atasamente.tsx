@@ -4,11 +4,11 @@ import { TIPURI_ATASAMENT } from '../lib/domeniu';
 import type { Atasament, Membru } from '../lib/tipuri';
 import { Eroare, mesajEroare } from './ui';
 
-const BUCKET = 'documente';
-const MAX = 50 * 1024 * 1024;
+export const BUCKET = 'documente';
+export const MAX = 50 * 1024 * 1024;
 
 /** Numele fișierului fără diacritice și caractere pe care Storage nu le acceptă. */
-const numeSigur = (n: string) =>
+export const numeSigur = (n: string) =>
   n.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/-+/g, '-').slice(-120);
 
 const marime = (b: number | null) =>

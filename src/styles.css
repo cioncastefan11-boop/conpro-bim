@@ -131,7 +131,7 @@ input:focus, select:focus { border-color: var(--accent); outline: 2px solid var(
 .jurnal small { color: var(--muted); }
 
 /* autentificare */
-.pagina-centru { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.pagina-centru { min-height: calc(100vh - 60px); display: grid; place-items: center; padding: 24px; }
 .pagina-centru.intrare { grid-template-columns: 1fr 1fr; gap: 48px; max-width: 1040px; margin: 0 auto; }
 .intrare-stanga h1 { font-size: 34px; }
 .intrare-stanga p { color: var(--muted); font-size: 17px; max-width: 440px; }
@@ -441,3 +441,45 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
   .bara { flex-wrap: wrap; row-gap: 4px; padding-bottom: 6px; }
   .bara nav { width: 100%; justify-content: space-between; overflow-x: auto; margin: 0 -6px; }
 }
+.zona-fisiere { display: block; border: 2px dashed var(--border); border-radius: 12px; padding: 28px; text-align: center; color: var(--muted); cursor: pointer; margin: 10px 0 14px; background: var(--bg); }
+.zona-fisiere b { color: var(--text); }
+.zona-fisiere.peste { border-color: var(--accent); background: var(--accent-soft); }
+.zona-fisiere input { display: none; }
+.cod-editabil { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; }
+.cod-editabil span { font-weight: 700; margin-right: 2px; }
+.cod-editabil input { font: inherit; padding: 3px 4px; min-width: 3ch; text-transform: uppercase; }
+.tabel-incarcare td input:not(.cod-editabil input) { width: 100%; }
+.nume-fisier { font-size: 12.5px; word-break: break-all; }
+.stare-ok { color: var(--ok); font-weight: 600; }
+.stare-eroare { color: var(--bad); font-weight: 600; }
+.fara-eticheta { display: flex; flex-direction: column; font-size: 13px; gap: 4px; }
+
+/* 0.12 · ghid, pagini publice, subsol */
+.pasi-ghid { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 10px; }
+.pasi-ghid li p { margin: 3px 0 0; color: var(--muted); font-size: 14px; }
+.pasi-ghid .unde { display: inline-block; font-size: 12px; font-weight: 600; color: var(--info); background: var(--info-bg); border-radius: 999px; padding: 1px 8px; margin-left: 4px; }
+.roluri-ghid { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 14px; }
+.roluri-ghid a { border: 1px solid var(--border); background: #fff; border-radius: 999px; padding: 5px 12px; font-size: 13px; color: var(--text); text-decoration: none; }
+.roluri-ghid a:hover { border-color: var(--navy); }
+.rol-ghid { scroll-margin-top: 80px; }
+.pagina-publica { max-width: 900px; margin: 0 auto; padding: 24px 16px 48px; }
+.bara-publica { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: var(--navy); }
+.bara-publica .marca { color: #fff; }
+.bara-publica a.buton { padding: 6px 12px; }
+.subsol-aplicatie { text-align: center; font-size: 13px; color: var(--muted); padding: 18px 16px 28px; }
+.subsol-aplicatie a { color: var(--muted); margin: 0 8px; }
+.text-legal h2 { font-size: 18px; margin: 26px 0 8px; }
+.text-legal h3 { font-size: 15px; margin: 18px 0 6px; }
+.text-legal p, .text-legal li { line-height: 1.6; }
+.text-legal table { border-collapse: collapse; width: 100%; font-size: 14px; }
+.text-legal th, .text-legal td { border: 1px solid var(--border); padding: 6px 8px; text-align: left; vertical-align: top; }
+.text-legal .de-completat { background: var(--warn-bg); color: #78350f; padding: 0 4px; border-radius: 4px; }
+.text-legal h1 { font-size: 24px; margin: 0 0 4px; }
+.text-legal h1 + p { color: var(--muted); font-size: 14px; }
+.text-legal ol.fara-numere { list-style: none; padding-left: 4px; }
+.text-legal .tabel-legal { overflow-x: auto; margin: 8px 0; }
+.text-legal .tabel-legal table { min-width: 560px; }
+.acceptare-termeni { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; font-weight: 400; }
+.acceptare-termeni input { width: auto; margin-top: 3px; }
+.fereastra-termeni { position: fixed; inset: 0; background: rgba(15, 23, 42, .55); display: grid; place-items: center; z-index: 50; padding: 16px; }
+.fereastra-termeni .card { max-width: 520px; }

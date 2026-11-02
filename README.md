@@ -18,6 +18,20 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.12 (ghid pe roluri, GDPR, încărcare multiplă)
+
+1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0013_gdpr.sql`, lipiți și **Run**.
+3. Verificare: `select count(*) from pg_proc where proname in ('accepta_termenii','datele_mele');` trebuie să dea **2**.
+4. **Înainte de primul proiect real:** completați datele firmei în `src/lib/legal.ts` (CUI, nr. Registrul Comerțului, sediu, e-mail pentru date personale, reprezentant, limita răspunderii, prețul). Până atunci apar evidențiate cu galben în pagini. Textele sunt în `src/legal/*.md` și trebuie verificate de un jurist; la o versiune nouă schimbați `VERSIUNE_TERMENI`, iar fiecare utilizator le acceptă din nou la prima intrare.
+
+Ce aduce:
+- **Ghidul pe roluri** la `/ghid`, vizibil și fără cont: primii pași (cont, profil, De făcut, semnătura electronică) și ce face fiecare rol, cu fila din aplicație unde se face. La invitare, aplicația arată linkul către rolul ales.
+- **Politica de confidențialitate** (`/confidentialitate`), **termenii de utilizare** (`/termeni`) și **modelul de acord de prelucrare** art. 28 GDPR între Conpro și firmele client (`/acord-prelucrare`), cu subprocesatorii (Supabase, Netlify, Resend) și măsurile de securitate. Legături în subsolul fiecărei pagini.
+- **Acceptarea termenilor:** bifă obligatorie la cont nou; versiunea și momentul se păstrează în baza de date. Conturile existente acceptă o dată, la prima intrare.
+- **„Descarcă datele mele”** în Profil (dreptul de acces și portabilitate): un fișier JSON cu profilul, autorizațiile, proiectele și acțiunile din istoric.
+- **Încărcarea mai multor documente deodată** (Documente → „Încarcă mai multe”): trageți fișierele, aplicația recunoaște codul ISO 19650 din nume, grupează fișierele cu același cod (PDF + DWG) într-o singură revizie, propune revizia următoare și arată ce nu se poate încărca și de ce.
+
 ## Actualizare la 0.11 (convenția de denumire și „De făcut”)
 
 1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
