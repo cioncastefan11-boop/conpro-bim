@@ -11,6 +11,7 @@ import { Eroare, Gol, mesajEroare } from '../components/ui';
 import Atasamente from '../components/Atasamente';
 import Urmarire from './Urmarire';
 import Mentenanta from './Mentenanta';
+import Reclamatii from './Reclamatii';
 
 type Props = { proiect: Proiect; membri: Membru[]; rolulMeu?: Rol; uid: string; onSchimbat: () => void };
 type RecAprobata = { id: string; aprobat_la: string; garantie_pana: string | null };
@@ -42,9 +43,11 @@ export default function Exploatare(props: Props) {
         <NavLink to="." end>Jurnalul evenimentelor</NavLink>
         <NavLink to="urmarire">Urmărirea în timp</NavLink>
         <NavLink to="mentenanta">Mentenanță și garanții</NavLink>
+        <NavLink to="reclamatii">Reclamații</NavLink>
       </nav>
       <Routes>
         <Route index element={<Jurnal {...props} rec={rec} ev={ev} />} />
+        <Route path="reclamatii/*" element={<Reclamatii {...props} />} />
         <Route path="mentenanta/*" element={<Mentenanta {...props} />} />
         <Route path="urmarire/*" element={<Urmarire {...props} onEveniment={incarca} />} />
         <Route path="nou" element={<EvenimentNou {...props} ev={ev} onSalvat={incarca} />} />

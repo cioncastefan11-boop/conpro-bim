@@ -33,7 +33,7 @@ export function compuneRezumat(p: Persoana, sarcini: Sarcina[], appUrl: string):
     html += `<p style="margin:16px 0 6px;font-weight:bold"><span style="background:#0f172a;color:#fff;border-radius:4px;padding:2px 6px;font-family:monospace">${esc(pr.cod_proiect)}</span> ${esc(pr.denumire_proiect)}</p><ul style="margin:0;padding-left:18px">`;
     text += `\n${pr.cod_proiect} · ${pr.denumire_proiect}\n`;
     for (const s of ale) {
-      const link = `${url}/proiect/${s.proiect_id}/${s.cale}`;
+      const link = s.cale.startsWith('/') ? `${url}${s.cale}` : `${url}/proiect/${s.proiect_id}/${s.cale}`;   // locatarii au pagina lor
       html += `<li style="margin:4px 0"><a href="${esc(link)}" style="color:#c2410c">${esc(s.titlu)}</a></li>`;
       text += `- ${s.titlu}: ${link}\n`;
     }

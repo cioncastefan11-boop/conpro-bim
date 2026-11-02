@@ -82,10 +82,20 @@ const ROLURI: Rol[] = [
     pasi: [
       { ce: 'Consemnează evenimentele', unde: 'Exploatare → Eveniment nou', detalii: 'Avarii, seisme, inundații, incendii, intervenții, inspecții, cu fotografii. Intrările nu se modifică; o greșeală se corectează cu o intrare nouă. Bifați „Necesită expertiză” când degradarea poate afecta siguranța.' },
       { ce: 'Ține urmărirea comportării în timp', unde: 'Exploatare → Urmărirea în timp', detalii: 'Programul (de la proiectant sau programul tip), inspecțiile la scadență, cu starea fiecărui punct: normal, atenție sau alarmă. Verificările scadente apar în „De făcut”; la final de an tipăriți raportul anual.' },
+      { ce: 'Ține lista locatarilor și rezolvă reclamațiile', unde: 'Exploatare → Reclamații', detalii: 'Adăugați locatarii (e-mail și apartament; se pot lipi din Excel). Reclamațiile noi apar în „De făcut”: le preluați, le trimiteți constructorului dacă sunt în garanție, sau le respingeți motivat; locatarul confirmă rezolvarea.' },
       { ce: 'Ține la zi echipamentele', unde: 'Echipamente', detalii: 'Echipamentele noi sau înlocuite, cu încăperea, producătorul, garanția și intervalul de mentenanță; se exportă în COBie.' },
       { ce: 'Înregistrează reviziile și reparațiile', unde: 'Exploatare → Mentenanță și garanții', detalii: 'Reviziile, verificările periodice (ISCIR, PSI), reparațiile, înlocuirile și defectele, cu fișele atașate. Mentenanța scadentă și garanțiile care expiră apar în „De făcut”.' },
       { ce: 'Urmărește garanțiile și recepția finală', unde: 'Exploatare → Mentenanță și garanții', detalii: 'Garanția de bună execuție (de la recepție) și garanția fiecărui echipament; defectele apărute în garanție se semnalează constructorului sau garantului.' },
       { ce: 'Păstrează Cartea tehnică', unde: 'Cartea tehnică', detalii: 'Descărcați arhiva electronică; se păstrează pe toată durata de existență a construcției.' },
+    ],
+  },
+  {
+    id: 'locatar', nume: 'Locatar (proprietar, chiriaș, utilizator al clădirii)',
+    pe_scurt: 'Nu face parte din echipa proiectului: vede doar locuința lui și reclamațiile trimise de el.',
+    pasi: [
+      { ce: 'Își face cont', unde: 'Creează cont', detalii: 'Cu adresa de e-mail dată administratorului clădirii; locuința apare singură, în „Locuința mea”.' },
+      { ce: 'Trimite o reclamație', unde: 'Locuința mea → Reclamație nouă', detalii: 'Ce fel de problemă, unde, ce se întâmplă, cu fotografii. Bifați „Urgent” la inundații, lipsa apei, a căldurii sau a curentului; la pericol imediat sunați la 112.' },
+      { ce: 'Urmărește și confirmă rezolvarea', unde: 'Locuința mea', detalii: 'Vedeți fiecare pas: preluată, trimisă constructorului (în garanție), rezolvată. Confirmați rezolvarea sau spuneți ce nu s-a rezolvat, iar reclamația se redeschide.' },
     ],
   },
   {

@@ -22,6 +22,10 @@ await ok('subiectul spune câte lucruri sunt de făcut', () => r.subiect === 'Co
 await ok('salută persoana pe nume', () => r.html.includes('Bună dimineața, Mihai Ionescu!'));
 await ok('grupează pe proiecte', () => r.html.indexOf('BLC01') < r.html.indexOf('SCL02') && (r.html.match(/<ul/g) ?? []).length === 2);
 await ok('fiecare sarcină are legătura ei în aplicație', () => r.html.includes('https://conpro-bim.netlify.app/proiect/p1/pv/a') && r.text.includes('/proiect/p2/beton/c'));
+await ok('sarcina locatarului duce la pagina lui, nu în proiect', () => {
+  const x = compuneRezumat({ nume: 'Ion', email: 'ion@test.ro' }, [S('p3', 'BLC03', 'Confirmați rezolvarea: Infiltrație', '/locuinta/r1')], 'https://conpro-bim.netlify.app');
+  return x.html.includes('https://conpro-bim.netlify.app/locuinta/r1') && !x.html.includes('/proiect/p3');
+});
 await ok('textul din date e protejat (fără HTML injectat)', () => r.html.includes('&lt;EPS 80&gt;') && !r.html.includes('<EPS 80>'));
 await ok('singular pentru o singură sarcină', () => compuneRezumat({ id: 'u', nume: '', email: 'x' }, sarcini.slice(0, 1), 'https://a').subiect === 'Conpro BIM: 1 lucru de făcut azi');
 

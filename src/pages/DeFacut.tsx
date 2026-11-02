@@ -8,7 +8,7 @@ import { Eroare, Gol, mesajEroare } from '../components/ui';
 
 export const TIPURI_SARCINA: Record<string, string> = {
   pv: 'Proces verbal', fam: 'Material (FAM)', turnare: 'Condica de betoane', incercare: 'Încercare',
-  receptie: 'Recepție', obiectie: 'Obiecție la recepție', document: 'Document', exploatare: 'Exploatare', urmarire: 'Urmărirea în timp', mentenanta: 'Mentenanță', garantie: 'Garanție',
+  receptie: 'Recepție', obiectie: 'Obiecție la recepție', document: 'Document', exploatare: 'Exploatare', urmarire: 'Urmărirea în timp', mentenanta: 'Mentenanță', garantie: 'Garanție', reclamatie: 'Reclamație',
 };
 
 export async function incarcaSarcini(): Promise<Sarcina[]> {
@@ -42,7 +42,7 @@ export default function DeFacut() {
                 {ale.map((s, i) => (
                   <li key={i}>
                     <span className={`tip-sarcina t-${s.tip}`}>{TIPURI_SARCINA[s.tip] ?? s.tip}</span>
-                    <Link to={`/proiect/${s.proiect_id}/${s.cale}`}>{s.titlu}</Link>
+                    <Link to={s.cale.startsWith('/') ? s.cale : `/proiect/${s.proiect_id}/${s.cale}`}>{s.titlu}</Link>
                     {s.din && <small className="discret">{new Date(s.din).toLocaleDateString('ro-RO')}</small>}
                   </li>
                 ))}
