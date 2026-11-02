@@ -4,7 +4,7 @@ import { supabase } from './supabase';
 import type { DateProiect } from './dateProiect';
 import { numeDe } from './dateProiect';
 import {
-  AVIZE, CAPITOLE_CARTE, DECIZII, STARI_FAM, TIPURI_ATASAMENT, codFam, codPv, formatData, numeIncercare, numeRol, tipPv,
+  AVIZE, CAPITOLE_CARTE, STARI_FAM, TIPURI_ATASAMENT, codFam, codPv, formatData, numeIncercare, numeRol, tipPv,
 } from './domeniu';
 import type { Atasament, ProcesVerbal } from './tipuri';
 import { genereazaCobie, lipsuriEchipament } from './cobie';
@@ -137,7 +137,7 @@ const esc = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&am
 const STIL = `body{font-family:Arial,Helvetica,sans-serif;color:#0f172a;max-width:900px;margin:32px auto;padding:0 20px;font-size:14px;line-height:1.45}
 h1{font-size:22px;margin:0 0 4px}h2{font-size:17px;margin:28px 0 8px;border-bottom:2px solid #0f172a;padding-bottom:4px}h3{font-size:15px;margin:18px 0 6px}
 table{border-collapse:collapse;width:100%;margin:8px 0}th,td{border:1px solid #cbd5e1;padding:6px 8px;text-align:left;vertical-align:top}th{background:#f1f5f9}
-.discret{color:#64748b}.cod{font-family:monospace;font-weight:bold}ul{padding-left:18px}@media print{body{margin:0}}`;
+.discret{color:#64748b}.semnaturi{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px;margin-top:8px;page-break-inside:avoid}@media print{body.pv{display:flex;flex-direction:column;min-height:252mm}body.pv .bloc-semnaturi{margin-top:auto}}.semnatura{display:flex;flex-direction:column;gap:2px}.semnatura .calitate{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#64748b}.semnatura .linie{margin-top:38px;border-top:1px solid #0f172a;padding-top:3px;font-size:11px;color:#64748b}.semnatura small{color:#94a3b8;font-size:10px}.cod{font-family:monospace;font-weight:bold}ul{padding-left:18px}@media print{body{margin:0}}`;
 const doc = (titlu: string, corp: string) => `<!doctype html><html lang="ro"><head><meta charset="utf-8"><title>${esc(titlu)}</title><style>${STIL}</style></head><body>${corp}</body></html>`;
 
 function antet(d: DateProiect, titlu: string) {
@@ -179,12 +179,16 @@ ${pv.alti_participanti ? `<tr><th>Alți participanți</th><td>${esc(pv.alti_part
   if (pv.referinte_proiect) corp += `<h3>Documentația de referință</h3><p>${esc(pv.referinte_proiect)}</p>`;
   if (pv.descriere_lucrari) corp += `<h3>Descrierea lucrărilor</h3><p>${esc(pv.descriere_lucrari)}</p>`;
   if (pv.concluzii) corp += `<h3>Concluzii</h3><p><b>${esc(pv.concluzii)}</b></p>`;
-  corp += '<h3>Confirmări</h3><table><tr><th>Participant</th><th>Calitatea</th><th>Decizia</th><th>Observații</th><th>Data și ora</th></tr>';
-  for (const x of parti) corp += `<tr><td>${esc(numeDe(d, x.persoana_id))}</td><td>${esc(x.rol === 'constructor' ? 'Constructor / RTE' : numeRol(x.rol))}</td><td>${x.decizie ? esc(DECIZII[x.decizie]) : 'în așteptare'}</td><td>${esc(x.observatii ?? '')}</td><td>${x.confirmat_la ? new Date(x.confirmat_la).toLocaleString('ro-RO') : ''}</td></tr>`;
-  corp += '</table>';
   if (t.ordine426) corp += '<p class="discret">Proiectantul a confirmat după dirigintele de șantier și responsabilul tehnic cu execuția (art. 426 alin. 3 din Legea 169/2026).</p>';
-  corp += `<p class="discret">Confirmările sunt înregistrate în Conpro BIM cu contul fiecărui participant, cu data și ora. Semnat de toți la ${pv.semnat_la ? new Date(pv.semnat_la).toLocaleString('ro-RO') : '—'}.</p>`;
-  return doc(codPv(d.proiect.cod, pv.numar), corp);
+  // semnăturile, în ordinea art. 426: diriginte, RTE, ceilalți, proiectantul la final
+  const ord = (r: string) => (r === 'diriginte' ? 0 : r === 'constructor' ? 1 : r === 'proiectant' && t.ordine426 ? 9 : 5);
+  const firma = (id: string) => d.membri.find(m => m.persoana_id === id)?.persoane?.firme?.denumire ?? '';
+  corp += '<div class="bloc-semnaturi"><h3>Semnături</h3><div class="semnaturi">';
+  for (const x of [...parti].sort((a, b) => ord(a.rol) - ord(b.rol))) {
+    corp += `<div class="semnatura"><span class="calitate">${esc(x.rol === 'constructor' ? 'Constructor / RTE' : numeRol(x.rol))}</span><b>${esc(numeDe(d, x.persoana_id))}</b>${firma(x.persoana_id) ? `<span>${esc(firma(x.persoana_id))}</span>` : ''}<div class="linie">Semnătura</div>${x.confirmat_la ? `<small>Confirmat în Conpro BIM la ${new Date(x.confirmat_la).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' })}</small>` : ''}</div>`;
+  }
+  corp += '</div></div>';
+  return doc(codPv(d.proiect.cod, pv.numar), corp).replace('<body>', '<body class="pv">');
 }
 
 export function htmlManual(d: DateProiect): string {

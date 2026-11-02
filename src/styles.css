@@ -341,3 +341,16 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
 .ds-fisier { margin: 8px 0; }
 .document-semnat .nota { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; }
 .buton-fisier.principal { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+/* PV tipărit: semnăturile în josul paginii */
+.semnaturi-pv { margin-top: 18px; page-break-inside: avoid; break-inside: avoid; }
+.semnaturi-grila { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 32px; margin-top: 6px; }
+.semnatura-pv { display: flex; flex-direction: column; gap: 2px; }
+.semnatura-pv .calitate { font-size: 10.5px; text-transform: uppercase; letter-spacing: .5px; color: #475569; }
+.semnatura-pv .linie-semnatura { margin-top: 40px; border-top: 1px solid #0f172a; padding-top: 3px; font-size: 10.5px; color: #475569; }
+.semnatura-pv small { color: #64748b; font-size: 9.5px; }
+@media print { .semnaturi-pv.doar-tipar { display: block; } }
+@media print {
+  .document-pv { display: flex; flex-direction: column; min-height: 252mm; }
+  .document-pv .semnaturi-pv { margin-top: auto; padding-top: 18px; }
+}
