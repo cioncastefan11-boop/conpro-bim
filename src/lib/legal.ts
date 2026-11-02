@@ -6,12 +6,12 @@ export const VERSIUNE_TERMENI = '2026-11-02';
 // Datele de mai jos se completează înainte de folosirea în producție (un câmp gol apare evidențiat în pagină).
 export const OPERATOR: Record<string, string> = {
   OPERATOR_NUME: 'Conpro Solutions SRL',
-  OPERATOR_CUI: '',
-  OPERATOR_REG: '',
-  OPERATOR_SEDIU: '',
-  OPERATOR_EMAIL: '',
-  OPERATOR_REPREZENTANT: '',
-  LIMITA_RASPUNDERE: '',
+  OPERATOR_CUI: '40247566',
+  OPERATOR_REG: 'J2018002059247',
+  OPERATOR_SEDIU: 'Municipiul Baia Mare, Str. Metalurgiei, Nr. 8, Județul Maramureș',
+  OPERATOR_EMAIL: 'office@conpro.ro',
+  OPERATOR_REPREZENTANT: 'Cionca Stefan Vlad',
+  LIMITA_RASPUNDERE: 'SRL',
   PRET: '',
 };
 
