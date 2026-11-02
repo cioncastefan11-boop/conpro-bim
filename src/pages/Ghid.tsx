@@ -51,6 +51,7 @@ const ROLURI: Rol[] = [
       { ce: 'Aprobă publicarea documentelor', unde: 'Documente', detalii: 'Când proiectantul cere publicarea unei planșe pentru execuție.' },
       { ce: 'Urmărește lucrarea', unde: 'toate filele, Istoric', detalii: 'Vedeți PV-urile, materialele, betoanele, documentele și cine ce a făcut.' },
       { ce: 'Primește Cartea tehnică', unde: 'Cartea tehnică', detalii: 'Arhiva electronică, pe capitole, cu toate documentele (art. 529–530).' },
+      { ce: 'Trece construcția în exploatare', unde: 'Exploatare', detalii: 'După ce aprobați recepția la terminarea lucrărilor. De atunci răspundeți de ținerea la zi a Cărții tehnice și de urmărirea comportării în timp; invitați în proiect administratorul clădirii.' },
     ],
   },
   {
@@ -76,8 +77,9 @@ const ROLURI: Rol[] = [
   },
   {
     id: 'administrator_cladire', nume: 'Administratorul clădirii (exploatare)',
-    pe_scurt: 'Preia construcția după recepție: Cartea tehnică, echipamentele și garanțiile (ISO 19650-3).',
+    pe_scurt: 'Preia construcția după recepție (asociația de proprietari, administratorul sau firma de facility management): Cartea tehnică, evenimentele, echipamentele și garanțiile (ISO 19650-3).',
     pasi: [
+      { ce: 'Consemnează evenimentele', unde: 'Exploatare → Eveniment nou', detalii: 'Avarii, seisme, inundații, incendii, intervenții, inspecții, cu fotografii. Intrările nu se modifică; o greșeală se corectează cu o intrare nouă. Bifați „Necesită expertiză” când degradarea poate afecta siguranța.' },
       { ce: 'Consultă echipamentele și mentenanța', unde: 'Echipamente', detalii: 'Fiecare echipament cu încăperea, producătorul, garanția și intervalul de mentenanță; se exportă în COBie.' },
       { ce: 'Urmărește garanțiile și recepția finală', unde: 'Recepție', detalii: 'Perioada de garanție curge de la recepția la terminarea lucrărilor.' },
       { ce: 'Păstrează Cartea tehnică', unde: 'Cartea tehnică', detalii: 'Descărcați arhiva electronică; se păstrează pe toată durata de existență a construcției.' },

@@ -15,6 +15,7 @@ export type Proiect = {
   ac_valabil_pana: string | null;
   ac_prelungit_pana: string | null;
   arhivat: boolean;
+  exploatare_din?: string | null;
   standard_info?: Conventie | null;
   creat_la: string;
 };
@@ -132,7 +133,7 @@ export type LivrareFam = {
 };
 
 export type Atasament = {
-  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte' | 'receptie' | 'obiectie_receptie' | 'revizie_document'; entitate_id: string;
+  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte' | 'receptie' | 'obiectie_receptie' | 'revizie_document' | 'eveniment_exploatare'; entitate_id: string;
   tip_document: string; nume_fisier: string; cale: string; marime: number | null; incarcat_de: string; incarcat_la: string;
 };
 
@@ -210,3 +211,12 @@ export type RevizieDocument = {
 export type ElementConventie = { cod: string; nume: string };
 export type Conventie = { strict?: boolean; cifre?: number; initiatori?: ElementConventie[]; volume?: ElementConventie[]; niveluri?: ElementConventie[] };
 export type Sarcina = { proiect_id: string; cod_proiect: string; denumire_proiect: string; tip: string; titlu: string; cale: string; din: string | null };
+
+// ---------- exploatarea (migrarea 0014) ----------
+export type TipEveniment = 'avarie' | 'seism' | 'fenomen_meteo' | 'incendiu' | 'interventie' | 'inspectie' | 'schimbare_utilizare' | 'altul';
+export type EvenimentExploatare = {
+  id: string; proiect_id: string; numar: number; tip: TipEveniment; data_eveniment: string;
+  titlu: string; descriere: string; zona: string | null; efecte: string | null; masuri: string | null;
+  necesita_expertiza: boolean; executant: string | null; corecteaza_id: string | null;
+  creat_de: string; creat_la: string;
+};

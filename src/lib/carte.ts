@@ -10,6 +10,7 @@ import type { Atasament, ProcesVerbal } from './tipuri';
 import { genereazaCobie, lipsuriEchipament } from './cobie';
 import { excelCondica, htmlCondica as htmlCondicaBetoane } from './condica';
 import { fisiereReceptie, htmlReceptie } from './receptie';
+import { codEveniment, numeEveniment } from './domeniu';
 import { codReceptie, DECIZII_RECEPTIE, numeCodStare, numeReceptie, numeRolDocument, numeTipDocument } from './domeniu';
 
 export type ElementOpis = {
@@ -18,7 +19,7 @@ export type ElementOpis = {
   detalii?: string;
   data?: string | null;
   fisiere: Atasament[];
-  generat?: 'pv' | 'manual' | 'cobie' | 'condica' | 'fam' | 'receptie' | 'document';
+  generat?: 'pv' | 'manual' | 'cobie' | 'condica' | 'fam' | 'receptie' | 'document' | 'evenimente';
   pvId?: string;
   dosar: string;                 // folderul din arhivă
 };
@@ -108,6 +109,14 @@ export function construiesteOpis(d: DateProiect): CapitolOpis[] {
     }
   }
 
+  // D · jurnalul evenimentelor din exploatare (stadiul 7)
+  if (p.exploatare_din) {
+    const ev = d.evenimente;
+    cap.D.push({ id: 'jurnal-evenimente', titlu: 'Jurnalul evenimentelor',
+      detalii: `în exploatare din ${formatData(p.exploatare_din)} · ${ev.length ? `${ev.length} ${ev.length === 1 ? 'eveniment' : 'evenimente'}` : 'niciun eveniment consemnat'}${ev.some(e => e.necesita_expertiza) ? ' · unele cer expertiză' : ''}`,
+      data: p.exploatare_din, fisiere: ev.flatMap(e => fis('eveniment_exploatare', e.id)), generat: 'evenimente', dosar: 'D_Exploatare/Jurnal_evenimente' });
+  }
+
   const sortat = (l: ElementOpis[]) => [...l].sort((a, b) => (a.data ?? '9999').localeCompare(b.data ?? '9999'));
   return CAPITOLE_CARTE.map(c => ({ ...c, elemente: sortat(cap[c.id]) }));
 }
@@ -171,6 +180,7 @@ export function htmlOpis(d: DateProiect, capitole: CapitolOpis[]): string {
         e.generat === 'cobie' ? `D_Exploatare/COBie-${esc(d.proiect.cod)}.xlsx` : '',
         e.generat === 'condica' ? 'B_Executie/Condica_betoane/Condica-betoane.html<br>B_Executie/Condica_betoane/Condica-betoane.xlsx' : '',
         e.generat === 'receptie' ? `${esc(e.dosar)}/${esc(e.titlu.split(' · ')[0])}.html` : '',
+        e.generat === 'evenimente' ? 'D_Exploatare/Jurnal_evenimente/Jurnalul-evenimentelor.html' : '',
         e.generat === 'fam' ? `B_Executie/FAM/${esc(e.titlu.split(' · ')[0].replace('/', '-'))}.html` : '',
         ...e.fisiere.map(f => `${esc(e.dosar)}/${esc(numeInArhiva(f))}`),
       ].filter(Boolean).join('<br>')}</td></tr>`;
@@ -302,6 +312,7 @@ export async function genereazaArhiva(d: DateProiect, progres: (text: string) =>
     radacina.file('B_Executie/Condica_betoane/Condica-betoane.html', htmlCondica(d));
     radacina.file('B_Executie/Condica_betoane/Condica-betoane.xlsx', await excelCondica(d));
   }
+  if (d.proiect.exploatare_din) radacina.file('D_Exploatare/Jurnal_evenimente/Jurnalul-evenimentelor.html', htmlJurnalEvenimente(d));
   if (d.tipuri.length) {
     radacina.file('D_Exploatare/Manual-utilizare-mentenanta.html', htmlManual(d));
     progres('Fișierul COBie…');
@@ -319,4 +330,22 @@ export async function genereazaArhiva(d: DateProiect, progres: (text: string) =>
   }
   progres('Se arhivează…');
   return zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+}
+
+/** Jurnalul evenimentelor (capitolul D), pentru tipărire și arhivă. */
+export function htmlJurnalEvenimente(d: DateProiect): string {
+  const p = d.proiect;
+  let corp = antet(d, 'Jurnalul evenimentelor');
+  corp += `<p>Construcția este în exploatare din <b>${formatData(p.exploatare_din)}</b>. Jurnalul consemnează evenimentele care pot influența siguranța și durabilitatea construcției: avarii, seisme, fenomene meteo, incendii, intervenții, inspecții și expertize. Intrările nu se modifică; o greșeală se corectează printr-o intrare nouă.</p>`;
+  if (!d.evenimente.length) return doc(`Jurnalul evenimentelor ${p.cod}`, corp + '<p class="discret">Niciun eveniment consemnat.</p>');
+  corp += '<table><tr><th>Nr.</th><th>Data</th><th>Evenimentul</th><th>Efecte constatate</th><th>Măsuri</th><th>Consemnat de</th></tr>';
+  for (const e of d.evenimente) {
+    const cor = e.corecteaza_id ? d.evenimente.find(x => x.id === e.corecteaza_id) : null;
+    const nf = d.atasamente.filter(a => a.entitate === 'eveniment_exploatare' && a.entitate_id === e.id).length;
+    corp += `<tr><td class="cod">${esc(codEveniment(p.cod, e.numar))}</td><td>${formatData(e.data_eveniment)}</td>
+<td><b>${esc(numeEveniment(e.tip))}: ${esc(e.titlu)}</b>${e.zona ? `<br><span class="discret">${esc(e.zona)}</span>` : ''}<br>${esc(e.descriere)}${cor ? `<br><i>Corectează intrarea ${esc(codEveniment(p.cod, cor.numar))}.</i>` : ''}${e.necesita_expertiza ? '<br><b>Necesită expertiză tehnică.</b>' : ''}${nf ? `<br><span class="discret">${nf} ${nf === 1 ? 'fișier atașat' : 'fișiere atașate'}</span>` : ''}</td>
+<td>${esc(e.efecte ?? '')}</td><td>${esc(e.masuri ?? '')}${e.executant ? `<br><span class="discret">Executant: ${esc(e.executant)}</span>` : ''}</td>
+<td>${esc(numeDe(d, e.creat_de))}<br><span class="discret">${new Date(e.creat_la).toLocaleDateString('ro-RO')}</span></td></tr>`;
+  }
+  return doc(`Jurnalul evenimentelor ${p.cod}`, corp + '</table>');
 }

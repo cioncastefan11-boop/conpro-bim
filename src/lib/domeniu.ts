@@ -271,6 +271,8 @@ export const TIPURI_ATASAMENT: Record<string, string> = {
   instiintare_finalizare: 'Înștiințarea emitentului AC',
   raport_comportare: 'Raportul privind comportarea în exploatare',
   dovada_remediere: 'Dovada remedierii',
+  raport_expertiza: 'Raport de expertiză tehnică',
+  deviz_interventie: 'Deviz / contract de intervenție',
   altul: 'Alt document',
 };
 
@@ -300,7 +302,7 @@ export const CAPITOLE_CARTE: { id: 'A' | 'B' | 'C' | 'D'; nume: string; continut
   { id: 'A', nume: 'A · Documentația privind proiectarea', continut: 'Certificatul de urbanism, autorizația, avizele, proiectul tehnic actualizat la recepție, as-built, dispozițiile de șantier ale proiectantului.' },
   { id: 'B', nume: 'B · Documentația privind execuția', continut: 'Procesele verbale de lucrări ascunse și faze determinante, FAM-urile și livrările, condica de betoane, încercările, probele.' },
   { id: 'C', nume: 'C · Documentația privind recepția', continut: 'Procesele verbale de recepție, punctele de vedere ale proiectanților și dirigintelui, fișele de instruire.' },
-  { id: 'D', nume: 'D · Exploatarea, întreținerea și urmărirea comportării', continut: 'Manualul de utilizare și mentenanță, inventarul echipamentelor (COBie), garanțiile, programul de urmărire în timp.' },
+  { id: 'D', nume: 'D · Exploatarea, întreținerea și urmărirea comportării', continut: 'Manualul de utilizare și mentenanță, inventarul echipamentelor (COBie), garanțiile, programul de urmărire în timp, jurnalul evenimentelor din exploatare.' },
 ];
 
 // ---------- recepția (migrarea 0008) ----------
@@ -386,3 +388,17 @@ export function revizieUrmatoare(existente: string[], publicata: boolean): strin
   const nr = (pref: string) => existente.filter(r => r.startsWith(pref)).map(r => parseInt(r.slice(1, 3), 10)).reduce((a, b) => Math.max(a, b), 0);
   return publicata ? `C${String(nr('C') + 1).padStart(2, '0')}` : `P${String(nr('P') + 1).padStart(2, '0')}`;
 }
+
+// ---------- exploatarea (migrarea 0014) ----------
+export const TIPURI_EVENIMENT: { id: import('./tipuri').TipEveniment; nume: string; ajutor: string }[] = [
+  { id: 'avarie', nume: 'Avarie / degradare', ajutor: 'Fisuri, infiltrații, desprinderi, tasări, defecte ale instalațiilor.' },
+  { id: 'seism', nume: 'Seism', ajutor: 'Cutremur resimțit în zonă; consemnați și dacă nu s-au constatat efecte.' },
+  { id: 'fenomen_meteo', nume: 'Fenomen meteo', ajutor: 'Inundație, furtună, încărcare mare din zăpadă, alunecare de teren.' },
+  { id: 'incendiu', nume: 'Incendiu sau explozie', ajutor: 'Cu efectele asupra structurii și a instalațiilor.' },
+  { id: 'interventie', nume: 'Intervenție / reparație', ajutor: 'Lucrări de reparații, înlocuiri, modernizări; cine le-a executat.' },
+  { id: 'inspectie', nume: 'Inspecție / expertiză', ajutor: 'Inspecție extinsă, expertiză tehnică, control ISC.' },
+  { id: 'schimbare_utilizare', nume: 'Schimbare de utilizare sau proprietar', ajutor: 'Schimbarea destinației, înstrăinarea, alt administrator.' },
+  { id: 'altul', nume: 'Alt eveniment', ajutor: 'Inclusiv corecția unei intrări greșite.' },
+];
+export const numeEveniment = (t: string) => TIPURI_EVENIMENT.find(x => x.id === t)?.nume ?? t;
+export const codEveniment = (codProiect: string, numar: number) => `${codProiect}-EV-${String(numar).padStart(3, '0')}`;

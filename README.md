@@ -18,6 +18,18 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.13 (exploatarea construcției, etapa 1)
+
+1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0014_exploatare.sql`, lipiți și **Run** (după 0013).
+3. Verificare: `select count(*) from pg_proc where proname in ('trece_in_exploatare','receptie_terminare_aprobata','eveniment_verifica');` trebuie să dea **3**.
+
+Ce aduce (stadiul 7 din Legea 169/2026, ISO 19650-3):
+- **Fila Exploatare** în proiect. După ce recepția la terminarea lucrărilor e admisă și aprobată, beneficiarul sau administratorul proiectului trece construcția în exploatare (cu data); proiectul trece în stadiul 7. Sarcina apare în „De făcut”.
+- **Rezumatul exploatării:** de când e în exploatare, până când curge garanția de bună execuție, câte evenimente cer expertiză.
+- **Jurnalul evenimentelor:** avarii, seisme, fenomene meteo, incendii, intervenții, inspecții, schimbări de utilizare sau proprietar, cu zona, efectele, măsurile, executantul și fotografii / documente atașate. Intrările nu se modifică și nu se șterg; o greșeală se corectează cu o intrare nouă, legată de cea veche. Jurnalul se tipărește și intră în Cartea tehnică, capitolul D, și în arhiva electronică.
+- Ghidul pe roluri are pașii noi pentru beneficiar și administratorul clădirii.
+
 ## Actualizare la 0.12 (ghid pe roluri, GDPR, încărcare multiplă)
 
 1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.

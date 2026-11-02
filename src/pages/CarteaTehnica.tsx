@@ -101,6 +101,7 @@ export default function CarteaTehnica({ proiect, membri, rolulMeu, uid }: Props)
                       : e.generat === 'document' ? <Link to={`../documente/${e.id}`}>{e.titlu}</Link>
                       : e.generat === 'manual' ? <button className="legatura" onClick={() => deschideHtml(htmlManual(d))}>{e.titlu}</button>
                       : e.generat === 'cobie' ? <Link to="../echipamente">{e.titlu}</Link>
+                      : e.generat === 'evenimente' ? <Link to="../exploatare">{e.titlu}</Link>
                       : e.titlu}</b>
                     {e.data && <span className="discret"> · {formatData(e.data)}</span>}
                     {e.detalii && <div className="discret">{e.detalii}</div>}
