@@ -183,9 +183,11 @@ ${pv.alti_participanti ? `<tr><th>Alți participanți</th><td>${esc(pv.alti_part
   // semnăturile, în ordinea art. 426: diriginte, RTE, ceilalți, proiectantul la final
   const ord = (r: string) => (r === 'diriginte' ? 0 : r === 'constructor' ? 1 : r === 'proiectant' && t.ordine426 ? 9 : 5);
   const firma = (id: string) => d.membri.find(m => m.persoana_id === id)?.persoane?.firme?.denumire ?? '';
+  const cuObs = parti.filter(x => x.observatii?.trim()).sort((a, b) => ord(a.rol) - ord(b.rol));
+  if (cuObs.length) corp += `<h3>Observații</h3><ul>${cuObs.map(x => `<li><b>${esc(numeDe(d, x.persoana_id))}</b> (${esc(x.rol === 'constructor' ? 'Constructor / RTE' : numeRol(x.rol))}): ${esc(x.observatii)}</li>`).join('')}</ul>`;
   corp += '<div class="bloc-semnaturi"><h3>Semnături</h3><div class="semnaturi">';
   for (const x of [...parti].sort((a, b) => ord(a.rol) - ord(b.rol))) {
-    corp += `<div class="semnatura"><span class="calitate">${esc(x.rol === 'constructor' ? 'Constructor / RTE' : numeRol(x.rol))}</span><b>${esc(numeDe(d, x.persoana_id))}</b>${firma(x.persoana_id) ? `<span>${esc(firma(x.persoana_id))}</span>` : ''}<div class="linie">Semnătura</div>${x.confirmat_la ? `<small>Confirmat în Conpro BIM la ${new Date(x.confirmat_la).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' })}</small>` : ''}</div>`;
+    corp += `<div class="semnatura"><span class="calitate">${esc(x.rol === 'constructor' ? 'Constructor / RTE' : numeRol(x.rol))}</span><b>${esc(numeDe(d, x.persoana_id))}</b>${firma(x.persoana_id) ? `<span>${esc(firma(x.persoana_id))}</span>` : ''}<div class="linie">Semnătura</div>${x.decizie === 'confirm_cu_observatii' ? '<small>Confirmă cu observații</small>' : x.decizie === 'refuz' ? '<small>A refuzat confirmarea</small>' : ''}${x.confirmat_la ? `<small>Confirmat în Conpro BIM la ${new Date(x.confirmat_la).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' })}</small>` : ''}</div>`;
   }
   corp += '</div></div>';
   return doc(codPv(d.proiect.cod, pv.numar), corp).replace('<body>', '<body class="pv">');

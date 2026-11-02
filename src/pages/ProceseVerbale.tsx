@@ -318,6 +318,16 @@ function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
         )}
         {pv.stare === 'contestat' && <p className="mesaj alerta">Un participant a refuzat. Procesul verbal se anulează și, după remediere, se convoacă unul nou.</p>}
         {pv.stare === 'anulat' && <p className="mesaj info">Anulat de {om(pv.anulat_de)}: {pv.motiv_anulare}</p>}
+        {sortati.some(p => p.observatii?.trim()) && (
+          <section className="observatii-pv doar-tipar">
+            <h3>Observații</h3>
+            <ul>
+              {sortati.filter(p => p.observatii?.trim()).map(p => (
+                <li key={p.id}><b>{om(p.persoana_id)}</b> ({p.rol === 'constructor' ? 'Constructor / RTE' : numeRol(p.rol)}): {p.observatii}</li>
+              ))}
+            </ul>
+          </section>
+        )}
         <section className="semnaturi-pv doar-tipar">
           <h3>Semnături</h3>
           <div className="semnaturi-grila">
@@ -327,6 +337,8 @@ function Detaliu({ proiect, membri, rolulMeu, uid }: Props) {
                 <b>{om(p.persoana_id)}</b>
                 {firma(p.persoana_id) && <span>{firma(p.persoana_id)}</span>}
                 <div className="linie-semnatura">Semnătura</div>
+                {p.decizie === 'confirm_cu_observatii' && <small>Confirmă cu observații</small>}
+                {p.decizie === 'refuz' && <small>A refuzat confirmarea</small>}
                 {p.confirmat_la && <small>Confirmat în Conpro BIM la {new Date(p.confirmat_la).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' })}</small>}
               </div>
             ))}
