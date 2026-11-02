@@ -666,3 +666,12 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
 .neconforme { margin: 6px 0 0; padding-left: 18px; max-height: 240px; overflow: auto; }
 .neconforme li { margin: 2px 0; }
 .nota-raport { flex: 1 1 240px; min-width: 0; }
+
+/* EIR și BEP (0.23) */
+.documente-bim { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; align-items: start; }
+.documente-bim .card { margin: 0; }
+.document-bim .mesaj ul { margin: 6px 0 0; padding-left: 18px; }
+.sectiuni-doc label { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.sectiuni-doc .titlu-sectiune { font-weight: 600; }
+.sectiuni-doc textarea { width: 100%; font: inherit; line-height: 1.45; }
+.sectiuni-doc .legatura { align-self: flex-start; font-size: 13px; }

@@ -1,13 +1,13 @@
 {
   "name": "conpro-bim",
   "private": true,
-  "version": "0.22.0",
+  "version": "0.23.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test:db": "node tests/reguli-acces.test.mjs && node tests/pv-registru.test.mjs && node tests/fam.test.mjs && node tests/betoane.test.mjs && node tests/echipamente.test.mjs && node tests/receptie.test.mjs && node tests/semnatura.test.mjs && node tests/documente.test.mjs && node tests/ifc.test.mjs && node tests/sarcini.test.mjs && node tests/rezumat.test.mjs && node tests/incarcare.test.mjs && node tests/gdpr.test.mjs && node tests/exploatare.test.mjs && node tests/urmarire.test.mjs && node tests/mentenanta.test.mjs && node tests/reclamatii.test.mjs && node tests/observatii.test.mjs && node tests/bcf.test.mjs && node tests/legaturi.test.mjs && node tests/executie.test.mjs && node tests/plan.test.mjs && node tests/cerinte.test.mjs && node tests/cerinte-eval.test.mjs && node tests/verificare.test.mjs && node tests/verificare-ifc.test.mjs"
+    "test:db": "node tests/reguli-acces.test.mjs && node tests/pv-registru.test.mjs && node tests/fam.test.mjs && node tests/betoane.test.mjs && node tests/echipamente.test.mjs && node tests/receptie.test.mjs && node tests/semnatura.test.mjs && node tests/documente.test.mjs && node tests/ifc.test.mjs && node tests/sarcini.test.mjs && node tests/rezumat.test.mjs && node tests/incarcare.test.mjs && node tests/gdpr.test.mjs && node tests/exploatare.test.mjs && node tests/urmarire.test.mjs && node tests/mentenanta.test.mjs && node tests/reclamatii.test.mjs && node tests/observatii.test.mjs && node tests/bcf.test.mjs && node tests/legaturi.test.mjs && node tests/executie.test.mjs && node tests/plan.test.mjs && node tests/cerinte.test.mjs && node tests/cerinte-eval.test.mjs && node tests/verificare.test.mjs && node tests/verificare-ifc.test.mjs && node tests/documente-bim.test.mjs && node tests/documente-bim-gen.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
