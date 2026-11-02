@@ -85,6 +85,7 @@ export default function Proiecte() {
                   {p.clasa_consecinte && <span className="eticheta neutru">{p.clasa_consecinte}</span>}
                   {p.regim_legal && <span className="eticheta neutru">{p.regim_legal}</span>}
                   {(p.ac_valabil_pana || p.ac_prelungit_pana) && <Eticheta stare={ac} />}
+                  {p.exploatare_din && <span className="eticheta ok">În exploatare</span>}
                   {p.arhivat && <span className="eticheta neutru">Arhivat</span>}
                 </div>
               </Link>

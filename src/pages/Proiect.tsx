@@ -16,6 +16,7 @@ import Documente from './Documente';
 import Model from './Model';
 import Conventie from '../components/Conventie';
 import CarteaTehnica from './CarteaTehnica';
+import Exploatare from './Exploatare';
 
 export default function Proiect() {
   const { id = '' } = useParams();
@@ -65,6 +66,7 @@ export default function Proiect() {
         <NavLink to="echipamente">Echipamente</NavLink>
         <NavLink to="receptie">Recepție</NavLink>
         <NavLink to="carte">Cartea tehnică</NavLink>
+        {(proiect.exploatare_din || proiect.stadiu_catuc >= 5) && <NavLink to="exploatare">Exploatare</NavLink>}
         <NavLink to="echipa">Echipa ({membri.length})</NavLink>
         <NavLink to="istoric">Istoric</NavLink>
       </nav>
@@ -80,6 +82,7 @@ export default function Proiect() {
         <Route path="beton/*" element={<Betoane proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="fam/*" element={<Materiale proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="pv/*" element={<ProceseVerbale proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
+        <Route path="exploatare/*" element={<Exploatare proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} onSchimbat={incarca} />} />
         <Route path="istoric" element={<Istoric proiect={proiect} membri={membri} />} />
       </Routes>
     </>
