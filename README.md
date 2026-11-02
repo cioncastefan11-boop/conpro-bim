@@ -18,6 +18,19 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.16 (locatarii și reclamațiile)
+
+1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0017_reclamatii.sql`, lipiți și **Run** (după 0016).
+3. Verificare: `select count(*) from pg_proc where proname in ('reclamatie_preia','reclamatie_rezolva','reclamatie_confirma','locuintele_mele');` trebuie să dea **4**.
+4. Funcția Edge `rezumat-zilnic` s-a schimbat puțin (legătura din e-mail pentru locatari). Dacă rezumatul e activ, copiați din nou `supabase/functions/rezumat-zilnic/index.ts` în editorul funcției și **Deploy**.
+
+Ce aduce:
+- **Locatarii** (Exploatare → Reclamații, la administrare): lista cu e-mailul și unitatea (se pot lipi din Excel), „s-a mutat” pentru cei plecați. Locatarii **nu sunt membri ai proiectului**: cu un cont pe același e-mail văd doar „Locuința mea”: clădirea, unitatea lor, administratorul și reclamațiile trimise de ei.
+- **Reclamațiile:** categoria, locul, descrierea, urgența, fotografii. Administrarea le preia, le trimite constructorului (în garanție) sau le respinge motivat; rezolvarea o consemnează administrarea sau, în garanție, constructorul; cel care a trimis-o confirmă sau o redeschide. Fiecare pas are data și rămâne în Istoric.
+- **„De făcut” și rezumatul pe e-mail:** reclamațiile noi (administrarea), cele în garanție (constructorul), confirmarea rezolvării (locatarul).
+- Ghidul are rolul „Locatar”; politica de confidențialitate menționează datele locatarilor.
+
 ## Actualizare la 0.15 (mentenanța echipamentelor și garanțiile)
 
 1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.

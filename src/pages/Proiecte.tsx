@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { incarcaLocuinte } from './Locuinta';
 import { useUid } from '../lib/sesiune';
 import { CLASE, STADII, codPv, numeRol, stareAutorizatie, tipPv, type Rol, type TipPv } from '../lib/domeniu';
 import type { Proiect } from '../lib/tipuri';
@@ -65,9 +66,7 @@ export default function Proiecte() {
       <Eroare text={eroare} />
       {formular && <ProiectNou onInchide={() => setFormular(false)} />}
       {lista === null ? <p className="discret">Se încarcă…</p> : lista.length === 0 ? (
-        <Gol titlu="Nu aveți încă niciun proiect">
-          <p>Creați primul proiect sau cereți administratorului unui proiect să vă invite pe adresa contului.</p>
-        </Gol>
+        <FaraProiecte />
       ) : (
         <div className="grila-proiecte">
           {lista.map(p => {
@@ -161,5 +160,18 @@ function ProiectNou({ onInchide }: { onInchide: () => void }) {
         <button className="buton principal" disabled={lucreaza}>{lucreaza ? 'Se creează…' : 'Creează proiectul'}</button>
       </div>
     </form>
+  );
+}
+
+// Un locatar (fără proiecte) ajunge direct la locuința lui.
+function FaraProiecte() {
+  const [locuinte, setLocuinte] = useState<number | null>(null);
+  useEffect(() => { incarcaLocuinte().then(l => setLocuinte(l.length)); }, []);
+  if (locuinte === null) return <p className="discret">Se încarcă…</p>;
+  if (locuinte > 0) return <Navigate to="/locuinta" replace />;
+  return (
+    <Gol titlu="Nu aveți încă niciun proiect">
+      <p>Creați primul proiect sau cereți administratorului unui proiect să vă invite pe adresa contului. Dacă sunteți locatar, cereți administratorului clădirii să vă adauge în lista locatarilor.</p>
+    </Gol>
   );
 }

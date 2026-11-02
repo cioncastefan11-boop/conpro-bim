@@ -437,3 +437,21 @@ export const TIPURI_INTERVENTIE: { id: import('./tipuri').TipInterventie; nume: 
 ];
 export const numeInterventie = (t: string) => TIPURI_INTERVENTIE.find(x => x.id === t)?.nume ?? t;
 export const codInterventie = (codProiect: string, numar: number) => `${codProiect}-IN-${String(numar).padStart(3, '0')}`;
+
+// ---------- locatarii și reclamațiile (migrarea 0017) ----------
+export const CATEGORII_RECLAMATIE: { id: string; nume: string }[] = [
+  { id: 'apa_canal', nume: 'Apă, canalizare' }, { id: 'incalzire', nume: 'Încălzire, apă caldă' }, { id: 'electric', nume: 'Instalația electrică' },
+  { id: 'infiltratii', nume: 'Infiltrații, umezeală' }, { id: 'tamplarie', nume: 'Uși, ferestre' }, { id: 'finisaje', nume: 'Finisaje (tencuieli, pardoseli, placaje)' },
+  { id: 'lift', nume: 'Lift' }, { id: 'parti_comune', nume: 'Părți comune (scară, interfon, iluminat)' }, { id: 'structura', nume: 'Fisuri, structură' },
+  { id: 'altul', nume: 'Altceva' },
+];
+export const numeCategorieReclamatie = (c: string) => CATEGORII_RECLAMATIE.find(x => x.id === c)?.nume ?? c;
+export const STARI_RECLAMATIE: Record<import('./tipuri').StareReclamatie, { eticheta: string; ton: 'ok' | 'atentie' | 'alerta' | 'neutru'; pentruLocatar: string }> = {
+  noua: { eticheta: 'Nouă', ton: 'alerta', pentruLocatar: 'Trimisă; așteaptă să fie preluată de administrare.' },
+  preluata: { eticheta: 'Preluată', ton: 'atentie', pentruLocatar: 'Preluată de administrare; se rezolvă.' },
+  la_constructor: { eticheta: 'La constructor (garanție)', ton: 'atentie', pentruLocatar: 'Trimisă constructorului, în garanție; se rezolvă.' },
+  rezolvata: { eticheta: 'Rezolvată, de confirmat', ton: 'ok', pentruLocatar: 'Marcată rezolvată. Confirmați, sau spuneți ce nu s-a rezolvat.' },
+  confirmata: { eticheta: 'Închisă', ton: 'neutru', pentruLocatar: 'Rezolvată și confirmată.' },
+  respinsa: { eticheta: 'Respinsă', ton: 'neutru', pentruLocatar: 'Respinsă de administrare (vedeți motivul).' },
+};
+export const codReclamatie = (codProiect: string, numar: number) => `${codProiect}-RC-${String(numar).padStart(3, '0')}`;

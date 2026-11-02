@@ -24,6 +24,7 @@ Rolul nostru diferă în funcție de date:
 | Contul | e-mail, nume, parola (doar criptată, nu o vedem), data creării, versiunea termenilor acceptați | de la dumneavoastră, la înregistrare |
 | Profilul | telefon, firma, autorizațiile și atestatele (număr, emitent, valabilitate, de ex. autorizația ISC de diriginte sau RTE), preferința pentru rezumatul pe e-mail | de la dumneavoastră |
 | Rolul în proiecte | proiectele, rolul (diriginte, constructor, proiectant etc.), cine v-a invitat și când | de la administratorul proiectului |
+| Locatarii clădirilor în exploatare | e-mail, unitatea (apartamentul), reclamațiile trimise, cu fotografiile lor | de la administrarea clădirii (e-mailul și unitatea) și de la locatar |
 | Activitatea în proiecte | ce ați creat, confirmat, avizat, aprobat sau refuzat, cu data și ora; observațiile; intrările în registre | din folosirea aplicației |
 | Documentele încărcate | fișierele încărcate (planșe, fișe tehnice, buletine, fotografii, PDF-uri semnate) și datele din ele | de la utilizatorii proiectului |
 | Semnăturile electronice | numele titularului certificatului, emitentul, numărul de serie, data semnării, rezultatul verificării | din PDF-urile semnate încărcate |
@@ -55,6 +56,8 @@ Nu folosim datele pentru publicitate, nu le vindem și nu facem profilare sau de
 ## 6. Cui transmitem datele
 
 **În proiect.** Membrii unui proiect văd datele celorlalți membri din acel proiect (nume, rol, firmă, telefon, autorizații) și ce au făcut în proiect. Cititorii, de exemplu inspectorii ISC sau membrii comisiei de recepție, au acces numai la citire. Persoanele din afara proiectului nu văd nimic din el.
+
+**Locatarii** nu fac parte din echipa proiectului: văd doar clădirea, unitatea lor și reclamațiile trimise de ei. Reclamațiile lor (cu unitatea, fără e-mail) le văd echipa de administrare și, pentru cele trimise în garanție, constructorul.
 
 **Furnizorii noștri (persoane împuternicite).** Folosim următorii furnizori, cu acorduri de prelucrare conforme art. 28 GDPR:
 

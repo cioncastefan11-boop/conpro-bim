@@ -133,7 +133,7 @@ export type LivrareFam = {
 };
 
 export type Atasament = {
-  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte' | 'receptie' | 'obiectie_receptie' | 'revizie_document' | 'eveniment_exploatare' | 'inspectie_urmarire' | 'interventie_echipament'; entitate_id: string;
+  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte' | 'receptie' | 'obiectie_receptie' | 'revizie_document' | 'eveniment_exploatare' | 'inspectie_urmarire' | 'interventie_echipament' | 'reclamatie'; entitate_id: string;
   tip_document: string; nume_fisier: string; cale: string; marime: number | null; incarcat_de: string; incarcat_la: string;
 };
 
@@ -242,3 +242,15 @@ export type InterventieEchipament = {
 };
 export type ScadentaMentenanta = { echipament_id: string; cod: string; denumire: string; interval_luni: number; ultima: string | null; urmatoarea: string };
 export type Garantie = { ce: 'constructie' | 'echipament'; id: string; denumire: string; garant: string | null; garantie_start: string | null; garantie_pana: string };
+
+// ---------- locatarii și reclamațiile (migrarea 0017) ----------
+export type Locatar = { id: string; proiect_id: string; email: string; unitate: string; persoana_id: string | null; activ: boolean; invitat_la: string; acceptat_la: string | null };
+export type StareReclamatie = 'noua' | 'preluata' | 'la_constructor' | 'rezolvata' | 'confirmata' | 'respinsa';
+export type Reclamatie = {
+  id: string; proiect_id: string; numar: number; categorie: string; unitate: string | null; loc: string | null; titlu: string; descriere: string;
+  urgenta: boolean; echipament_id: string | null; stare: StareReclamatie; raportat_de: string; de_locatar: boolean;
+  preluata_de: string | null; preluata_la: string | null; trimisa_constructorului_la: string | null; rezolvare: string | null;
+  rezolvata_de: string | null; rezolvata_la: string | null; confirmata_la: string | null; motiv_respingere: string | null;
+  redeschideri: number; nota_redeschidere: string | null; creat_la: string;
+};
+export type Locuinta = { locatar_id: string; proiect_id: string; cod: string; denumire: string; adresa: string | null; unitate: string; administrator: string | null };

@@ -10,6 +10,7 @@ import Configurare from './pages/Configurare';
 import Registru from './pages/Registru';
 import DeFacut, { incarcaSarcini } from './pages/DeFacut';
 import Ghid from './pages/Ghid';
+import Locuinta, { incarcaLocuinte } from './pages/Locuinta';
 import { CadruPublic, PaginaLegala, Subsol } from './pages/PaginaPublica';
 import { AcceptareTermeni } from './components/AcceptareTermeni';
 
@@ -18,7 +19,9 @@ export default function App() {
   const nav = useNavigate();
   const loc = useLocation();
   const [deFacut, setDeFacut] = useState<number | null>(null);
+  const [areLocuinta, setAreLocuinta] = useState(false);
   // numărul de sarcini, reîmprospătat la fiecare schimbare de pagină
+  useEffect(() => { if (sesiune) incarcaLocuinte().then(l => setAreLocuinta(l.length > 0)); }, [sesiune]);
   useEffect(() => { if (sesiune) incarcaSarcini().then(l => setDeFacut(l.length)).catch(() => setDeFacut(null)); }, [sesiune, loc.pathname]);
 
   if (!configurat) return <Configurare />;
@@ -43,6 +46,7 @@ export default function App() {
         <nav>
           <NavLink to="/" end>Proiecte</NavLink>
           <NavLink to="/de-facut">De făcut{deFacut ? <span className="numar-sarcini">{deFacut}</span> : null}</NavLink>
+          {areLocuinta && <NavLink to="/locuinta">Locuința mea</NavLink>}
           <NavLink to="/registru">Registru</NavLink>
           <NavLink to="/profil">Profil</NavLink>
           <button className="legatura" onClick={async () => { await supabase.auth.signOut(); nav('/autentificare'); }}>
@@ -57,6 +61,7 @@ export default function App() {
           <Route path="/registru" element={<Registru />} />
           <Route path="/de-facut" element={<DeFacut />} />
           <Route path="/profil" element={<Profil />} />
+          <Route path="/locuinta/*" element={<Locuinta />} />
           <Route path="/ghid" element={<Ghid />} />
           <Route path="/confidentialitate" element={<PaginaLegala text="confidentialitate" />} />
           <Route path="/termeni" element={<PaginaLegala text="termeni" />} />
