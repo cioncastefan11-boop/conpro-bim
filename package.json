@@ -1,13 +1,13 @@
 {
   "name": "conpro-bim",
   "private": true,
-  "version": "0.16.0",
+  "version": "0.17.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test:db": "node tests/reguli-acces.test.mjs && node tests/pv-registru.test.mjs && node tests/fam.test.mjs && node tests/betoane.test.mjs && node tests/echipamente.test.mjs && node tests/receptie.test.mjs && node tests/semnatura.test.mjs && node tests/documente.test.mjs && node tests/ifc.test.mjs && node tests/sarcini.test.mjs && node tests/rezumat.test.mjs && node tests/incarcare.test.mjs && node tests/gdpr.test.mjs && node tests/exploatare.test.mjs && node tests/urmarire.test.mjs && node tests/mentenanta.test.mjs && node tests/reclamatii.test.mjs"
+    "test:db": "node tests/reguli-acces.test.mjs && node tests/pv-registru.test.mjs && node tests/fam.test.mjs && node tests/betoane.test.mjs && node tests/echipamente.test.mjs && node tests/receptie.test.mjs && node tests/semnatura.test.mjs && node tests/documente.test.mjs && node tests/ifc.test.mjs && node tests/sarcini.test.mjs && node tests/rezumat.test.mjs && node tests/incarcare.test.mjs && node tests/gdpr.test.mjs && node tests/exploatare.test.mjs && node tests/urmarire.test.mjs && node tests/mentenanta.test.mjs && node tests/reclamatii.test.mjs && node tests/observatii.test.mjs && node tests/bcf.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
@@ -27,6 +27,7 @@
     "@types/react-dom": "^18.3.1",
     "@types/three": "^0.180.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "@xmldom/xmldom": "^0.8.10",
     "typescript": "~5.6.3",
     "vite": "^5.4.11"
   }

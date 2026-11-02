@@ -75,7 +75,7 @@ export default function Proiect() {
         <Route index element={<><Detalii proiect={proiect} admin={admin} onSalvat={incarca} /><Conventie proiect={proiect} membri={membri} admin={admin} onSalvat={incarca} /></>} />
         <Route path="echipa" element={<Echipa proiectId={id} membri={membri} admin={admin} uid={uid} onSchimbat={incarca} />} />
         <Route path="echipamente" element={<Echipamente proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
-        <Route path="model" element={<Model proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
+        <Route path="model/*" element={<Model proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="documente/*" element={<Documente proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="receptie/*" element={<Receptie proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="carte" element={<CarteaTehnica proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />

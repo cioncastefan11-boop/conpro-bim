@@ -8,7 +8,7 @@ import { Eroare, Gol, mesajEroare } from '../components/ui';
 
 export const TIPURI_SARCINA: Record<string, string> = {
   pv: 'Proces verbal', fam: 'Material (FAM)', turnare: 'Condica de betoane', incercare: 'Încercare',
-  receptie: 'Recepție', obiectie: 'Obiecție la recepție', document: 'Document', exploatare: 'Exploatare', urmarire: 'Urmărirea în timp', mentenanta: 'Mentenanță', garantie: 'Garanție', reclamatie: 'Reclamație',
+  receptie: 'Recepție', obiectie: 'Obiecție la recepție', document: 'Document', exploatare: 'Exploatare', urmarire: 'Urmărirea în timp', mentenanta: 'Mentenanță', garantie: 'Garanție', reclamatie: 'Reclamație', observatie: 'Observație pe model',
 };
 
 export async function incarcaSarcini(): Promise<Sarcina[]> {

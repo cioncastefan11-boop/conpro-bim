@@ -133,7 +133,7 @@ export type LivrareFam = {
 };
 
 export type Atasament = {
-  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte' | 'receptie' | 'obiectie_receptie' | 'revizie_document' | 'eveniment_exploatare' | 'inspectie_urmarire' | 'interventie_echipament' | 'reclamatie'; entitate_id: string;
+  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte' | 'receptie' | 'obiectie_receptie' | 'revizie_document' | 'eveniment_exploatare' | 'inspectie_urmarire' | 'interventie_echipament' | 'reclamatie' | 'observatie'; entitate_id: string;
   tip_document: string; nume_fisier: string; cale: string; marime: number | null; incarcat_de: string; incarcat_la: string;
 };
 
@@ -254,3 +254,16 @@ export type Reclamatie = {
   redeschideri: number; nota_redeschidere: string | null; creat_la: string;
 };
 export type Locuinta = { locatar_id: string; proiect_id: string; cod: string; denumire: string; adresa: string | null; unitate: string; administrator: string | null };
+
+// ---------- observațiile pe model, BCF (migrarea 0018) ----------
+export type StareObservatie = 'deschisa' | 'in_lucru' | 'rezolvata' | 'inchisa';
+export type Observatie = {
+  id: string; proiect_id: string; numar: number; bcf_guid: string; tip: string; prioritate: string; titlu: string; descriere: string | null;
+  stare: StareObservatie; atribuita_rol: string | null; atribuita_catre: string | null; termen: string | null; zona: string | null;
+  elemente: { guid: string; nume?: string; clasa?: string }[]; punct_vedere: import('./bcf').PunctVedere | null;
+  sursa: string | null; autor_extern: string | null; creat_de: string; creat_la: string; rezolvata_la: string | null; inchisa_la: string | null; inchisa_de: string | null;
+};
+export type ComentariuObservatie = {
+  id: string; observatie_id: string; proiect_id: string; text: string; stare_noua: StareObservatie | null; autor_extern: string | null;
+  data_externa: string | null; bcf_guid: string; creat_de: string; creat_la: string;
+};

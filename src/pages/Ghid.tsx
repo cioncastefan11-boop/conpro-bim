@@ -13,6 +13,7 @@ const ROLURI: Rol[] = [
       { ce: 'Confirmă procesele verbale de lucrări ascunse și faze determinante', unde: 'Procese verbale', detalii: 'Citiți descrierea și concluziile, apoi „Confirm”, „Confirm cu observații” sau „Refuz”. Confirmarea intră singură în registrul dumneavoastră.' },
       { ce: 'Aprobă materialele (FAM)', unde: 'Materiale (FAM)', detalii: 'După avizul proiectantului: aprobat, aprobat cu observații sau respins. La fiecare livrare verificați lotul și documentele de însoțire.' },
       { ce: 'Vizează turnările din condica de betoane și ia la cunoștință rezultatele încercărilor', unde: 'Betoane și încercări', detalii: 'Un rezultat neconform intră în registru ca neconformitate.' },
+      { ce: 'Deschide neconformitățile pe model', unde: 'Model 3D → Observație nouă', detalii: 'Alegeți elementele în model (Shift + clic pentru mai multe), așezați vederea și deschideți observația: se salvează elementele, camera și o captură. O atribuiți constructorului sau proiectantului, cu termen; după rezolvare o verificați și o închideți.' },
       { ce: 'Aprobă publicarea planșelor pentru execuție', unde: 'Documente', detalii: 'Revizia publicată (A1) devine cea „în vigoare”; cea veche se arhivează.' },
       { ce: 'Ține registrul electronic', unde: 'Registru (bara de sus)', detalii: 'Intrările automate (PV-uri, vize, încercări, recepții) apar singure; dispozițiile de șantier, verificările și opririle le scrieți dumneavoastră. Nu se șterg; o greșeală se corectează cu o intrare nouă.' },
       { ce: 'Întocmește Cartea tehnică', unde: 'Cartea tehnică', detalii: 'Opisul pe capitole A–D se completează singur; adăugați documentele din afara aplicației (certificat de urbanism, avize). Lista „Ce mai lipsește” arată ce e de rezolvat; la final descărcați arhiva electronică.' },
@@ -29,6 +30,7 @@ const ROLURI: Rol[] = [
       { ce: 'Introduce rezultatele încercărilor', unde: 'Betoane și încercări', detalii: 'Cu buletinul de la laborator atașat (sau le introduce laboratorul, dacă e în echipă).' },
       { ce: 'Completează echipamentele montate (COBie)', unde: 'Echipamente (sau Model 3D → Preluare în COBie)', detalii: 'Tipurile, cu producător, garanție și mentenanță; apoi fiecare echipament cu eticheta, încăperea și punerea în funcțiune. Din modelul IFC le puteți prelua dintr-un clic.' },
       { ce: 'Încarcă procedurile, graficele, rapoartele', unde: 'Documente', detalii: 'Cu codul standard; la mai multe fișiere folosiți „Încarcă mai multe”.' },
+      { ce: 'Pune întrebări proiectantului pe model', unde: 'Model 3D → Observație nouă (Întrebare)', detalii: 'Pe elementul în cauză, cu captură; răspunsul vine în discuția observației. Neconformitățile atribuite dumneavoastră apar în „De făcut”: le preluați și le marcați rezolvate, cu descrierea.' },
       { ce: 'Remediază obiecțiile de la recepție', unde: 'Recepție', detalii: 'Descrieți remedierea, atașați fotografii, apoi dirigintele confirmă.' },
       { ce: 'Ține registrul RTE', unde: 'Registru', detalii: 'Ca dirigintele, pentru propriile verificări (art. 459).' },
     ],
@@ -38,6 +40,7 @@ const ROLURI: Rol[] = [
     pe_scurt: 'Publică planșele și modelele, avizează materialele propuse și participă la fazele determinante.',
     pasi: [
       { ce: 'Încarcă planșele și modelele, cu revizii', unde: 'Documente', detalii: 'Fiecare revizie începe în lucru (o vede doar echipa dumneavoastră); o partajați pentru coordonare sau comentarii (S1–S4) și cereți publicarea pentru execuție (A1). Modelele IFC (tip M3) se deschid în Model 3D.' },
+      { ce: 'Răspunde la întrebări și observații', unde: 'Model 3D → Observații pe model', detalii: 'Cele atribuite proiectantului apar în „De făcut”. Se pot exporta în BCF, rezolva în Revit / Archicad și importa înapoi.' },
       { ce: 'Avizează FAM-urile', unde: 'Materiale (FAM)', detalii: 'Conform, echivalent sau neconform (cu observații, care trimit fișa înapoi la constructor).' },
       { ce: 'Confirmă fazele determinante', unde: 'Procese verbale', detalii: 'Le primiți după ce au confirmat dirigintele și RTE-ul (art. 426 alin. 3).' },
       { ce: 'Stabilește programul de urmărire în timp', unde: 'Exploatare → Urmărirea în timp → Programul', detalii: 'Ce se urmărește, metoda, intervalul (cel mult 12 luni) și pragul de alarmă, după caietul de sarcini.' },

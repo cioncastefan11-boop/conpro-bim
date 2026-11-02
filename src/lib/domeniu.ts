@@ -272,6 +272,7 @@ export const TIPURI_ATASAMENT: Record<string, string> = {
   raport_comportare: 'Raportul privind comportarea în exploatare',
   dovada_remediere: 'Dovada remedierii',
   raport_expertiza: 'Raport de expertiză tehnică',
+  captura_model: 'Captura din model',
   deviz_interventie: 'Deviz / contract de intervenție',
   altul: 'Alt document',
 };
@@ -455,3 +456,21 @@ export const STARI_RECLAMATIE: Record<import('./tipuri').StareReclamatie, { etic
   respinsa: { eticheta: 'Respinsă', ton: 'neutru', pentruLocatar: 'Respinsă de administrare (vedeți motivul).' },
 };
 export const codReclamatie = (codProiect: string, numar: number) => `${codProiect}-RC-${String(numar).padStart(3, '0')}`;
+
+// ---------- observațiile pe model, BCF (migrarea 0018) ----------
+export const TIPURI_OBSERVATIE: { id: string; nume: string; ajutor: string }[] = [
+  { id: 'neconformitate', nume: 'Neconformitate', ajutor: 'Abatere de la proiect constatată pe șantier (armare, cofraje, cote, materiale).' },
+  { id: 'intrebare', nume: 'Întrebare (RFI)', ajutor: 'Întrebare către proiectant: o neclaritate, o interferență, o soluție alternativă.' },
+  { id: 'dispozitie', nume: 'Dispoziție de șantier', ajutor: 'Soluția sau modificarea dispusă de proiectant / diriginte.' },
+  { id: 'remediere', nume: 'Remediere', ajutor: 'Punct de pe lista de remedieri (finisaje, pre-recepție).' },
+  { id: 'comentariu', nume: 'Comentariu', ajutor: 'Observație fără acțiune obligatorie.' },
+];
+export const numeTipObservatie = (t: string) => TIPURI_OBSERVATIE.find(x => x.id === t)?.nume ?? t;
+export const STARI_OBSERVATIE: Record<import('./tipuri').StareObservatie, { eticheta: string; ton: 'ok' | 'atentie' | 'alerta' | 'neutru' }> = {
+  deschisa: { eticheta: 'Deschisă', ton: 'alerta' }, in_lucru: { eticheta: 'În lucru', ton: 'atentie' },
+  rezolvata: { eticheta: 'Rezolvată, de verificat', ton: 'ok' }, inchisa: { eticheta: 'Închisă', ton: 'neutru' },
+};
+export const PRIORITATI_OBSERVATIE: { id: string; nume: string }[] = [
+  { id: 'mica', nume: 'Mică' }, { id: 'normala', nume: 'Normală' }, { id: 'mare', nume: 'Mare' }, { id: 'critica', nume: 'Critică' },
+];
+export const codObservatie = (codProiect: string, numar: number) => `${codProiect}-OB-${String(numar).padStart(3, '0')}`;

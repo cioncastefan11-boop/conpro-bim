@@ -1,10 +1,13 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { Link, NavLink, Route, Routes, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { numeRolDocument, type Rol } from '../lib/domeniu';
 import type { Atasament, DocumentProiect, Membru, Proiect, RevizieDocument } from '../lib/tipuri';
 import { Eroare, Gol, mesajEroare } from '../components/ui';
-import type { ModelDeAfisat, ModelIncarcat } from '../components/Vizualizator';
+import type { ControlVizualizator, ElementAles, ModelDeAfisat, ModelIncarcat } from '../components/Vizualizator';
+import { BUCKET } from '../components/Atasamente';
+import Observatii, { CampuriObservatie, EticObs, cuiI, incarcaObservatii, lucreaza, type CampuriObs, type DateObs } from './Observatii';
+import { codObservatie } from '../lib/domeniu';
 import { planificaImport, type PlanImport } from '../lib/cobieIfc';
 
 const Vizualizator = lazy(() => import('../components/Vizualizator'));
@@ -16,7 +19,28 @@ const MB = (b: number | null) => (b == null ? '' : `${(b / 1048576).toLocaleStri
 
 type FisierModel = { cheie: string; cod: string; titlu: string; rol: string; revizie: string; cod_stare: string; fisier: Atasament };
 
-export default function Model({ proiect, rolulMeu }: Props) {
+export default function Model(props: Props) {
+  const [nObs, setNObs] = useState<number | null>(null);
+  useEffect(() => { incarcaObservatii(props.proiect.id).then(r => setNObs(r.obs.filter(o => o.stare !== 'inchisa').length)); }, [props.proiect.id]);
+  return (
+    <>
+      <nav className="subfile" aria-label="Modelul">
+        <NavLink to="." end>Modelul 3D</NavLink>
+        <NavLink to="observatii">Observații pe model{nObs ? ` (${nObs})` : ''}</NavLink>
+      </nav>
+      <Routes>
+        <Route index element={<VedereModel {...props} />} />
+        <Route path="observatii/*" element={<Observatii {...props} />} />
+      </Routes>
+    </>
+  );
+}
+
+function VedereModel({ proiect, membri, rolulMeu, uid }: Props) {
+  const [q] = useSearchParams();
+  const obsCeruta = q.get('obs');
+  const ctrl = useRef<ControlVizualizator>(null);
+  const [selectie, setSelectie] = useState<ElementAles[]>([]);
   const [fisiere, setFisiere] = useState<FisierModel[] | null>(null);
   const [alese, setAlese] = useState<Set<string>>(new Set());
   const [modele, setModele] = useState<ModelDeAfisat[]>([]);
@@ -35,10 +59,14 @@ export default function Model({ proiect, rolulMeu }: Props) {
       const alese = docs.flatMap(d => { const r = rev.find(x => x.document_id === d.id && x.stare === 'publicat') ?? rev.find(x => x.document_id === d.id && x.stare !== 'arhivat'); return r ? [{ d, r }] : []; });
       const f = alese.length ? await supabase.from('atasamente').select('*').eq('entitate', 'revizie_document').in('entitate_id', alese.map(x => x.r.id)) : { data: [] };
       const ifc = ((f.data as Atasament[]) ?? []).filter(x => /\.ifc$/i.test(x.nume_fisier));
-      setFisiere(ifc.map(x => { const { d, r } = alese.find(y => y.r.id === x.entitate_id)!; return { cheie: x.id, cod: d.cod, titlu: d.titlu, rol: d.rol, revizie: r.revizie, cod_stare: r.cod_stare, fisier: x }; }));
+      const lista = ifc.map(x => { const { d, r } = alese.find(y => y.r.id === x.entitate_id)!; return { cheie: x.id, cod: d.cod, titlu: d.titlu, rol: d.rol, revizie: r.revizie, cod_stare: r.cod_stare, fisier: x }; });
+      setFisiere(lista);
       setEroare(mesajEroare(a.error ?? b.error));
+      // venit din fișa unei observații: se deschid toate modelele
+      if (obsCeruta && lista.length) setAlese(new Set(lista.map(f => f.cheie)));
     })();
-  }, [proiect.id]);
+  }, [proiect.id]);  // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (obsCeruta && fisiere?.length && alese.size === fisiere.length && !modele.length) deschide(); }, [alese]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   async function deschide() {
     setEroare(null);
@@ -103,9 +131,11 @@ export default function Model({ proiect, rolulMeu }: Props) {
 
       {modele.length > 0 && (
         <Suspense fallback={<div className="card"><p className="discret">Se încarcă vizualizarea…</p></div>}>
-          <Vizualizator modele={modele} onIncarcate={laIncarcare} />
+          <Vizualizator ref={ctrl} modele={modele} onIncarcate={laIncarcare} onSelectie={setSelectie} />
         </Suspense>
       )}
+
+      {incarcate.length > 0 && <PanouObservatii proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} ctrl={ctrl} selectie={selectie} obsCeruta={obsCeruta} />}
 
       {incarcate.length > 0 && <ImportCobie proiect={proiect} rolulMeu={rolulMeu} modele={incarcate} />}
     </>
@@ -197,6 +227,101 @@ function ImportCobie({ proiect, rolulMeu, modele }: { proiect: Proiect; rolulMeu
             {!poateSpatii && <small className="discret">Nivelurile și încăperile le preia proiectantul sau constructorul.</small>}
           </div>
         </>
+      )}
+    </div>
+  );
+}
+
+// --------------------------------------------------------------------- Observațiile, lângă model
+function PanouObservatii({ proiect, membri, rolulMeu, ctrl, selectie, obsCeruta }: Props & {
+  ctrl: React.RefObject<ControlVizualizator>; selectie: ElementAles[]; obsCeruta: string | null;
+}) {
+  const [d, setD] = useState<DateObs | null>(null);
+  const [nou, setNou] = useState(false);
+  const [mesaj, setMesaj] = useState<string | null>(null);
+  const gol: CampuriObs = { tip: 'neconformitate', prioritate: 'normala', titlu: '', descriere: '', termen: '', zona: '', atribuire: 'r:proiectant' };
+  const [f, setF] = useState<CampuriObs>(gol);
+  const [eroare, setEroare] = useState<string | null>(null);
+  const [lucru, setLucru] = useState(false);
+  const [activa, setActiva] = useState<string | null>(null);
+  const incarca = useCallback(async () => { const r = await incarcaObservatii(proiect.id); setD(r); if (r.eroare) setEroare(r.eroare); }, [proiect.id]);
+  useEffect(() => { incarca(); }, [incarca]);
+
+  const arata = useCallback(async (id: string) => {
+    const o = d?.obs.find(x => x.id === id); if (!o || !ctrl.current) return;
+    setActiva(id);
+    const n = await ctrl.current.arata(o.punct_vedere, o.elemente.map(e => e.guid));
+    setMesaj(o.elemente.length && n < o.elemente.length ? `${n} din ${o.elemente.length} elemente găsite în modelele deschise (deschideți și celelalte discipline).` : null);
+  }, [d, ctrl]);
+  // venit din fișa observației: o arătăm imediat ce modelele sunt gata
+  useEffect(() => { if (obsCeruta && d && ctrl.current && activa !== obsCeruta) arata(obsCeruta); }, [obsCeruta, d, arata, activa, ctrl]);
+
+  async function salveaza(e: FormEvent) {
+    e.preventDefault(); if (!ctrl.current) return;
+    setEroare(null); setLucru(true);
+    try {
+      const { punct_vedere, captura } = ctrl.current.capteaza();
+      const id = crypto.randomUUID();
+      const { error } = await supabase.from('observatii').insert({
+        id, proiect_id: proiect.id, tip: f.tip, prioritate: f.prioritate, titlu: f.titlu.trim(), descriere: f.descriere.trim() || null, termen: f.termen || null,
+        zona: f.zona.trim() || null, atribuita_catre: f.atribuire.startsWith('p:') ? f.atribuire.slice(2) : null, atribuita_rol: f.atribuire.startsWith('r:') ? f.atribuire.slice(2) : null,
+        elemente: selectie.map(x => ({ guid: x.guid, nume: x.nume, clasa: x.clasa })), punct_vedere,
+      });
+      if (error) throw error;
+      const png = await captura();
+      if (png) {
+        const cale = `${proiect.id}/observatie/${id}/captura.png`;
+        const up = await supabase.storage.from(BUCKET).upload(cale, png, { contentType: 'image/png' });
+        if (!up.error) await supabase.from('atasamente').insert({ proiect_id: proiect.id, entitate: 'observatie', entitate_id: id, tip_document: 'captura_model', nume_fisier: 'captura.png', cale, marime: png.size });
+      }
+      setF(gol); setNou(false); setMesaj('Observația a fost deschisă, cu punctul de vedere și captura.');
+      await incarca();
+    } catch (er) { setEroare(mesajEroare(er as { message?: string })); }
+    setLucru(false);
+  }
+
+  const deschise = (d?.obs ?? []).filter(o => o.stare !== 'inchisa');
+  return (
+    <div className="card panou-observatii">
+      <div className="antet-card">
+        <div>
+          <h2>Observații pe model</h2>
+          <p className="discret">Alegeți elementele în model (Shift sau Ctrl + clic pentru mai multe), așezați vederea, apoi deschideți observația: se salvează elementele, camera și o captură.</p>
+        </div>
+        <div className="actiuni">
+          <Link className="buton" to="observatii">Toate observațiile</Link>
+          {lucreaza(rolulMeu) && !nou && <button className="buton principal" onClick={() => { setNou(true); setMesaj(null); }}>Observație nouă{selectie.length ? ` (${selectie.length} ${selectie.length === 1 ? 'element' : 'elemente'})` : ''}</button>}
+        </div>
+      </div>
+      {mesaj && <p className="mesaj info">{mesaj}</p>}
+      <Eroare text={eroare} />
+      {nou && (
+        <form className="formular eveniment-nou cadru-editare" onSubmit={salveaza}>
+          <p className="discret">{selectie.length ? <>Elementele alese: <b>{selectie.map(x => x.nume || x.clasa).join(', ')}</b></> : 'Niciun element ales: observația se leagă doar de punctul de vedere.'}</p>
+          <CampuriObservatie f={f} set={(k, v) => setF({ ...f, [k]: v })} membri={membri} />
+          <div className="actiuni">
+            <button type="button" className="buton" onClick={() => setNou(false)}>Renunță</button>
+            <button className="buton principal" disabled={lucru}>{lucru ? 'Se salvează…' : 'Deschide observația'}</button>
+          </div>
+        </form>
+      )}
+      {!deschise.length ? <p className="discret">Nicio observație deschisă.</p> : (
+        <ul className="lista-evenimente">
+          {deschise.map(o => (
+            <li key={o.id} className={activa === o.id ? 'ev-avarie activa' : 'ev-seism'}>
+              <div className="rand-obs">
+                <span className="cod">{codObservatie(proiect.cod, o.numar)}</span>
+                <b>{o.titlu}</b>
+                <small className="discret">{cuiI(o, membri) ?? 'neatribuită'}</small>
+                <EticObs o={o} />
+                <span className="actiuni-mici">
+                  {(o.elemente.length > 0 || o.punct_vedere) && <button className="legatura" onClick={() => arata(o.id)}>Arată</button>}
+                  <Link to={`observatii/${o.id}`}>Fișa</Link>
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

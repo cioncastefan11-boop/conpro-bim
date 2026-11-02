@@ -400,7 +400,7 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
 .viz-scena { position: relative; min-height: 360px; }
 .viz-scena canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .viz-progres { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: rgba(15, 23, 42, .85); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 14px; }
-.viz-progres.eroare { background: var(--bad); }
+.viz-progres.eroare { background: var(--bad); top: 52px; transform: translateX(-50%); max-width: 80%; }
 .viz-unelte { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; }
 .viz-sectiune { position: absolute; bottom: 12px; left: 12px; right: 12px; background: rgba(255, 255, 255, .92); border-radius: 10px; padding: 8px 12px; font-size: 13px; display: flex; gap: 10px; align-items: center; flex-direction: row; }
 .viz-sectiune input { flex: 1; }
@@ -434,7 +434,7 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
 .lista-sarcini li:last-child { border-bottom: 0; }
 .tip-sarcina { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); }
 .tip-sarcina.t-pv, .tip-sarcina.t-receptie, .tip-sarcina.t-exploatare, .tip-sarcina.t-reclamatie { color: var(--info); }
-.tip-sarcina.t-fam, .tip-sarcina.t-document, .tip-sarcina.t-urmarire, .tip-sarcina.t-mentenanta, .tip-sarcina.t-garantie { color: var(--warn); }
+.tip-sarcina.t-fam, .tip-sarcina.t-document, .tip-sarcina.t-urmarire, .tip-sarcina.t-observatie, .tip-sarcina.t-mentenanta, .tip-sarcina.t-garantie { color: var(--warn); }
 .tip-sarcina.t-obiectie, .tip-sarcina.t-incercare { color: var(--bad); }
 @media (max-width: 640px) { .lista-sarcini li { grid-template-columns: 1fr; gap: 2px; } }
 @media (max-width: 640px) {
@@ -546,3 +546,21 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
 .pasi-reclamatie { padding-left: 20px; display: grid; gap: 4px; margin: 4px 0 14px; }
 .actiuni-reclamatie { border-top: 1px solid var(--border); padding-top: 12px; margin: 8px 0 16px; display: grid; gap: 8px; }
 .actiuni-reclamatie label { display: block; }
+
+/* 0.17 · observațiile pe model (BCF) */
+.cadru-editare { border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin: 10px 0 16px; background: #f8fafc; }
+.obs-corp { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 360px); gap: 18px; align-items: start; }
+.obs-captura { margin: 12px 0 0; }
+.obs-captura img { width: 100%; border-radius: 8px; border: 1px solid var(--border); display: block; }
+.lista-guid { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.lista-guid code { font-size: 12px; color: var(--muted); }
+.discutie { list-style: none; padding: 0; margin: 6px 0 12px; display: grid; gap: 8px; }
+.discutie li { border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; }
+.discutie li.cu-stare { background: #f8fafc; }
+.discutie-cap { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; font-size: 14px; }
+.discutie li p { margin: 4px 0 0; }
+.rand-obs { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 9px 12px; }
+.rand-obs .actiuni-mici { margin-left: auto; display: inline-flex; gap: 12px; }
+.lista-evenimente li.activa { background: #fff7ed; }
+@media (max-width: 720px) { .obs-corp { grid-template-columns: 1fr; } }
+.filtre-punct select { width: auto; padding: 4px 10px; font-size: 13px; border-radius: 999px; }
