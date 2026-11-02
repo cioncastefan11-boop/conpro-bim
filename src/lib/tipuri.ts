@@ -133,7 +133,7 @@ export type LivrareFam = {
 };
 
 export type Atasament = {
-  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte' | 'receptie' | 'obiectie_receptie' | 'revizie_document' | 'eveniment_exploatare' | 'inspectie_urmarire'; entitate_id: string;
+  id: string; proiect_id: string; entitate: 'fam' | 'livrare_fam' | 'pv' | 'turnare' | 'incercare' | 'tip_echipament' | 'echipament' | 'document_carte' | 'receptie' | 'obiectie_receptie' | 'revizie_document' | 'eveniment_exploatare' | 'inspectie_urmarire' | 'interventie_echipament'; entitate_id: string;
   tip_document: string; nume_fisier: string; cale: string; marime: number | null; incarcat_de: string; incarcat_la: string;
 };
 
@@ -233,3 +233,12 @@ export type InspectieUrmarire = {
 };
 export type ConstatareInspectie = { inspectie_id: string; punct_id: string; proiect_id: string; stare: StareConstatare; observatii: string | null };
 export type ScadentaUrmarire = { punct_id: string; ce: string; interval_luni: number; ultima: string | null; urmatoarea: string };
+
+// ---------- mentenanța și garanțiile (migrarea 0016) ----------
+export type TipInterventie = 'revizie' | 'verificare_periodica' | 'reparatie' | 'inlocuire' | 'defect';
+export type InterventieEchipament = {
+  id: string; proiect_id: string; echipament_id: string; numar: number; tip: TipInterventie; data: string; descriere: string;
+  executant: string | null; in_garantie: boolean; functional: boolean; creat_de: string; creat_la: string;
+};
+export type ScadentaMentenanta = { echipament_id: string; cod: string; denumire: string; interval_luni: number; ultima: string | null; urmatoarea: string };
+export type Garantie = { ce: 'constructie' | 'echipament'; id: string; denumire: string; garant: string | null; garantie_start: string | null; garantie_pana: string };

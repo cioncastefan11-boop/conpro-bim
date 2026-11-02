@@ -18,6 +18,20 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.15 (mentenanța echipamentelor și garanțiile)
+
+1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0016_mentenanta.sql`, lipiți și **Run** (după 0015).
+3. Verificare: `select count(*) from pg_proc where proname in ('scadente_mentenanta','garantii','interventie_verifica');` trebuie să dea **3**.
+
+Ce aduce (ISO 19650-3, informațiile despre echipamente ținute la zi în exploatare):
+- **Exploatare → Mentenanță și garanții:** mentenanța restantă, garanțiile care expiră, intervențiile din an.
+- **Scadențele de mentenanță** din intervalul tipului (COBie) și ultima revizie / verificare periodică (sau punerea în funcțiune).
+- **Registrul intervențiilor:** revizii, verificări periodice obligatorii (ISCIR, PSI), reparații, înlocuiri, defecte, cu executantul, „în garanție”, starea după intervenție și fișele atașate. Nu se modifică. Se tipărește și intră în Cartea tehnică, capitolul D.
+- **Garanțiile:** garanția de bună execuție a construcției (de la recepție) și a fiecărui echipament (din durata garanției tipului). La o intervenție, aplicația spune dacă echipamentul e în garanție și cine e garantul.
+- **„De făcut”** pentru beneficiar și administratorul clădirii: mentenanța scadentă în 14 zile, garanția construcției cu 90 de zile înainte de expirare, a echipamentelor cu 60.
+- **Administratorul clădirii** poate adăuga și actualiza echipamentele (înlocuiri, echipamente noi) și documentația lor.
+
 ## Actualizare la 0.14 (urmărirea comportării în timp)
 
 1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.

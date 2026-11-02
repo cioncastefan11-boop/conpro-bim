@@ -10,7 +10,7 @@ import type { Atasament, ProcesVerbal } from './tipuri';
 import { genereazaCobie, lipsuriEchipament } from './cobie';
 import { excelCondica, htmlCondica as htmlCondicaBetoane } from './condica';
 import { fisiereReceptie, htmlReceptie } from './receptie';
-import { codEveniment, codInspectie, numeEveniment, stareConstatare } from './domeniu';
+import { codEveniment, codInspectie, codInterventie, numeEveniment, numeInterventie, stareConstatare } from './domeniu';
 import { scadente } from './urmarire';
 import { codReceptie, DECIZII_RECEPTIE, numeCodStare, numeReceptie, numeRolDocument, numeTipDocument } from './domeniu';
 
@@ -20,7 +20,7 @@ export type ElementOpis = {
   detalii?: string;
   data?: string | null;
   fisiere: Atasament[];
-  generat?: 'pv' | 'manual' | 'cobie' | 'condica' | 'fam' | 'receptie' | 'document' | 'evenimente' | 'urmarire';
+  generat?: 'pv' | 'manual' | 'cobie' | 'condica' | 'fam' | 'receptie' | 'document' | 'evenimente' | 'urmarire' | 'interventii';
   pvId?: string;
   dosar: string;                 // folderul din arhivă
 };
@@ -127,6 +127,14 @@ export function construiesteOpis(d: DateProiect): CapitolOpis[] {
       fisiere: d.inspectii.flatMap(i => fis('inspectie_urmarire', i.id)), generat: 'urmarire', dosar: 'D_Exploatare/Urmarire_in_timp' });
   }
 
+  // D · registrul intervențiilor la echipamente (mentenanță, verificări periodice, reparații)
+  if (p.exploatare_din && d.interventii.length) {
+    cap.D.push({ id: 'interventii', titlu: 'Registrul intervențiilor la echipamente',
+      detalii: `${d.interventii.length} ${d.interventii.length === 1 ? 'intervenție' : 'intervenții'} la ${new Set(d.interventii.map(i => i.echipament_id)).size} echipamente`,
+      data: d.interventii[d.interventii.length - 1]?.data, fisiere: d.interventii.flatMap(i => fis('interventie_echipament', i.id)),
+      generat: 'interventii', dosar: 'D_Exploatare/Interventii_echipamente' });
+  }
+
   const sortat = (l: ElementOpis[]) => [...l].sort((a, b) => (a.data ?? '9999').localeCompare(b.data ?? '9999'));
   return CAPITOLE_CARTE.map(c => ({ ...c, elemente: sortat(cap[c.id]) }));
 }
@@ -191,6 +199,7 @@ export function htmlOpis(d: DateProiect, capitole: CapitolOpis[]): string {
         e.generat === 'condica' ? 'B_Executie/Condica_betoane/Condica-betoane.html<br>B_Executie/Condica_betoane/Condica-betoane.xlsx' : '',
         e.generat === 'receptie' ? `${esc(e.dosar)}/${esc(e.titlu.split(' · ')[0])}.html` : '',
         e.generat === 'evenimente' ? 'D_Exploatare/Jurnal_evenimente/Jurnalul-evenimentelor.html' : '',
+        e.generat === 'interventii' ? 'D_Exploatare/Interventii_echipamente/Registrul-interventiilor.html' : '',
         e.generat === 'urmarire' ? 'D_Exploatare/Urmarire_in_timp/Urmarirea-comportarii-in-timp.html' : '',
         e.generat === 'fam' ? `B_Executie/FAM/${esc(e.titlu.split(' · ')[0].replace('/', '-'))}.html` : '',
         ...e.fisiere.map(f => `${esc(e.dosar)}/${esc(numeInArhiva(f))}`),
@@ -324,6 +333,7 @@ export async function genereazaArhiva(d: DateProiect, progres: (text: string) =>
     radacina.file('B_Executie/Condica_betoane/Condica-betoane.xlsx', await excelCondica(d));
   }
   if (d.proiect.exploatare_din) radacina.file('D_Exploatare/Jurnal_evenimente/Jurnalul-evenimentelor.html', htmlJurnalEvenimente(d));
+  if (d.proiect.exploatare_din && d.interventii.length) radacina.file('D_Exploatare/Interventii_echipamente/Registrul-interventiilor.html', htmlInterventii(d));
   if (d.proiect.exploatare_din && (d.puncte.length || d.inspectii.length)) radacina.file('D_Exploatare/Urmarire_in_timp/Urmarirea-comportarii-in-timp.html', htmlUrmarire(d));
   if (d.tipuri.length) {
     radacina.file('D_Exploatare/Manual-utilizare-mentenanta.html', htmlManual(d));
@@ -402,3 +412,19 @@ export function htmlUrmarire(d: DateProiect, an?: number): string {
   return doc(titlu, corp);
 }
 const laIsoAzi = () => new Date().toISOString().slice(0, 10);
+
+/** Registrul intervențiilor la echipamente (capitolul D). */
+export function htmlInterventii(d: DateProiect): string {
+  const p = d.proiect;
+  let corp = antet(d, 'Registrul intervențiilor la echipamente');
+  corp += '<p>Reviziile, verificările periodice, reparațiile, înlocuirile și defectele consemnate în exploatare. Intrările nu se modifică.</p>';
+  corp += '<table><tr><th>Nr.</th><th>Data</th><th>Echipamentul</th><th>Intervenția</th><th>Executant</th><th>Consemnat de</th></tr>';
+  for (const i of [...d.interventii].sort((a, b) => a.data.localeCompare(b.data) || a.numar - b.numar)) {
+    const e = d.echipamente.find(x => x.id === i.echipament_id);
+    const t = d.tipuri.find(x => x.id === e?.tip_id);
+    corp += `<tr><td class="cod">${esc(codInterventie(p.cod, i.numar))}</td><td>${formatData(i.data)}</td><td><b>${esc(e?.cod ?? '')}</b> ${esc(t?.denumire ?? '')}</td>
+<td><b>${esc(numeInterventie(i.tip))}</b>${i.in_garantie ? ' · în garanție' : ''}${i.functional ? '' : ' · <b>nefuncțional</b>'}<br>${esc(i.descriere)}</td>
+<td>${esc(i.executant ?? '')}</td><td>${esc(numeDe(d, i.creat_de))}</td></tr>`;
+  }
+  return doc(`Registrul intervențiilor ${p.cod}`, corp + '</table>');
+}
