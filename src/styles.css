@@ -597,3 +597,50 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
 .lectii li.buna { border-left-color: var(--ok); }
 .lectii li p { margin: 4px 0; }
 .lectii .legatura { margin-left: 10px; }
+
+/* 0.21 · meniul proiectului și prezentarea */
+.continut:has(.proiect-cadru) { max-width: 1360px; }
+.proiect-cadru { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 28px; align-items: start; }
+.meniu-proiect { position: sticky; top: 76px; display: grid; gap: 14px; padding-right: 8px; border-right: 1px solid var(--border); max-height: calc(100vh - 96px); overflow-y: auto; }
+.meniu-grup { display: grid; gap: 2px; }
+.meniu-titlu { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 0 10px 4px; }
+.meniu-proiect a { text-decoration: none; color: var(--text); padding: 7px 10px; border-radius: 8px; font-size: 14.5px; font-weight: 500; border-left: 3px solid transparent; }
+.meniu-proiect a:hover { background: #f1f5f9; }
+.meniu-proiect a.active { background: var(--accent-soft); border-left-color: var(--accent); font-weight: 600; }
+.meniu-proiect-mobil { display: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 980px) {
+  .proiect-cadru { grid-template-columns: 1fr; gap: 12px; }
+  .meniu-proiect { display: none; }
+  .meniu-proiect-mobil { display: block; position: sticky; top: 64px; z-index: 4; }
+  .meniu-proiect-mobil select { width: 100%; font-weight: 600; padding: 10px 12px; border: 2px solid var(--accent); background: #fff; border-radius: 10px; }
+}
+@media print { .meniu-proiect, .meniu-proiect-mobil { display: none !important; } .proiect-cadru { display: block; } }
+
+.prez-stare { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+.prez-stare > div { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; display: grid; gap: 2px; align-content: start; }
+.prez-stare span { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+.prez-stare b { font-family: var(--display); font-size: 17px; }
+.prez-stare small { color: var(--muted); font-size: 13px; }
+.prez-grila { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.prez-panou { display: grid; gap: 6px; align-content: start; text-decoration: none; color: var(--text); margin: 0; transition: border-color .15s; }
+.prez-panou:hover { border-color: var(--accent); }
+.prez-panou h3 { font-size: 14px; color: var(--muted); font-family: var(--font); font-weight: 600; margin: 0; }
+.prez-numar { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.prez-numar b { font-family: var(--display); font-size: 30px; line-height: 1; }
+.prez-numar span { color: var(--muted); font-size: 13.5px; }
+.prez-panou .discret { margin: 0; font-size: 13px; }
+.prez-alerta { margin: 2px 0 0; font-size: 13px; font-weight: 600; color: var(--bad); }
+.prez-panou.cu-alerta { border-color: #fecaca; }
+.bara-seg { display: flex; gap: 2px; height: 8px; border-radius: 4px; overflow: hidden; }
+.bara-seg i { display: block; min-width: 4px; }
+.bara-seg i.ok, .bara-legenda i.ok { background: var(--ok); }
+.bara-seg i.atentie, .bara-legenda i.atentie { background: #eab308; }
+.bara-seg i.alerta, .bara-legenda i.alerta { background: var(--bad); }
+.bara-legenda { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; font-size: 12.5px; color: var(--muted); }
+.bara-legenda i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; }
+.prez-sarcini .lista-sarcini { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 6px; }
+.prez-sarcini .lista-sarcini li { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.activitate { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 6px; font-size: 14px; }
+.activitate li { display: flex; gap: 10px; flex-wrap: wrap; }
+@media (max-width: 760px) { .prez-stare { grid-template-columns: 1fr 1fr; } }

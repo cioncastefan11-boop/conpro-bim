@@ -18,6 +18,14 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.21 (prezentarea proiectului și meniul nou)
+
+Nu are script SQL; codul ajunge pe site singur, după unirea în `main`.
+
+- **Prezentarea proiectului** (prima pagină a fiecărui proiect): stadiul, autorizația, echipa, recepția sau exploatarea; ce așteaptă după dumneavoastră în proiect; panouri pentru procese verbale, FAM-uri, betoane, observații pe model, planul de livrare, execuția pe model, predare și exploatare, cu alertele (contestate, neconforme, întârziate, lipsuri); activitatea recentă. Fiecare panou duce la secțiunea lui.
+- **Meniul proiectului**, grupat pe etapele lucrării (Informații, Execuție, Predare, Exploatare, Proiect): în stânga pe calculator, ca listă de alegere pe telefon. Detaliile proiectului, convenția și lecțiile învățate sunt acum în „Detalii și convenție”.
+- **Lista de proiecte** arată câte lucruri aveți de făcut în fiecare.
+
 ## Actualizare la 0.20 (cerințele de predare și lecțiile învățate)
 
 1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.

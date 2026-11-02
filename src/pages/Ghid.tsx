@@ -126,6 +126,7 @@ export default function Ghid({ public: pub }: { public?: boolean }) {
         <ol className="pasi-ghid">
           <li><b>Contul.</b> Administratorul proiectului vă adaugă în echipă cu adresa de e-mail. Intrați pe aplicație, „Creează cont” cu <b>aceeași adresă</b>, confirmați e-mailul primit și intrați: proiectul apare singur.</li>
           <li><b>Profilul.</b> Completați numele, telefonul și firma (din Profil). Numele apare pe procesele verbale și în semnături.</li>
+          <li><b>Proiectul.</b> Prima pagină a proiectului e Prezentarea: ce așteaptă după dumneavoastră și cum stă lucrarea. Secțiunile sunt în meniul din stânga (pe telefon, în lista de sus), grupate pe etape: Informații, Execuție, Predare, Exploatare.</li>
           <li><b>De făcut.</b> În bara de sus, „De făcut” arată tot ce așteaptă după dumneavoastră, în toate proiectele; fiecare rând duce direct acolo. Dimineața primiți și un rezumat pe e-mail (se poate opri din Profil).</li>
           <li><b>Lecțiile învățate.</b> În Detaliile proiectului, oricine din echipă notează ce a mers bine și ce nu, cu recomandarea pentru proiectul următor.</li>
           <li><b>Semnătura electronică.</b> PV-urile și recepțiile se pot semna cu semnătura electronică calificată: salvați documentul ca PDF, semnați-l pe rând cu certificatul calificat și încărcați-l; aplicația verifică fiecare semnătură.</li>

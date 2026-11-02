@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Link, NavLink, Route, Routes, useParams } from 'react-router-dom';
+import { Link, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useUid } from '../lib/sesiune';
 import {
@@ -18,6 +18,7 @@ import Conventie from '../components/Conventie';
 import CarteaTehnica from './CarteaTehnica';
 import Exploatare from './Exploatare';
 import LectiiInvatate from '../components/LectiiInvatate';
+import Prezentare from './Prezentare';
 
 export default function Proiect() {
   const { id = '' } = useParams();
@@ -57,23 +58,13 @@ export default function Proiect() {
           <p className="discret">{STADII[proiect.stadiu_catuc]} · rolul dumneavoastră: <b>{rolulMeu ? numeRol(rolulMeu) : '—'}</b></p>
         </div>
       </div>
-      <nav className="file" aria-label="Secțiunile proiectului">
-        <NavLink to="" end>Detalii</NavLink>
-        <NavLink to="documente">Documente</NavLink>
-        <NavLink to="model">Model 3D</NavLink>
-        <NavLink to="pv">Procese verbale</NavLink>
-        <NavLink to="fam">Materiale (FAM)</NavLink>
-        <NavLink to="beton">Betoane și încercări</NavLink>
-        <NavLink to="echipamente">Echipamente</NavLink>
-        <NavLink to="receptie">Recepție</NavLink>
-        <NavLink to="carte">Cartea tehnică</NavLink>
-        {(proiect.exploatare_din || proiect.stadiu_catuc >= 5) && <NavLink to="exploatare">Exploatare</NavLink>}
-        <NavLink to="echipa">Echipa ({membri.length})</NavLink>
-        <NavLink to="istoric">Istoric</NavLink>
-      </nav>
       <Eroare text={eroare} />
+      <div className="proiect-cadru">
+      <MeniuProiect proiect={proiect} nrMembri={membri.length} />
+      <div className="proiect-continut">
       <Routes>
-        <Route index element={<><Detalii proiect={proiect} admin={admin} onSalvat={incarca} /><Conventie proiect={proiect} membri={membri} admin={admin} onSalvat={incarca} /><LectiiInvatate proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} /></>} />
+        <Route index element={<Prezentare proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
+        <Route path="detalii" element={<><Detalii proiect={proiect} admin={admin} onSalvat={incarca} /><Conventie proiect={proiect} membri={membri} admin={admin} onSalvat={incarca} /><LectiiInvatate proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} /></>} />
         <Route path="echipa" element={<Echipa proiectId={id} membri={membri} admin={admin} uid={uid} onSchimbat={incarca} />} />
         <Route path="echipamente" element={<Echipamente proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="model/*" element={<Model proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
@@ -86,6 +77,8 @@ export default function Proiect() {
         <Route path="exploatare/*" element={<Exploatare proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} onSchimbat={incarca} />} />
         <Route path="istoric" element={<Istoric proiect={proiect} membri={membri} />} />
       </Routes>
+      </div>
+      </div>
     </>
   );
 }
@@ -470,3 +463,46 @@ function Istoric({ proiect, membri }: { proiect: TProiect; membri: Membru[] }) {
 }
 
 const ancoraGhid = (r: Rol) => r;  // ancorele din ghid au aceleași nume ca rolurile
+
+// ------------------------------------------------------------------ Meniul proiectului
+// Secțiunile, grupate pe etapele lucrării; pe calculator în stânga, pe telefon o listă de alegere.
+type Intrare = { la: string; nume: string; end?: boolean };
+function grupeMeniu(proiect: TProiect, nrMembri: number): { grup: string; intrari: Intrare[] }[] {
+  return [
+    { grup: '', intrari: [{ la: '', nume: 'Prezentare', end: true }] },
+    { grup: 'Informații', intrari: [{ la: 'documente', nume: 'Documente și plan' }, { la: 'model', nume: 'Model 3D și observații' }] },
+    { grup: 'Execuție', intrari: [{ la: 'pv', nume: 'Procese verbale' }, { la: 'fam', nume: 'Materiale (FAM)' }, { la: 'beton', nume: 'Betoane și încercări' }, { la: 'echipamente', nume: 'Echipamente' }] },
+    { grup: 'Predare', intrari: [{ la: 'receptie', nume: 'Recepție' }, { la: 'carte', nume: 'Cartea tehnică' }] },
+    ...(proiect.exploatare_din || proiect.stadiu_catuc >= 5 ? [{ grup: 'Exploatare', intrari: [{ la: 'exploatare', nume: proiect.exploatare_din ? 'Exploatarea clădirii' : 'Trecerea în exploatare' }] }] : []),
+    { grup: 'Proiect', intrari: [{ la: 'detalii', nume: 'Detalii și convenție' }, { la: 'echipa', nume: `Echipa (${nrMembri})` }, { la: 'istoric', nume: 'Istoric' }] },
+  ];
+}
+
+function MeniuProiect({ proiect, nrMembri }: { proiect: TProiect; nrMembri: number }) {
+  const grupe = grupeMeniu(proiect, nrMembri);
+  const loc = useLocation();
+  const nav = useNavigate();
+  const baza = `/proiect/${proiect.id}`;
+  const rest = loc.pathname.slice(baza.length).replace(/^\//, '');
+  const curenta = grupe.flatMap(g => g.intrari).find(i => (i.end ? rest === '' : rest === i.la || rest.startsWith(`${i.la}/`)))?.la ?? '';
+  return (
+    <>
+      <nav className="meniu-proiect" aria-label="Secțiunile proiectului">
+        {grupe.map(g => (
+          <div key={g.grup || 'prezentare'} className="meniu-grup">
+            {g.grup && <span className="meniu-titlu">{g.grup}</span>}
+            {g.intrari.map(i => <NavLink key={i.la} to={i.la} end={i.end}>{i.nume}</NavLink>)}
+          </div>
+        ))}
+      </nav>
+      <label className="meniu-proiect-mobil">
+        <span className="sr-only">Secțiunea</span>
+        <select value={curenta} onChange={e => nav(e.target.value ? `${baza}/${e.target.value}` : baza)}>
+          {grupe.map(g => g.grup
+            ? <optgroup key={g.grup} label={g.grup}>{g.intrari.map(i => <option key={i.la} value={i.la}>{i.nume}</option>)}</optgroup>
+            : g.intrari.map(i => <option key={i.la} value={i.la}>{i.nume}</option>))}
+        </select>
+      </label>
+    </>
+  );
+}
