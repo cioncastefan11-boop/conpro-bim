@@ -564,3 +564,13 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
 .lista-evenimente li.activa { background: #fff7ed; }
 @media (max-width: 720px) { .obs-corp { grid-template-columns: 1fr; } }
 .filtre-punct select { width: auto; padding: 4px 10px; font-size: 13px; border-radius: 999px; }
+
+/* 0.18 · execuția pe model */
+.legenda-executie { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; margin: 6px 0 12px; }
+.legenda-executie i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.legenda-executie i.fantoma { background: #e2e8f0; border: 1px dashed #94a3b8; }
+.executie-selectie { border-top: 1px solid var(--border); padding-top: 10px; }
+.trasabilitate { margin: 4px 0 12px; padding-left: 18px; display: grid; gap: 3px; font-size: 14px; }
+.elemente-model { border-top: 1px solid var(--border); margin-top: 18px; padding-top: 12px; }
+.elemente-model h3 { margin: 0; }
+.elemente-model .lista-guid li { display: flex; gap: 8px; flex-wrap: wrap; align-items: baseline; }

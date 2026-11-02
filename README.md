@@ -18,6 +18,18 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.18 (legăturile cu modelul și starea execuției)
+
+1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0019_legaturi_model.sql`, lipiți și **Run** (după 0018).
+3. Verificare: `select count(*) from pg_proc where proname in ('poate_lega','legatura_verifica','executat_verifica');` trebuie să dea **3**.
+
+Ce aduce (harta BIM, liniile PV, MAT și IFC):
+- **Model 3D → Execuția pe model:** elementele alese se leagă de un proces verbal, de o turnare din condica de betoane sau de un FAM; constructorul le poate marca și „executate”.
+- **Modelul colorat după starea execuției:** verde = verificat (PV semnat), galben = în verificare (PV în curs), albastru = executat, roșu = cu observație deschisă; restul devine transparent. Legenda arată câte elemente are fiecare stare.
+- **Trasabilitatea elementului ales:** PV-urile, turnările, FAM-urile și observațiile lui, cu legături directe.
+- **În fișa PV-ului, a turnării și a FAM-ului:** lista elementelor din model, „Arată în model” (deschide modelele și evidențiază elementele) și dezlegarea unei legături greșite (după semnarea PV-ului, doar de diriginte). PV-ul și FAM-ul tipărite (și din Cartea tehnică) au lista elementelor din modelul IFC.
+
 ## Actualizare la 0.17 (observațiile pe model, BCF)
 
 1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
