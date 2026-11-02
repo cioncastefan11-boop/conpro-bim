@@ -18,6 +18,19 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.10 (modelul 3D, IFC)
+
+1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0011_model_ifc.sql`, lipiți și **Run**. Scriptul doar adaugă o coloană; nu șterge nimic.
+3. Verificare: `select count(*) from information_schema.columns where column_name = 'ifc_guid' and table_name in ('niveluri','incaperi','tipuri_echipament','echipamente');` trebuie să dea **4**.
+4. **Când treceți pe Supabase Pro**, ridicați limita de mărime pe fișier (planul gratuit acceptă cel mult 50 MB), de exemplu la 1 GB: `update storage.buckets set file_size_limit = 1073741824 where id = 'documente';`
+
+Ce aduce:
+- **Tab nou „Model 3D”:** modelele IFC din documentele proiectului (tip M3, revizia în vigoare sau cea mai nouă partajată) se deschid direct în browser, fără alt program. Se pot deschide mai multe deodată (arhitectură, structură, instalații), suprapuse, fiecare cu culoarea ei; se poate deschide și un fișier IFC de pe calculator, doar pentru vizualizare.
+- **În vizualizare:** rotire, apropiere, încadrare; bife pe discipline și pe niveluri; **secțiune orizontală** la orice cotă; clic pe un element → clasa, GlobalId, atributele și seturile de proprietăți și cantități.
+- **Preluare în COBie:** nivelurile, spațiile (cu aria, dacă e în model) și echipamentele (guri de aer, pompe, cazane, corpuri de iluminat, obiecte sanitare etc.) trec în tabul Echipamente, cu tipul și categoria lor. Fiecare păstrează GlobalId-ul din model, deci o nouă preluare adaugă doar ce e nou.
+- Motorul de vizualizare (web-ifc, three.js) se încarcă doar în tabul Model 3D; restul aplicației rămâne la fel de rapid.
+
 ## Actualizare la 0.9 (documentele proiectului după ISO 19650)
 
 1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.

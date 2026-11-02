@@ -13,6 +13,7 @@ import Betoane from './Betoane';
 import Echipamente from './Echipamente';
 import Receptie from './Receptie';
 import Documente from './Documente';
+import Model from './Model';
 import CarteaTehnica from './CarteaTehnica';
 
 export default function Proiect() {
@@ -56,6 +57,7 @@ export default function Proiect() {
       <nav className="file" aria-label="Secțiunile proiectului">
         <NavLink to="" end>Detalii</NavLink>
         <NavLink to="documente">Documente</NavLink>
+        <NavLink to="model">Model 3D</NavLink>
         <NavLink to="pv">Procese verbale</NavLink>
         <NavLink to="fam">Materiale (FAM)</NavLink>
         <NavLink to="beton">Betoane și încercări</NavLink>
@@ -70,6 +72,7 @@ export default function Proiect() {
         <Route index element={<Detalii proiect={proiect} admin={admin} onSalvat={incarca} />} />
         <Route path="echipa" element={<Echipa proiectId={id} membri={membri} admin={admin} uid={uid} onSchimbat={incarca} />} />
         <Route path="echipamente" element={<Echipamente proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
+        <Route path="model" element={<Model proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="documente/*" element={<Documente proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="receptie/*" element={<Receptie proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
         <Route path="carte" element={<CarteaTehnica proiect={proiect} membri={membri} rolulMeu={rolulMeu} uid={uid} />} />
