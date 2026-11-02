@@ -1,18 +1,20 @@
 {
   "name": "conpro-bim",
   "private": true,
-  "version": "0.7.0",
+  "version": "0.8.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test:db": "node tests/reguli-acces.test.mjs && node tests/pv-registru.test.mjs && node tests/fam.test.mjs && node tests/betoane.test.mjs && node tests/echipamente.test.mjs && node tests/receptie.test.mjs"
+    "test:db": "node tests/reguli-acces.test.mjs && node tests/pv-registru.test.mjs && node tests/fam.test.mjs && node tests/betoane.test.mjs && node tests/echipamente.test.mjs && node tests/receptie.test.mjs && node tests/semnatura.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
+    "asn1js": "^3.0.5",
     "exceljs": "^4.4.0",
     "jszip": "^3.10.1",
+    "pkijs": "^3.2.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0"

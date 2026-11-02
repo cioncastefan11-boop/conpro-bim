@@ -23,10 +23,11 @@ type Props = {
   membri: Membru[];
   titlu?: string;
   gol?: string;
+  excludeTipuri?: string[];   // documente afișate în altă parte (de ex. PV-ul semnat electronic)
   ascundeDacaGol?: boolean;   // nu afișa nimic dacă nu sunt fișiere și nu se poate încărca
 };
 
-export default function Atasamente({ proiectId, entitate, entitateId, poateIncarca, tipuri, membri, titlu = 'Documente atașate', gol, ascundeDacaGol }: Props) {
+export default function Atasamente({ proiectId, entitate, entitateId, poateIncarca, tipuri, membri, titlu = 'Documente atașate', gol, ascundeDacaGol, excludeTipuri }: Props) {
   const [lista, setLista] = useState<Atasament[] | null>(null);
   const [tip, setTip] = useState(tipuri[0] ?? 'altul');
   const [eroare, setEroare] = useState<string | null>(null);
@@ -37,8 +38,8 @@ export default function Atasamente({ proiectId, entitate, entitateId, poateIncar
     const { data, error } = await supabase.from('atasamente').select('*')
       .eq('entitate', entitate).eq('entitate_id', entitateId).order('incarcat_la');
     if (error) setEroare(mesajEroare(error));
-    setLista((data as Atasament[]) ?? []);
-  }, [entitate, entitateId]);
+    setLista(((data as Atasament[]) ?? []).filter(a => !excludeTipuri?.includes(a.tip_document)));
+  }, [entitate, entitateId, excludeTipuri?.join()]);
   useEffect(() => { incarca(); }, [incarca]);
 
   async function urca(fisiere: FileList | null) {
