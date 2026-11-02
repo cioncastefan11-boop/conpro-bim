@@ -18,6 +18,20 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.17 (observațiile pe model, BCF)
+
+1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
+2. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0018_observatii.sql`, lipiți și **Run** (după 0017).
+3. Verificare: `select count(*) from pg_proc where proname in ('observatie_stare','observatie_verifica','comentariu_verifica');` trebuie să dea **3**.
+
+Ce aduce (ISO 19650-2, 5.6–5.7; linia BCF din harta BIM):
+- **Model 3D → Observație nouă:** alegeți unul sau mai multe elemente (Shift / Ctrl + clic), așezați vederea și deschideți observația: neconformitate, întrebare (RFI), dispoziție, remediere sau comentariu, cu prioritate, termen și cine răspunde (un rol sau o persoană). Se salvează elementele (GlobalId), camera și o captură.
+- **„Arată”** readuce camera și evidențiază elementele, în orice model deschis; din fișa observației, „Arată în model” deschide singur modelele.
+- **Observații pe model:** lista (deschise / ale mele / toate), fișa cu discuția, stările deschisă → în lucru → rezolvată → închisă (verificată de autor, diriginte sau administrator), redeschiderea motivată, fotografii. Totul rămâne în Istoric.
+- **BCF 2.1:** export și import `.bcfzip`, cu camera, elementele, captura și comentariile, ca observațiile să circule cu Revit, Archicad, BIMcollab, Solibri, Navisworks.
+- **„De făcut”:** observațiile atribuite (rolului sau persoanei) și cele rezolvate, de verificat de autor.
+- Vizualizatorul: clicul nu mai alege volumele transparente (spații, zone) din fața elementelor; un model care nu se deschide nu le mai oprește pe celelalte.
+
 ## Actualizare la 0.16 (locatarii și reclamațiile)
 
 1. Codul ajunge pe site singur, după unirea în `main` pe GitHub.
