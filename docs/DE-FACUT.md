@@ -7,6 +7,7 @@
 
 ## Etape următoare
 - **Documente, completări posibile:** convenția de denumire salvată pe proiect (listă de inițiatori, volume, niveluri), încărcarea mai multor documente deodată, transmitale.
-- **Vizualizarea modelului IFC în browser** și preluarea nivelurilor, spațiilor și echipamentelor în COBie. Atenție la limita de 50 MB pe fișier din planul gratuit Supabase.
+- **Înainte de prima lucrare reală: trecerea pe Supabase Pro** (copii de siguranță zilnice, fără oprire la inactivitate, 100 GB pentru fișiere), apoi ridicarea limitei pe fișier (comanda e în README, la 0.10).
+- **Model 3D, completări posibile:** măsurători în model, vederi salvate, legarea unui element de PV-ul sau de FAM-ul lui, modele foarte mari (fragmentare).
 - **Semnătura electronică, etapa 2:** semnarea direct din aplicație prin API-ul unui furnizor de semnătură în cloud.
 - **Opțional:** rularea automată a scripturilor SQL în Supabase la fiecare unire în `main` (GitHub Actions, cu cheile ca secrete în GitHub).

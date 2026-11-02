@@ -17,7 +17,7 @@ create table storage.objects (id uuid primary key default gen_random_uuid(), buc
 alter table storage.objects enable row level security;
 `);
 for (const f of ['0001_fundatie.sql', '0002_procese_verbale.sql', '0003_continut_pv.sql', '0004_fam.sql', '0005_betoane_incercari.sql',
-  '0006_echipamente_carte.sql', '0007_condica_betoane.sql', '0008_receptie.sql', '0009_semnatura_electronica.sql', '0010_documente_cde.sql'])
+  '0006_echipamente_carte.sql', '0007_condica_betoane.sql', '0008_receptie.sql', '0009_semnatura_electronica.sql', '0010_documente_cde.sql', '0011_model_ifc.sql'])
   await db.exec(fs.readFileSync(new URL(`../supabase/migrations/${f}`, import.meta.url), 'utf8'));
 
 const U = {
@@ -154,6 +154,14 @@ await ok('publicarea C01 arhivează tot ce era înainte', async () => {
 await ok('istoricul complet rămâne vizibil', async () => (await as('rte', `select id from revizii_document`)).rows.length === 4);
 await refuses('reviziile nu se șterg', () => as('proi', `delete from revizii_document`), 'permission');
 await ok('un străin nu vede documentele', async () => (await as('strain', `select id from documente_proiect`)).rows.length === 0);
+
+console.log('Identificatorul din modelul IFC (0011)');
+await ok('nivelul preluat din model păstrează GlobalId-ul', async () =>
+  (await as('rte', `insert into niveluri (proiect_id, cod, denumire, ifc_guid) values ($1, '00', 'Parter', '1Ano2ZUxnEIvVQ_beukl8b')`, [P])).affectedRows === 1);
+await refuses('același element din model nu se preia de două ori', () =>
+  as('rte', `insert into niveluri (proiect_id, cod, denumire, ifc_guid) values ($1, '00b', 'Parter', '1Ano2ZUxnEIvVQ_beukl8b')`, [P]), 'duplicate');
+await ok('nivelurile introduse de mână (fără GlobalId) merg ca înainte', async () =>
+  (await as('rte', `insert into niveluri (proiect_id, cod, denumire) values ($1, 'E1', 'Etaj 1'), ($1, 'E2', 'Etaj 2')`, [P])).affectedRows === 2);
 
 console.log(`\n${pass} trecute, ${fail} picate`);
 process.exit(fail ? 1 : 0);

@@ -388,3 +388,36 @@ fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { 
 @media (max-width: 640px) { .stare-document { align-items: flex-start; text-align: left; } }
 .previzualizare-cod code { background: none; color: #fff; padding: 0; border: 0; }
 .tabel td .legatura { text-align: left; word-break: break-all; }
+
+/* 0.10 · modelul 3D */
+.lista-modele { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 6px; }
+.lista-modele li { border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; }
+.viz-bifa { display: flex; align-items: center; gap: 10px; flex-direction: row; font-weight: 500; cursor: pointer; padding: 3px 0; }
+.viz-bifa input { width: auto; margin: 0; }
+.viz-bifa small { display: block; color: var(--muted); font-size: 12px; font-weight: 400; }
+.viz-culoare { width: 14px; height: 14px; border-radius: 4px; border: 1px solid #94a3b8; flex: none; }
+.vizualizator { display: grid; grid-template-columns: 1fr 300px; gap: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #fff; margin-bottom: 16px; height: min(72vh, 720px); }
+.viz-scena { position: relative; min-height: 360px; }
+.viz-scena canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.viz-progres { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: rgba(15, 23, 42, .85); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 14px; }
+.viz-progres.eroare { background: var(--bad); }
+.viz-unelte { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; }
+.viz-sectiune { position: absolute; bottom: 12px; left: 12px; right: 12px; background: rgba(255, 255, 255, .92); border-radius: 10px; padding: 8px 12px; font-size: 13px; display: flex; gap: 10px; align-items: center; flex-direction: row; }
+.viz-sectiune input { flex: 1; }
+.viz-panou { border-left: 1px solid var(--border); overflow: auto; padding: 12px 14px; background: var(--bg); }
+.viz-panou section + section { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+.viz-panou h4 { margin: 0 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); }
+.viz-titlu { margin: 0 0 8px; }
+.viz-titlu small { display: block; color: var(--muted); }
+.viz-proprietati details { border: 1px solid var(--border); border-radius: 8px; background: #fff; margin-bottom: 6px; padding: 4px 8px; }
+.viz-proprietati summary { cursor: pointer; font-weight: 600; font-size: 13px; }
+.viz-proprietati dl { margin: 6px 0 2px; display: grid; gap: 3px; }
+.viz-proprietati dl div { display: grid; grid-template-columns: 45% 55%; gap: 6px; font-size: 12.5px; }
+.viz-proprietati dt { color: var(--muted); word-break: break-word; }
+.viz-proprietati dd { margin: 0; word-break: break-word; }
+.previzualizare-import ul { margin: 6px 0; padding-left: 18px; font-size: 14px; }
+@media (max-width: 860px) {
+  .vizualizator { grid-template-columns: 1fr; height: auto; }
+  .viz-scena { height: 60vh; }
+  .viz-panou { border-left: 0; border-top: 1px solid var(--border); max-height: 50vh; }
+}
