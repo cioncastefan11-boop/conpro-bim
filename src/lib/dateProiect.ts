@@ -31,6 +31,7 @@ export type DateProiect = {
   constatari: ConstatareInspectie[];
   interventii: InterventieEchipament[];
   legaturi: { entitate: string; entitate_id: string; guid: string; nume: string | null; clasa: string | null }[];
+  cerinte: import('./cerinte').CerintaPredare[];
 };
 
 export async function incarcaDateProiect(proiect: Proiect, membri: Membru[]): Promise<DateProiect> {
@@ -39,7 +40,7 @@ export async function incarcaDateProiect(proiect: Proiect, membri: Membru[]): Pr
     if (r.error) throw r.error;
     return (r.data ?? []) as T[];
   });
-  const [niveluri, incaperi, tipuri, echipamente, documente, pvs, participanti, famuri, livrari, turnari, incercari, atasamente, receptii, comisii, obiectii, documenteProiect, revizii, evenimente, puncte, inspectii, constatari, interventii, legaturi] = await Promise.all([
+  const [niveluri, incaperi, tipuri, echipamente, documente, pvs, participanti, famuri, livrari, turnari, incercari, atasamente, receptii, comisii, obiectii, documenteProiect, revizii, evenimente, puncte, inspectii, constatari, interventii, legaturi, cerinte] = await Promise.all([
     q<Nivel>('niveluri', 'ordine'), q<Incapere>('incaperi', 'cod'), q<TipEchipament>('tipuri_echipament', 'denumire'),
     q<Echipament>('echipamente', 'cod'), q<DocumentCarte>('documente_carte', 'creat_la'), q<ProcesVerbal>('procese_verbale', 'numar'),
     q<ParticipantPv>('participanti_pv'), q<Fam>('fam', 'numar'), q<LivrareFam>('livrari_fam', 'data'),
@@ -53,8 +54,9 @@ export async function incarcaDateProiect(proiect: Proiect, membri: Membru[]): Pr
     proiect.exploatare_din ? q<InterventieEchipament>('interventii_echipament', 'numar') : Promise.resolve([] as InterventieEchipament[]),
     // legăturile cu modelul (migrarea 0019); dacă scriptul nu e rulat încă, lista rămâne goală
     supabase.from('elemente_legate').select('entitate, entitate_id, guid, nume, clasa').eq('proiect_id', id).then(r => (r.data ?? []) as DateProiect['legaturi']),
+    supabase.from('cerinte_predare').select('*').eq('proiect_id', id).order('ordine').then(r => (r.data ?? []) as DateProiect['cerinte']),
   ]);
-  return { proiect, membri, niveluri, incaperi, tipuri, echipamente, documente, pvs, participanti, famuri, livrari, turnari, incercari, atasamente, receptii, comisii, obiectii, documenteProiect, revizii, evenimente, puncte, inspectii, constatari, interventii, legaturi };
+  return { proiect, membri, niveluri, incaperi, tipuri, echipamente, documente, pvs, participanti, famuri, livrari, turnari, incercari, atasamente, receptii, comisii, obiectii, documenteProiect, revizii, evenimente, puncte, inspectii, constatari, interventii, legaturi, cerinte };
 }
 
 export const emailDe = (d: DateProiect, id: string | null) =>

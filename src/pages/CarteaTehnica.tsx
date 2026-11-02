@@ -5,6 +5,7 @@ import { CAPITOLE_CARTE, TIPURI_ATASAMENT, formatData, type Rol } from '../lib/d
 import type { Membru, Proiect } from '../lib/tipuri';
 import { Eroare, mesajEroare } from '../components/ui';
 import { incarcaDateProiect, type DateProiect } from '../lib/dateProiect';
+import CerintePredare from '../components/CerintePredare';
 import { construiesteOpis, genereazaArhiva, htmlManual, htmlOpis, lipsuriCarte } from '../lib/carte';
 import { genereazaCobie } from '../lib/cobie';
 import { descarca } from './Echipamente';
@@ -74,6 +75,8 @@ export default function CarteaTehnica({ proiect, membri, rolulMeu, uid }: Props)
         <p className="nota">Arhiva conține opisul, procesele verbale, FAM-urile, condica de betoane, manualul și COBie generate din aplicație, plus toate fișierele atașate, pe capitole. Formatul de încărcare în Registrul Național al Construcțiilor nu e publicat încă; arhiva se va adapta când apare metodologia.</p>
         <Eroare text={eroare} />
       </div>
+
+      <CerintePredare d={d} rolulMeu={rolulMeu} onSchimbat={incarca} />
 
       {lipsuri.length > 0 && (
         <div className="card atentie-card">
