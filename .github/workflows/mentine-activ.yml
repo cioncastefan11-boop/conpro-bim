@@ -1,0 +1,33 @@
+# Ține pornit proiectul Supabase de pe planul gratuit (se suspendă după o săptămână fără activitate).
+# De două ori pe săptămână cheamă funcția publică semnal_activ() (migrarea 0024), care doar întoarce ora.
+# Are nevoie de secretul SUPABASE_ANON_KEY: GitHub → Settings → Secrets and variables → Actions.
+# După trecerea pe Supabase Pro nu mai e nevoie de el; se poate dezactiva din fila Actions.
+name: Menține Supabase activ
+
+on:
+  schedule:
+    - cron: '17 6 * * 1,4'   # luni și joi, 06:17 UTC (08:17 / 09:17 ora României)
+  workflow_dispatch: {}       # și manual: Actions → Menține Supabase activ → Run workflow
+
+permissions:
+  contents: read
+
+jobs:
+  semnal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Cheamă semnal_activ()
+        env:
+          SUPABASE_URL: https://xebjeqajxdxawtnlyquv.supabase.co
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_ANON_KEY" ]; then echo "::error::Lipsește secretul SUPABASE_ANON_KEY (Settings → Secrets and variables → Actions)."; exit 1; fi
+          for incercare in 1 2 3; do
+            cod=$(curl -sS -o raspuns.txt -w '%{http_code}' -X POST "$SUPABASE_URL/rest/v1/rpc/semnal_activ" \
+              -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $SUPABASE_ANON_KEY" -H 'Content-Type: application/json' -d '{}' || echo 000)
+            if [ "$cod" = "200" ]; then echo "Supabase activ: $(cat raspuns.txt)"; exit 0; fi
+            echo "Încercarea $incercare: HTTP $cod $(cat raspuns.txt 2>/dev/null)"; sleep 30
+          done
+          echo "::error::Supabase nu răspunde. Dacă proiectul e suspendat, apăsați Restore project în Supabase; dacă răspunsul e 404, rulați migrarea 0024_mentine_activ.sql."
+          exit 1
