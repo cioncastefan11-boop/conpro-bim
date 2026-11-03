@@ -18,9 +18,19 @@ Următoarele module (CDE și documente, FAM, condica de betoane, încercări, ec
 
 ---
 
+## Actualizare la 0.24 (proiectul Supabase rămâne pornit)
+
+Pe planul gratuit, Supabase suspendă proiectul după o săptămână fără activitate. Un job GitHub cheamă de două ori pe săptămână (luni și joi dimineața) o funcție care doar întoarce ora serverului, ca proiectul să rămână pornit.
+
+1. **Supabase → SQL Editor → New query:** copiați `supabase/migrations/0024_mentine_activ.sql`, lipiți și **Run** (după 0023).
+2. **GitHub → depozitul conpro-bim → Settings → Secrets and variables → Actions → New repository secret:** numele `SUPABASE_ANON_KEY`, valoarea = cheia anon (publică), aceeași ca în Netlify (`VITE_SUPABASE_ANON_KEY`). Nu puneți aici cheia service_role.
+3. **Test:** GitHub → **Actions → Menține Supabase activ → Run workflow**. După un minut rularea trebuie să fie verde; în detalii scrie „Supabase activ” și ora.
+
+Dacă o rulare pică, GitHub trimite un e-mail. După trecerea pe Supabase Pro, jobul se poate dezactiva din fila Actions (Pro nu suspendă proiectele).
+
 ## Verificarea instalării (oricând, înainte de o demonstrație)
 
-Scriptul `supabase/verificare_instalare.sql` arată dintr-o privire dacă toate migrările sunt rulate în Supabase. Doar citește, nu schimbă nimic:
+Scriptul `supabase/verificare_instalare.sql` arată dintr-o privire dacă toate migrările (0001–0024) sunt rulate în Supabase. Doar citește, nu schimbă nimic:
 
 1. **Supabase → SQL Editor → New query:** copiați `supabase/verificare_instalare.sql`, lipiți și **Run**.
 2. Primul rând e rezumatul: „Totul e instalat” sau „De rulat: 0018, 0019…”.

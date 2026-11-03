@@ -1,7 +1,7 @@
 -- =====================================================================
 -- Conpro BIM · verificarea instalării bazei de date
 --
--- Arată, pentru fiecare migrare 0001–0023, dacă tabelele, funcțiile și
+-- Arată, pentru fiecare migrare 0001–0024, dacă tabelele, funcțiile și
 -- coloanele ei există în Supabase și, la funcțiile rescrise de migrările
 -- următoare, dacă e instalată ultima versiune.
 --
@@ -68,7 +68,8 @@ verificari(migr, ce, ok) as (
     ('0020', 'livrabile_stare'),
     ('0021', 'cerinta_verifica'), ('0021', 'lectie_verifica'),
     ('0022', 'regula_model_verifica'), ('0022', 'verificare_model_verifica'),
-    ('0023', 'document_bim_verifica')
+    ('0023', 'document_bim_verifica'),
+    ('0024', 'semnal_activ')
   ) as v(m, x)
 
   union all

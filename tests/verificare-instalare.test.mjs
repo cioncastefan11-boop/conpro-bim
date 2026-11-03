@@ -43,5 +43,13 @@ await ok('… iar 0001–0017 rămân OK', () => partiala.filter(r => /^00(0[1-9
 await ok('versiunea veche a unei funcții rescrise se vede', () => partiala.some(r => r.migrarea === '0018' && r.verificarea.startsWith('poate_atasa()') && r.starea === 'LIPSEȘTE'));
 await ok('rândurile care lipsesc vin primele în migrarea lor', () => { const m = partiala.filter(r => r.migrarea === '0018'); return m[0].starea === 'LIPSEȘTE'; });
 
+console.log('Semnalul de activitate (0024)');
+{
+  const db = await baza(ultima);
+  const caAnon = async sql => { await db.exec('set role anon'); try { return await db.query(sql); } finally { await db.exec('reset role'); } };
+  await ok('cheia publică poate chema semnal_activ()', async () => (await caAnon('select public.semnal_activ() as t')).rows[0].t instanceof Date);
+  await ok('… dar tot nu poate citi proiectele', async () => { try { await caAnon('select * from public.proiecte'); return false; } catch (e) { return /permission denied/.test(e.message); } });
+}
+
 console.log(`\n${pass} trecute, ${fail} picate`);
 process.exit(fail ? 1 : 0);
