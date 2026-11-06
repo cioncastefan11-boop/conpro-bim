@@ -19,9 +19,9 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/barlow-semi-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/barlow-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/site.css?v=215c3ca7ae">
 <script src="/assets/config.js"></script>
-<script src="/assets/site.js" defer></script>
+<script src="/assets/site.js?v=7b73b137cf" defer></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Conpro BIM","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"https://bim.conpro.ro","inLanguage":"ro","publisher":{"@type":"Organization","name":"Conpro Solutions SRL"},"description":"Aplicație pentru documentarea execuției construcțiilor: procese verbale, FAM, condica de betoane, registrul dirigintelui, recepția și Cartea tehnică, legate de modelul BIM (IFC). Conformă cu Legea 169/2026 și SR EN ISO 19650.","featureList":["Procese verbale de lucrări ascunse și faze determinante","Fișe de aprobare a materialelor (FAM)","Condica de betoane și încercări","Registrul electronic al dirigintelui și RTE","Model IFC colorat după starea execuției","Observații pe model în format BCF 2.1","Verificarea modelului după reguli IDS 1.0","Recepția la terminarea lucrărilor","Cartea tehnică electronică și COBie","EIR și BEP după ISO 19650","Urmărirea în timp, mentenanță și reclamații în exploatare"]}</script>
 </head>
 <body data-rol="Diriginte de șantier">
@@ -40,15 +40,9 @@
     <div class="actiuni"><a class="buton principal" href="#demo">Programează o demonstrație</a><a class="buton" href="#functii">Ce face, pe scurt</a></div>
   </div>
   <figure class="plansa" style="margin:0">
-  <div class="desen"><img src="/assets/img/model-executie.webp" width="652" height="588" alt="Modelul 3D al clădirii colorat după starea execuției, în Conpro BIM" fetchpriority="high"></div>
+  <div class="desen"><img src="/assets/img/structura-azi.webp" width="1080" height="1160" alt="Modelul 3D al blocului BLC01 în execuție: 89% din structură executat, 79% verificat prin PV semnat. Structura e colorată după stare: verde verificat prin PV semnat, galben PV în curs, albastru executat, roșu cu observație deschisă, iar ce urmează e doar conturat. Pe model: observația OBS-0042 la stâlpul D3 și turnarea nr. 18 pe tronsonul T2; în dreapta, cotele nivelurilor de la ±0.00 la +15.60" fetchpriority="high"></div>
   <figcaption class="cartus">
     <div><small>Rolul</small><strong>Diriginte de șantier</strong></div><div><small>Registru</small><strong>art. 456 din Legea 169/2026</strong></div><div class="ascunde-mic"><small>Faza</small><strong>Execuție</strong></div><div><small>Recepție</small><strong>art. 527–532</strong></div><div><small>Cartea tehnică</small><strong>art. 529–530</strong></div><div class="ascunde-mic"><small>Semnătură</small><strong>eIDAS</strong></div>
-    <div class="lat"><small>Legenda</small><ul class="legenda">
-      <li><i style="background:var(--verificat)"></i>Verificat prin PV semnat</li>
-      <li><i style="background:var(--in-verificare)"></i>PV în curs</li>
-      <li><i style="background:var(--executat)"></i>Executat</li>
-      <li><i style="background:var(--observatie)"></i>Observație deschisă</li>
-    </ul></div>
   </figcaption>
 </figure>
 </div></section>

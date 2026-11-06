@@ -2,6 +2,7 @@
 // Rulare: node site/src/genereaza.mjs   · Paginile generate se publică așa cum sunt (Netlify, fără build).
 import fs from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 
 const RADACINA = new URL('../public/', import.meta.url).pathname;
 const DOMENIU = 'https://bim.conpro.ro';
@@ -85,6 +86,9 @@ const SCHEMA_APP = {
   featureList: ['Procese verbale de lucrări ascunse și faze determinante', 'Fișe de aprobare a materialelor (FAM)', 'Condica de betoane și încercări', 'Registrul electronic al dirigintelui și RTE', 'Model IFC colorat după starea execuției', 'Observații pe model în format BCF 2.1', 'Verificarea modelului după reguli IDS 1.0', 'Recepția la terminarea lucrărilor', 'Cartea tehnică electronică și COBie', 'EIR și BEP după ISO 19650', 'Urmărirea în timp, mentenanță și reclamații în exploatare'],
 };
 
+// versiunea fișierelor CSS/JS după conținut: se schimbă doar când se schimbă fișierul
+const VERSIUNE = Object.fromEntries(['css', 'js'].map(t => [t, createHash('sha256').update(fs.readFileSync(new URL(`../public/assets/site.${t}`, import.meta.url))).digest('hex').slice(0, 10)]));
+
 function pagina({ cale, titlu, descriere, corp, rol = '', faraIndex = false, conversie = false, schema = [], imagineOg = '/assets/og.png', faraDemo = false }) {
   const url = DOMENIU + cale;
   return `<!doctype html>
@@ -108,9 +112,9 @@ ${faraIndex ? '<meta name="robots" content="noindex">' : `<link rel="canonical" 
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/barlow-semi-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/barlow-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/site.css?v=${VERSIUNE.css}">
 <script src="/assets/config.js"></script>
-<script src="/assets/site.js" defer></script>
+<script src="/assets/site.js?v=${VERSIUNE.js}" defer></script>
 ${schema.map(s => `<script type="application/ld+json">${JSON.stringify(s)}</script>`).join('\n')}
 </head>
 <body${rol ? ` data-rol="${esc(rol)}"` : ''}${conversie ? ' data-conversie' : ''}>
@@ -125,18 +129,13 @@ ${subsol()}
 `;
 }
 
-// planșa din hero: modelul colorat, cu cartușul
-function plansa(campuri, alt) {
+// planșa din hero: progresul structurii pe model (legenda e în imagine), cu cartușul
+const ALT_HERO = 'Modelul 3D al blocului BLC01 în execuție: 89% din structură executat, 79% verificat prin PV semnat. Structura e colorată după stare: verde verificat prin PV semnat, galben PV în curs, albastru executat, roșu cu observație deschisă, iar ce urmează e doar conturat. Pe model: observația OBS-0042 la stâlpul D3 și turnarea nr. 18 pe tronsonul T2; în dreapta, cotele nivelurilor de la ±0.00 la +15.60';
+function plansa(campuri, alt = ALT_HERO) {
   return `<figure class="plansa" style="margin:0">
-  <div class="desen"><img src="/assets/img/model-executie.webp" width="652" height="588" alt="${esc(alt)}" fetchpriority="high"></div>
+  <div class="desen"><img src="/assets/img/structura-azi.webp" width="1080" height="1160" alt="${esc(alt)}" fetchpriority="high"></div>
   <figcaption class="cartus">
     ${campuri.map(([e, v, cls]) => `<div${cls ? ` class="${cls}"` : ''}><small>${esc(e)}</small><strong>${v}</strong></div>`).join('')}
-    <div class="lat"><small>Legenda</small><ul class="legenda">
-      <li><i style="background:var(--verificat)"></i>Verificat prin PV semnat</li>
-      <li><i style="background:var(--in-verificare)"></i>PV în curs</li>
-      <li><i style="background:var(--executat)"></i>Executat</li>
-      <li><i style="background:var(--observatie)"></i>Observație deschisă</li>
-    </ul></div>
   </figcaption>
 </figure>`;
 }
@@ -168,7 +167,7 @@ const acasa = pagina({
     <p class="sub">Pentru diriginți, constructori și beneficiari. Conform Legii 169/2026 și SR EN ISO 19650, cu formate deschise: IFC, BCF, IDS, COBie.</p>
     <div class="actiuni"><a class="buton principal" href="#demo">Programează o demonstrație</a><a class="buton" href="#roluri">Ce face pentru dumneavoastră</a></div>
   </div>
-  ${plansa([['Proiect', 'BLC01 · Bloc de locuințe P+4'], ['Planșa', 'Starea execuției pe model'], ['Faza', 'Execuție', 'ascunde-mic'], ['Sursa', 'Modelul IFC, 3 discipline'], ['Actualizat', 'la fiecare PV confirmat'], ['Scara', 'întreaga clădire', 'ascunde-mic']], 'Modelul 3D al clădirii colorat după starea execuției: verde verificat prin PV semnat, galben PV în curs, albastru executat, roșu cu observație deschisă')}
+  ${plansa([['Proiect', 'BLC01 · Bloc de locuințe P+4'], ['Planșa', 'Starea execuției pe model'], ['Faza', 'Execuție', 'ascunde-mic'], ['Sursa', 'Modelul IFC, 3 discipline'], ['Actualizat', 'la fiecare PV confirmat'], ['Scara', 'întreaga clădire', 'ascunde-mic']])}
 </div></section>
 
 <section class="sectiune alba" aria-labelledby="drum-titlu"><div class="cadru">
@@ -256,7 +255,7 @@ function paginaRol({ cale, titlu, descriere, h1, lead, sub, cartus, functiiLista
     <p class="sub">${sub}</p>
     <div class="actiuni"><a class="buton principal" href="#demo">Programează o demonstrație</a><a class="buton" href="#functii">Ce face, pe scurt</a></div>
   </div>
-  ${plansa(cartus, 'Modelul 3D al clădirii colorat după starea execuției, în Conpro BIM')}
+  ${plansa(cartus)}
 </div></section>
 ${context}
 <section class="sectiune alba" id="functii" aria-labelledby="functii-titlu"><div class="cadru">
