@@ -79,12 +79,13 @@ p { margin: 0 0 1em; max-width: 66ch; }
 @media (max-width: 960px) { .hero .cadru { grid-template-columns: 1fr; gap: 36px; } .hero { padding: 40px 0 48px; } }
 
 .plansa { background: var(--hartie); border: 2px solid var(--cerneala); }
-.plansa .desen { padding: 18px; background: #f3f5f7; border-bottom: 2px solid var(--cerneala); position: relative; }
+.plansa .desen { background: #f3f5f7; border-bottom: 2px solid var(--cerneala); position: relative; }
 .plansa .desen img { margin: 0 auto; }
 /* cartușul: câmpurile unei planșe, cu eticheta mică deasupra valorii */
 .cartus { display: grid; grid-template-columns: 1.3fr 1fr 0.7fr; font-size: 0.95rem; }
 .cartus > div { padding: 8px 12px 10px; border-right: 1px solid var(--cerneala); border-bottom: 1px solid var(--cerneala); min-width: 0; }
 .cartus > div:nth-child(3n) { border-right: 0; }
+.cartus > div:nth-last-child(-n+3) { border-bottom: 0; }
 .cartus > .lat { grid-column: 1 / -1; border-right: 0; border-bottom: 0; }
 .cartus small { display: block; color: var(--cerneala-2); font-size: 0.78rem; line-height: 1.2; margin-bottom: 2px; }
 .cartus strong { font-weight: 600; display: block; line-height: 1.25; overflow-wrap: anywhere; }
